@@ -1,0 +1,11 @@
+{
+  "name": "lasyard/lasys",
+  "description": "A simple PHP framework.",
+  "license": "MIT",
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit src/tests"
+  }
+}

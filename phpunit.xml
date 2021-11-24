@@ -1,0 +1,5 @@
+<testsuites>
+    <testsuite name="Lasys Test Suite">
+        <directory>./src/tests</directory>
+    </testsuite>
+</testsuites>

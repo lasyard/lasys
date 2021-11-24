@@ -1,0 +1,9 @@
+{
+  "phpunit.args": [
+    "--debug"
+  ],
+  "phpunit.files": "src/tests/**/*Test.php",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
+}

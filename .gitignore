@@ -1,0 +1,25 @@
+.*
+!.gitignore
+!.gitmodules
+!.editorconfig
+
+# Apache2 files
+!.htaccess
+
+# VSCode files
+!.vscode/
+
+# Composer files
+vendor/
+
+# NodeJS files
+node_modules/
+
+# GitHub files
+!.github
+
+# webpack output
+pub/
+
+# js-beautify files
+!.jsbeautifyrc
