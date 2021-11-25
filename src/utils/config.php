@@ -53,6 +53,7 @@ final class Config
                 $item = ['title' => $item];
             }
             $item['type'] = $item['type'] ?? 'file';
+            $item['hidden'] = $item['hidden'] ?? false;
         }
         $this->_conf = $conf;
     }
@@ -85,8 +86,11 @@ final class Config
     {
         $list = $this->_conf['list'];
         $type = $list[$name]['type'] ?? 'file';
-        if ($type === 'file') {
+        if ($type == 'file') {
             return FileItem::get($path, $name);
+        } else if ($type == 'php') {
+            $item = $list[$name];
+            return Action::get(!empty($item['action']) ? $item['action'] : 'Action::default');
         }
         return new ErrorItem('Unsupported item type "' . $type . '".');
     }

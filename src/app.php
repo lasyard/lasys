@@ -84,12 +84,20 @@ final class App
         $base = $this->_base;
         $list0 = [];
         foreach ($conf->list as $name => $item) {
-            $isDir = false;
-            if (array_key_exists($name, $files)) {
-                $isDir = $files[$name];
-                unset($files[$name]);
-            } else if ($item['type'] == 'file') {
+            if ($item['hidden']) {
+                if (array_key_exists($name, $files)) {
+                    unset($files[$name]);
+                }
                 continue;
+            }
+            if ($item['type'] == 'file') {
+                $isDir = false;
+                if (array_key_exists($name, $files)) {
+                    $isDir = $files[$name];
+                    unset($files[$name]);
+                } else {
+                    continue;
+                }
             }
             $list0[] = [
                 'text' => $item['title'] ?? Str::captalize($name),

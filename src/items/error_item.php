@@ -3,10 +3,7 @@ final class ErrorItem
 {
     use Getter;
 
-    private $_httpHeaders = [
-        'Cache-Control: no-cache, no-store, must-revalidate',
-        'Expires: 0',
-    ];
+    private $_httpHeaders = Sys::NO_CACHE_HEADERS;
 
     private $_title = 'Error';
     private $_content;

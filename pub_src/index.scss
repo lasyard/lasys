@@ -16,19 +16,23 @@
 
 $redColor: #F55;
 $greenColor: #0A0;
+$whiteColor: #FFF;
 $blackColor: #000;
-$normalFont: Serif;
-$headerFont: Sans-Serif;
-$titleFont: Fantasy;
+$greyColor: #999;
+
 $bgColor:#DEF;
 $fgColor: $blackColor;
-$greyColor: #999;
-$barColor: #FFF;
+$barColor: $whiteColor;
 $linkColor:#55F;
 $visitedLinkColor: #A0A;
 $hoverLinkBgColor: #FFF;
 $hoverLinkColor: $redColor;
 $sysColor: $greenColor;
+
+$normalFont: Serif;
+$headerFont: Sans-Serif;
+$titleFont: Fantasy;
+
 $barHeight: 31px;
 $listWidth: 18rem;
 
@@ -43,22 +47,52 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+.left {
+    text-align: left;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
+
+.centered {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.red {
+    color: $redColor;
+}
+
+.green {
+    color: $greenColor;
+}
+
+.black {
+    color: $blackColor;
+}
+
 a {
     background: transparent;
     text-decoration: none;
-}
 
-a:link {
-    color: $linkColor;
-}
+    &:link {
+        color: $linkColor;
+    }
 
-a:visited {
-    color: $visitedLinkColor;
-}
+    &:visited {
+        color: $visitedLinkColor;
+    }
 
-a:hover {
-    background: $hoverLinkBgColor;
-    color: $hoverLinkColor;
+    &:hover {
+        background: $hoverLinkBgColor;
+        color: $hoverLinkColor;
+    }
 }
 
 .sys {
@@ -142,10 +176,10 @@ div#list {
 
     div#breadcrumbs {
         display: inline-block;
-        color: $fgColor;
+        font-family: $headerFont;
 
         a {
-            color: $fgColor;
+            color: $whiteColor;
         }
     }
 }
@@ -171,6 +205,10 @@ div#main {
         margin-top: 1em;
         margin-left: 2em;
         margin-right: 2em;
+
+        img {
+            @extend .centered
+        }
     }
 }
 
@@ -220,33 +258,4 @@ table {
 
 img {
     border: 0;
-}
-
-.left {
-    text-align: left;
-}
-
-.center {
-    text-align: center;
-}
-
-.right {
-    text-align: right;
-}
-
-.centered {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.red {
-    color: $redColor;
-}
-
-.green {
-    color: #0A0;
-}
-
-.black {
-    color: #000;
 }

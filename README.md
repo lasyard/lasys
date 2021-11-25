@@ -68,8 +68,9 @@ There must be a directory named `configs` in the root of your project to put you
 In this file, constants are defined. If one is not defined, it will be set to a default value.
 
 ```php
-define('APP_TITLE', 'Lasys'); // The title of app.
-define('DATA_DIR', 'data');   // The root dir of website contents.
-define('VIEW_DIR', 'views');  // The dir of view files.
-define('PUB_DIR', 'pub');     // The dir of public assets.
+define('APP_TITLE', 'Lasys');     // The title of app.
+define('DATA_DIR', 'data');       // The root dir of website contents.
+define('PUB_DIR', 'pub');         // The dir of public assets.
+define('VIEW_DIR', 'views');      // The dir of view files.
+define('ACTIONS_DIR', 'actions'); // The dir of actions.
 ```
