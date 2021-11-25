@@ -48,6 +48,12 @@ final class Config
         $this->mergeArray($conf, 'excludes');
         $this->setDefault($conf, 'orderBy', $recursive);
         $this->setDefault($conf, 'list');
+        foreach ($conf['list'] as &$item) {
+            if (is_string($item)) {
+                $item = ['title' => $item];
+            }
+            $item['type'] = $item['type'] ?? 'file';
+        }
         $this->_conf = $conf;
     }
 

@@ -63,21 +63,12 @@ final class App
         }
         $this->_breadcrumbs = $breadcrumbs;
         $this->_base = $base;
-        $itemList = $this->createItemList($path, $conf);
-        $list = [];
-        foreach ($itemList as $n => $v) {
-            $list[] = [
-                'text' => $v['title'],
-                'url' => $this->_base . $n . ($v['isDir'] ? '/' : ''),
-                'selected' => $n === $name,
-            ];
-        }
-        if ($conf->orderBy) {
-            usort($list, $conf->orderBy);
-        }
-        $this->_list = $list;
+        $this->_list = $this->createItemList($conf, $this->createFileList($path, $conf), $name);
         $this->_item = $item;
-        $this->_title = APP_TITLE . ' - ' . $item->title ?? $conf->resolveTitle($name);
+        $this->_title = APP_TITLE;
+        if ($path != DATA_PATH || !empty($name)) {
+            $this->_title .= ' - ' . $item->title ?? $conf->resolveTitle($name);
+        }
         $this->addScript('js/main');
         $this->addStyle('css/main');
         $this->addStyle('lib/bootstrap-icons');
@@ -88,30 +79,59 @@ final class App
         $this->view('main');
     }
 
-    private function createItemList($path, $conf)
+    private function createItemList($conf, $files, $selected)
+    {
+        $base = $this->_base;
+        $list0 = [];
+        foreach ($conf->list as $name => $item) {
+            $isDir = false;
+            if (array_key_exists($name, $files)) {
+                $isDir = $files[$name];
+                unset($files[$name]);
+            } else if ($item['type'] == 'file') {
+                continue;
+            }
+            $list0[] = [
+                'text' => $item['title'] ?? Str::captalize($name),
+                'url' => $base . $name . ($isDir ? '/' : ''),
+                'selected' => $name == $selected,
+            ];
+        }
+        $list1 = [];
+        foreach ($files as $name => $isDir) {
+            $list1[] = [
+                'text' => Str::captalize($name),
+                'url' => $base . $name . ($isDir ? '/' : ''),
+                'selected' => $name == $selected,
+            ];
+        }
+        if ($conf->orderBy) {
+            usort($list1, $conf->orderBy);
+        }
+        return array_merge($list0, $list1);
+    }
+
+    private function createFileList($path, $conf)
     {
         $dh = @opendir($path);
         if (!$dh) {
             return [];
         }
-        $items = [];
+        $files = [];
         while (($file = readdir($dh)) !== false) {
             if ($conf->excluded($file)) {
                 continue;
             }
             if (is_dir("$path/$file")) {
                 $name = $file;
-                $isDir = true;
+                $files[$name] = true;
             } else {
-                $t = pathinfo($file);
-                $name = $t['filename'];
-                $isDir = false;
+                $name = pathinfo($file, PATHINFO_FILENAME);
+                $files[$name] = false;
             }
-            $title = $conf->resolveTitle($name);
-            $items[$name] = compact('title', 'isDir');
         }
         closedir($dh);
-        return $items;
+        return $files;
     }
 
     public function view($view, $extraVars = [])

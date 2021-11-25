@@ -30,7 +30,7 @@ $hoverLinkBgColor: #FFF;
 $hoverLinkColor: $redColor;
 $sysColor: $greenColor;
 $barHeight: 31px;
-$menuWidth: 18rem;
+$listWidth: 18rem;
 
 body {
     margin: 0 !important;
@@ -61,8 +61,8 @@ a:hover {
     color: $hoverLinkColor;
 }
 
-a.sys {
-    color: $sysColor;
+.sys {
+    color: $sysColor !important;
 }
 
 div#bar {
@@ -113,6 +113,14 @@ div#list {
         margin-left: 1ex;
         padding: 0;
     }
+
+    .button {
+        display: inline-block;
+        border: 1px solid $greyColor;
+        border-radius: 8px;
+        width: $listWidth - 5rem;
+        text-align: center;
+    }
 }
 
 @media screen and (min-width: 54rem) {
@@ -120,14 +128,14 @@ div#list {
         position: sticky;
         left: 0;
         top: $barHeight;
-        width: $menuWidth;
+        width: $listWidth;
         float: left;
         margin-bottom: $barHeight;
     }
 
     div#main {
         margin-top: $barHeight;
-        margin-left: $menuWidth;
+        margin-left: $listWidth;
         border: 1px solid transparent;
         margin-bottom: $barHeight;
     }
