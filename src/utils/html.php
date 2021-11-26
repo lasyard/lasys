@@ -23,4 +23,22 @@ final class Html
         $html .= '>' . $link['text'] . '</a>';
         return $html;
     }
+
+    public static function input($type, $name, $attrs = [])
+    {
+        if ($type == 'textarea') {
+            $html = '<textarea name="' . $name . '"';
+            foreach ($attrs as $key => $value) {
+                $html .= ' ' . $key . '="' . $value . '"';
+            }
+            $html .= '></textarea>';
+        } else {
+            $html = '<input type="' . $type . '" name="' . $name . '"';
+            foreach ($attrs as $key => $value) {
+                $html .= ' ' . $key . '="' . $value . '"';
+            }
+            $html .= ' />';
+        }
+        return $html;
+    }
 }

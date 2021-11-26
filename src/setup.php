@@ -26,13 +26,10 @@ set_include_path(
         . PATH_SEPARATOR . __DIR__
         . PATH_SEPARATOR . __DIR__ . '/utils'
         . PATH_SEPARATOR . __DIR__ . '/items'
-        . PATH_SEPARATOR . ACTIONS_PATH
 );
+// Load it for autoload has not been enabled.
+require_once 'str.php';
 spl_autoload_register(function ($class) {
-    $words = preg_split('/(?=[A-Z])/', $class, -1, PREG_SPLIT_NO_EMPTY);
-    foreach ($words as &$word) {
-        $word = strtolower($word);
-    }
-    $file = implode('_', $words) . '.php';
+    $file = Str::classToFile($class);
     require_once $file;
 });

@@ -1,5 +1,5 @@
 <?php
-final class TxtItem extends FileItem
+final class TextItem extends FileItem
 {
     use Getter;
 
@@ -16,7 +16,8 @@ final class TxtItem extends FileItem
 
     private function render($lines)
     {
-        $html = '<h1>' . $this->_title . '</h1>' . PHP_EOL;
+        $html = '<div class="text">' . PHP_EOL;
+        $html .= '<h1>' . $this->_title . '</h1>' . PHP_EOL;
         $pOpen = false;
         foreach ($lines as &$line) {
             if (empty(trim($line))) {
@@ -38,6 +39,7 @@ final class TxtItem extends FileItem
             $html .= "</p>" . PHP_EOL;
             $pOpen = false;
         }
+        $html .= '</div>' . PHP_EOL;
         $html = Text::markTitle($html);
         return $html;
     }

@@ -8,6 +8,7 @@ final class App
     private $_styles = [];
     private $_breadcrumbs = [];
     private $_base;
+    private $_path;
     private $_list;
     private $_item;
 
@@ -19,41 +20,50 @@ final class App
         require_once 'setup.php';
     }
 
+    public function base()
+    {
+        return $this->_base;
+    }
+
+    public function path()
+    {
+        return $this->_path;
+    }
+
     public function run()
     {
-        list($base, $args) = Server::getHomeAndPath();
-        $this->_home = $base;
-        $path = DATA_PATH;
+        list($this->_base, $args) = Server::getHomeAndPath();
+        $this->_home = $this->_base;
+        $this->_path = DATA_PATH;
         $conf = new Config(CONF_PATH);
         $title = null;
         $item = null;
-        $breadcrumbs = [];
         try {
             while (!empty($args)) {
                 $name = array_shift($args);
                 if (empty($name)) {
                     continue;
                 }
-                $newPath = $path . '/' . $name;
+                $newPath = $this->_path . '/' . $name;
                 if (is_dir($newPath)) {
-                    if ($base != $this->_home) {
-                        $breadcrumbs[] = [
+                    if ($this->_base != $this->_home) {
+                        $this->_breadcrumbs[] = [
                             'text' => $title,
-                            'url' => $base,
+                            'url' => $this->_base,
                         ];
                     }
-                    $path = $newPath;
-                    $base .= $name . '/';
+                    $this->_path = $newPath;
+                    $this->_base .= $name . '/';
                     $conf->shift($name);
                     $title = $conf->resolveTitle($name);
                 } else {
-                    $item = $conf->resolve($path, $name);
+                    $item = $conf->resolve($this->_path, $name);
                     break;
                 }
             }
             if ($item === null) {
                 $name = '';
-                $item = $conf->resolve($path, 'index');
+                $item = $conf->resolve($this->_path, 'index');
             }
             if (method_exists($item, 'cook')) {
                 $item->cook($args);
@@ -61,12 +71,10 @@ final class App
         } catch (Exception $e) {
             $item = new ErrorItem($e->getMessage());
         }
-        $this->_breadcrumbs = $breadcrumbs;
-        $this->_base = $base;
-        $this->_list = $this->createItemList($conf, $this->createFileList($path, $conf), $name);
+        $this->_list = $this->createItemList($conf, $this->createFileList($conf), $name);
         $this->_item = $item;
         $this->_title = APP_TITLE;
-        if ($path != DATA_PATH || !empty($name)) {
+        if ($this->_path != DATA_PATH || !empty($name)) {
             $this->_title .= ' - ' . $item->title ?? $conf->resolveTitle($name);
         }
         $this->addScript('js/main');
@@ -119,8 +127,9 @@ final class App
         return array_merge($list0, $list1);
     }
 
-    private function createFileList($path, $conf)
+    private function createFileList($conf)
     {
+        $path = $this->_path;
         $dh = @opendir($path);
         if (!$dh) {
             return [];

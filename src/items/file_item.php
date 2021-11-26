@@ -14,12 +14,16 @@ abstract class FileItem
     {
         $files = glob($path . '/' . $name . '.*');
         if (!$files) {
-            throw new Exception('Cannot find item "' . $name . '".');
+            throw new RuntimeException('Cannot find file "' . $name . '".');
         }
         $file = $files[0];
         $ext = pathinfo($file, PATHINFO_EXTENSION);
-        $class = ucfirst($ext) . 'Item';
-        return new $class($file);
+        switch ($ext) {
+            case 'txt':
+                return new TextItem($file);
+            default:
+                throw new RuntimeException('Unsupported file type "' . $ext . '".');
+        }
     }
 
     public function httpHeaders()

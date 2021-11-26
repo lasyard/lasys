@@ -90,7 +90,7 @@ final class Config
             return FileItem::get($path, $name);
         } else if ($type == 'php') {
             $item = $list[$name];
-            return Action::get(!empty($item['action']) ? $item['action'] : 'Action::default');
+            return Action::get($item['action'] ?? '');
         }
         return new ErrorItem('Unsupported item type "' . $type . '".');
     }

@@ -18,7 +18,7 @@ final class View
         if (is_file(VIEWS_PATH . '/' . $layout . '.php')) { // In user view path.
             require VIEWS_PATH . '/' . $layout . '.php';
         } else if (is_file(__DIR__ . '/../views/' . $layout . '.php')) { // In sys view path.
-            require 'views/' . $layout . '.php';
+            require __DIR__ . '/../views/' . $layout . '.php';
         }
     }
 }

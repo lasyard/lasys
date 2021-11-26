@@ -1,0 +1,50 @@
+div#content {
+    fieldset {
+        legend {
+            font-family: Sans-Serif;
+            font-size: 0.8em;
+        }
+
+        margin: 0.5em 0;
+        border: 1px solid #AAA;
+        padding: 0;
+
+        form {
+            div.field {
+                width: 100%;
+
+                div.label {
+                    display: inline-block;
+                    font-weight: bold;
+                    text-align: right;
+                    width: 15%;
+                }
+
+                input[type="text"] {
+                    width: 80%;
+                }
+
+                textarea {
+                    width: 80%;
+                    margin-top: 0.3em;
+                    vertical-align: top;
+                }
+
+                div.checkbox-group {
+                    border: 1px solid grey;
+                    padding: 1px;
+                    display: inline-block;
+                    width: 80%;
+                    vertical-align: top;
+
+                    span.checkbox {
+                        display: inline-block;
+                        min-width: 18%;
+                        white-space: nowrap;
+                        font-size: 16px;
+                    }
+                }
+            }
+        }
+    }
+}

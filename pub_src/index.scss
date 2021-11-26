@@ -32,6 +32,7 @@ $sysColor: $greenColor;
 $normalFont: Serif;
 $headerFont: Sans-Serif;
 $titleFont: Fantasy;
+$letterSpacing: 0.1em;
 
 $barHeight: 31px;
 $listWidth: 18rem;
@@ -43,7 +44,7 @@ body {
     font-family: $normalFont;
     font-weight: normal;
     line-height: 1.5;
-    letter-spacing: 0.1em;
+    letter-spacing: $letterSpacing;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -259,3 +260,6 @@ table {
 img {
     border: 0;
 }
+
+@import 'form';
+@import 'text';

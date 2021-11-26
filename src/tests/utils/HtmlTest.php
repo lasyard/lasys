@@ -32,4 +32,16 @@ final class HtmlTest extends TestCase
             Html::link(['text' => 'lasys', 'url' => 'http://lasys.org', 'target' => '_blank'])
         );
     }
+
+    public function testInput()
+    {
+        $this->assertSame(
+            '<input type="text" name="name" />',
+            Html::input('text', 'name')
+        );
+        $this->assertSame(
+            '<textarea name="text" class="sys"></textarea>',
+            Html::input('textarea', 'text', ['class' => 'sys'])
+        );
+    }
 }
