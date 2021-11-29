@@ -29,4 +29,10 @@ final class Server
         }
         return [$home, explode('/', $path)];
     }
+
+    public static function isAjaxRequest()
+    {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strcasecmp($_SERVER['HTTP_X_REQUESTED_WITH'], 'xmlhttprequest') == 0;
+    }
 }

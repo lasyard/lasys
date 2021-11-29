@@ -20,7 +20,8 @@ div#content {
                     width: 15%;
                 }
 
-                input[type="text"] {
+                input[type=text],
+                input[type=password] {
                     width: 80%;
                 }
 

@@ -8,7 +8,13 @@ const CopyPlugin = require("copy-webpack-plugin");
 module.exports = {
     mode: 'production',
     entry: {
-        'js/main.js': './pub_src/index.ts',
+        'js/main.js': {
+            import: './pub_src/index.ts',
+            library: {
+                type: 'window',
+            },
+        },
+        'js/login.js': './pub_src/login.ts',
         // MiniCssExtractPlugin will add `.css`.
         'css/main': './pub_src/index.scss',
     },

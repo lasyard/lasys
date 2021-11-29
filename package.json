@@ -2,6 +2,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-typescript": "^7.16.0",
+    "@types/crypto-js": "^4.0.2",
     "babel-jest": "^27.3.1",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^10.0.0",
@@ -20,6 +21,7 @@
     "release-build": "npx webpack --config webpack.config.js"
   },
   "dependencies": {
-    "bootstrap-icons": "^1.7.1"
+    "bootstrap-icons": "^1.7.1",
+    "crypto-js": "^4.1.1"
   }
 }

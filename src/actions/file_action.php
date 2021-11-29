@@ -1,5 +1,5 @@
 <?php
-final class File extends Action
+final class FileAction extends Action
 {
     public function upload($title, $accept = '*', $fieldName = 'file', $sizeLimit = 65536)
     {

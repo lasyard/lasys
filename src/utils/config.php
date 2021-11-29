@@ -1,6 +1,10 @@
 <?php
 final class Config
 {
+    public const FILE = 'file';
+    public const PHP = 'php';
+    public const DIR = 'dir';
+
     private const DEFAULT = [
         'recursive' => true,
         'listedOnly' => true,
@@ -52,8 +56,10 @@ final class Config
             if (is_string($item)) {
                 $item = ['title' => $item];
             }
-            $item['type'] = $item['type'] ?? 'file';
+            $item['type'] = $item['type'] ?? self::FILE;
             $item['hidden'] = $item['hidden'] ?? false;
+            $item['action'] = $item['action'] ?? '';
+            $item['args'] = $item['args'] ?? [];
         }
         $this->_conf = $conf;
     }
@@ -86,12 +92,17 @@ final class Config
     {
         $list = $this->_conf['list'];
         $type = $list[$name]['type'] ?? 'file';
-        if ($type == 'file') {
+        if ($type == self::FILE) {
             return FileItem::get($path, $name);
-        } else if ($type == 'php') {
+        } else if ($type == self::PHP) {
             $item = $list[$name];
-            return Action::get($item['action'] ?? '');
+            return Action::get($item['action'], $item['args']);
         }
         return new ErrorItem('Unsupported item type "' . $type . '".');
+    }
+
+    public function isDir($name)
+    {
+        return $this->_conf['list'][$name]['type'] == self::DIR;
     }
 }

@@ -7,6 +7,12 @@
         }
         ?>
     </div>
+    <span>
+        <?php if (Sys::user()->name) { ?>
+            <a href="<?php echo $home; ?>logout" class="sys" style="float:right">
+                <i class="bi bi-person"></i> <?php echo Sys::user()->name; ?></a>
+        <?php } ?>
+    </span>
 </div>
 <div id="list">
     <fieldset>

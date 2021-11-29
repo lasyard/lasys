@@ -1,4 +1,7 @@
 <?php
+if (!defined('SITE')) {
+    define('SITE', 'unknown');
+}
 if (!defined('DATA_DIR')) {
     define('DATA_DIR', 'data');
 }
@@ -30,6 +33,6 @@ set_include_path(
 // Load it for autoload has not been enabled.
 require_once 'str.php';
 spl_autoload_register(function ($class) {
-    $file = Str::classToFile($class);
+    $file = Str::classToFile($class) . '.php';
     require_once $file;
 });

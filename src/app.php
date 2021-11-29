@@ -18,6 +18,8 @@ final class App
         define('CONF_PATH', ROOT_PATH . '/configs');
         require_once CONF_PATH . '/defs.php';
         require_once 'setup.php';
+        session_cache_limiter('public');
+        session_start();
     }
 
     public function base()
@@ -44,18 +46,17 @@ final class App
                 if (empty($name)) {
                     continue;
                 }
-                $newPath = $this->_path . '/' . $name;
-                if (is_dir($newPath)) {
+                if ($conf->isDir($name) || is_dir($this->_path . '/' . $name)) {
                     if ($this->_base != $this->_home) {
                         $this->_breadcrumbs[] = [
                             'text' => $title,
                             'url' => $this->_base,
                         ];
                     }
-                    $this->_path = $newPath;
+                    $this->_path .= '/' . $name;
                     $this->_base .= $name . '/';
-                    $conf->shift($name);
                     $title = $conf->resolveTitle($name);
+                    $conf->shift($name);
                 } else {
                     $item = $conf->resolve($this->_path, $name);
                     break;
@@ -98,14 +99,16 @@ final class App
                 }
                 continue;
             }
-            if ($item['type'] == 'file') {
-                $isDir = false;
+            $isDir = false;
+            if ($item['type'] == Config::FILE) {
                 if (array_key_exists($name, $files)) {
                     $isDir = $files[$name];
                     unset($files[$name]);
                 } else {
                     continue;
                 }
+            } else if ($item['type'] == Config::DIR) {
+                $isDir = true;
             }
             $list0[] = [
                 'text' => $item['title'] ?? Str::captalize($name),

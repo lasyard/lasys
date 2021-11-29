@@ -73,4 +73,7 @@ define('DATA_DIR', 'data');       // The root dir of website contents.
 define('PUB_DIR', 'pub');         // The dir of public assets.
 define('VIEW_DIR', 'views');      // The dir of view files.
 define('ACTIONS_DIR', 'actions'); // The dir of actions.
+define('SITE', 'unknown');        // For multi-site deployment.
 ```
+
+The values defined above are also the default values.

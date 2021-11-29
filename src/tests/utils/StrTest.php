@@ -32,21 +32,8 @@ final class StrTest extends TestCase
 
     public function testClassToFile()
     {
-        $this->assertSame('super_class.php', Str::classToFile('SuperClass'));
-        $this->assertSame('m_s_d_b.php', Str::classToFile('MSDB'));
-    }
-
-    public function testSplitFunParas()
-    {
-        list($fun, $paras) = Str::splitFunParas('abc(a, b, c)');
-        $this->assertSame('abc', $fun);
-        $this->assertSame(['a', 'b', 'c'], $paras);
-        list($fun, $paras) = Str::splitFunParas('def()');
-        $this->assertSame('def', $fun);
-        $this->assertSame([], $paras);
-        list($fun, $paras) = Str::splitFunParas('ghi');
-        $this->assertSame('ghi', $fun);
-        $this->assertSame([], $paras);
+        $this->assertSame('super_class', Str::classToFile('SuperClass'));
+        $this->assertSame('m_s_d_b', Str::classToFile('MSDB'));
     }
 
     public function testIsValidFileName()

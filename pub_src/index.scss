@@ -254,7 +254,13 @@ span.nobr {
 }
 
 table {
+    border: 1px solid $greyColor;
     border-collapse: collapse;
+
+    th,
+    td {
+        border: 1px solid $greyColor;
+    }
 }
 
 img {

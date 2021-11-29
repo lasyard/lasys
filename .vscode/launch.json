@@ -6,7 +6,7 @@
       "request": "launch",
       "type": "pwa-chrome",
       "trace": true,
-      "url": "http://localhost/~jyg/lasy",
+      "url": "http://localhost/~jyg/homepage",
       "webRoot": "${workspaceFolder}"
     },
     {
