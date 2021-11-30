@@ -70,4 +70,28 @@ final class User
     {
         return $this->_user == null;
     }
+
+    public function hasPriv($privDefs)
+    {
+        $user = $this->_user;
+        foreach (explode(' ', $privDefs) as $privDef) {
+            @list($priv, $site) = explode('@', $privDef, 2);
+            if (!empty($priv)) {
+                if ($user == null) {
+                    continue;
+                }
+                $privs = $user['priv'];
+                if (!in_array($priv, $privs)) {
+                    continue;
+                }
+            }
+            if (!empty($site)) {
+                if ($site != SITE) {
+                    continue;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

@@ -103,7 +103,7 @@ final class App
         $files = $this->_files;
         $list0 = [];
         foreach ($conf->list as $name => $item) {
-            if ($item['hidden']) {
+            if ($item['hidden'] || !Sys::user()->hasPriv($item['priv'])) {
                 if (array_key_exists($name, $files)) {
                     unset($files[$name]);
                 }

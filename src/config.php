@@ -60,12 +60,21 @@ final class Config
             $item['hidden'] = $item['hidden'] ?? false;
             $item['action'] = $item['action'] ?? '';
             $item['args'] = $item['args'] ?? [];
+            $item['priv'] = $item['priv'] ?? '';
         }
         $this->_conf = $conf;
     }
 
+    private function checkPriv($name)
+    {
+        if (!Sys::user()->hasPriv($this->_conf['list'][$name]['priv'])) {
+            throw new RuntimeException('You do not have privilege to access this item.');
+        }
+    }
+
     public function shift($name)
     {
+        $this->checkPriv($name);
         $this->_path .= '/' . $name;
         $this->read();
     }
@@ -90,6 +99,7 @@ final class Config
 
     public function resolve($path, $name)
     {
+        $this->checkPriv($name);
         $list = $this->_conf['list'];
         $type = $list[$name]['type'] ?? 'file';
         if ($type == self::FILE) {
