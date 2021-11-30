@@ -35,6 +35,9 @@
     </fieldset>
 </div>
 <div id="main">
+    <?php if (!empty($meta)) { ?>
+        <div id="meta"><?php echo $meta; ?></div>
+    <?php } ?>
     <div id="content">
         <?php echo $content; ?>
     </div>

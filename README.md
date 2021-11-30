@@ -68,6 +68,7 @@ There must be a directory named `configs` in the root of your project to put you
 In this file, constants are defined. If one is not defined, it will be set to a default value.
 
 ```php
+date_default_timezone_set('Asia/Shanghai');
 define('APP_TITLE', 'Lasys');     // The title of app.
 define('DATA_DIR', 'data');       // The root dir of website contents.
 define('PUB_DIR', 'pub');         // The dir of public assets.

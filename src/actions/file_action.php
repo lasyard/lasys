@@ -35,13 +35,21 @@ final class FileAction extends Action
         if (!is_uploaded_file($file['tmp_name'])) {
             throw new RuntimeException('Uploaded file error!');
         }
+        $path = Sys::app()->path();
+        $name = $file['name'];
         if (
-            Str::isValidFileName($file['name'])
-            && move_uploaded_file($file['tmp_name'], Sys::app()->path() . '/' . $file['name'])
+            Str::isValidFileName($name)
+            && move_uploaded_file($file['tmp_name'], $path . '/' . $name)
         ) {
-            echo '<p class="sys">File "', $file['name'], '" is uploaded successfully.</p>';
-            return;
+            $bn = pathinfo($name, PATHINFO_FILENAME);
+            $item = FileItem::get($path, $bn);
+            Sys::app()->addFile($bn, [
+                'title' => $item->title,
+                'time' => $_SERVER['REQUEST_TIME'],
+                'user' => Sys::user()->name,
+            ]);
+            Sys::app()->redirect($bn);
         }
-        throw new RuntimeException('Cannot save uploaded file "' . $file['name'] . '".');
+        throw new RuntimeException('Cannot save uploaded file "' . $name . '".');
     }
 }

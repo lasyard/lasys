@@ -5,7 +5,7 @@ final class UserAction extends Action
     {
         if (isset($_POST['name'])) {
             Sys::user()->login($_POST['name'], $_POST['password']);
-        } else if (!Sys::user()->name) {
+        } else if (Sys::user()->isGuest) {
             Sys::app()->addScript('js/login');
             View::render('login');
             return;
@@ -15,8 +15,8 @@ final class UserAction extends Action
 
     public function logout()
     {
-        $name = Sys::user()->name;
-        if ($name) {
+        if (!Sys::user()->isGuest) {
+            $name = Sys::user()->name;
             Sys::user()->logout();
             echo '<p class="center sys">User "', $name, '" logged out successfully.</p>';
         } else {

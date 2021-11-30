@@ -1,6 +1,8 @@
 <?php
 final class App
 {
+    public const META_FILE = 'list.json';
+
     private $_home;
     private $_title;
     private $_datum = [];
@@ -9,12 +11,13 @@ final class App
     private $_breadcrumbs = [];
     private $_base;
     private $_path;
+    private $_name;
     private $_list;
+    private $_files;
     private $_item;
 
     public function __construct()
     {
-        date_default_timezone_set("UTC");
         define('CONF_PATH', ROOT_PATH . '/configs');
         require_once CONF_PATH . '/defs.php';
         require_once 'setup.php';
@@ -46,6 +49,7 @@ final class App
                 if (empty($name)) {
                     continue;
                 }
+                $this->_name = $name;
                 if ($conf->isDir($name) || is_dir($this->_path . '/' . $name)) {
                     if ($this->_base != $this->_home) {
                         $this->_breadcrumbs[] = [
@@ -63,16 +67,21 @@ final class App
                 }
             }
             if ($item === null) {
-                $name = '';
+                $this->_name = '';
                 $item = $conf->resolve($this->_path, 'index');
-            }
-            if (method_exists($item, 'cook')) {
-                $item->cook($args);
             }
         } catch (Exception $e) {
             $item = new ErrorItem($e->getMessage());
         }
-        $this->_list = $this->createItemList($conf, $this->createFileList($conf), $name);
+        $this->_files = $this->createFileList($conf);
+        if (method_exists($item, 'cook')) {
+            try {
+                $item->cook($args);
+            } catch (Exception $e) {
+                $item = new ErrorItem($e->getMessage());
+            }
+        }
+        $this->_list = $this->createItemList($conf, $name);
         $this->_item = $item;
         $this->_title = APP_TITLE;
         if ($this->_path != DATA_PATH || !empty($name)) {
@@ -88,9 +97,10 @@ final class App
         $this->view('main');
     }
 
-    private function createItemList($conf, $files, $selected)
+    private function createItemList($conf, $selected)
     {
         $base = $this->_base;
+        $files = $this->_files;
         $list0 = [];
         foreach ($conf->list as $name => $item) {
             if ($item['hidden']) {
@@ -102,7 +112,8 @@ final class App
             $isDir = false;
             if ($item['type'] == Config::FILE) {
                 if (array_key_exists($name, $files)) {
-                    $isDir = $files[$name];
+                    $isDir = $files[$name]['isDir'];
+                    $title = $files[$name]['title'];
                     unset($files[$name]);
                 } else {
                     continue;
@@ -111,16 +122,16 @@ final class App
                 $isDir = true;
             }
             $list0[] = [
-                'text' => $item['title'] ?? Str::captalize($name),
+                'text' => $title ?? $item['title'] ?? Str::captalize($name),
                 'url' => $base . $name . ($isDir ? '/' : ''),
                 'selected' => $name == $selected,
             ];
         }
         $list1 = [];
-        foreach ($files as $name => $isDir) {
+        foreach ($files as $name => $file) {
             $list1[] = [
-                'text' => Str::captalize($name),
-                'url' => $base . $name . ($isDir ? '/' : ''),
+                'text' => $file['title'] ?? Str::captalize($name),
+                'url' => $base . $name . ($file['isDir'] ? '/' : ''),
                 'selected' => $name == $selected,
             ];
         }
@@ -139,19 +150,63 @@ final class App
         }
         $files = [];
         while (($file = readdir($dh)) !== false) {
+            if ($file == self::META_FILE) {
+                $files = array_merge_recursive(
+                    $files,
+                    json_decode(file_get_contents("$path/$file"), true)
+                );
+                continue;
+            }
             if ($conf->excluded($file)) {
                 continue;
             }
             if (is_dir("$path/$file")) {
                 $name = $file;
-                $files[$name] = true;
+                $files[$name]['isDir'] = true;
             } else {
                 $name = pathinfo($file, PATHINFO_FILENAME);
-                $files[$name] = false;
+                $files[$name]['isDir'] = false;
             }
         }
         closedir($dh);
         return $files;
+    }
+
+    public function addFile($name, $fileInfo)
+    {
+        $this->_files[$name] = $fileInfo;
+        $this->_files[$name]['isDir'] = false;
+        $this->saveMeta();
+    }
+
+    private function saveMeta()
+    {
+        $json = [];
+        foreach ($this->_files as $name => $file) {
+            $res = Arr::transKeys($file, 'title', 'time', 'user');
+            if (!empty($res)) {
+                $json[$name] = $res;
+            }
+        }
+        if (!empty($json)) {
+            $path = $this->_path;
+            if (!is_dir($path)) {
+                mkdir($path, 0775, true);
+            }
+            file_put_contents(
+                $path . '/' . App::META_FILE,
+                json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+            );
+        }
+    }
+
+    private function metaView()
+    {
+        $meta = $this->_files[$this->_name];
+        if (isset($meta['time']) || isset($meta['user'])) {
+            return View::renderHtml('meta', $meta);
+        }
+        return '';
     }
 
     public function view($view, $extraVars = [])
@@ -164,6 +219,7 @@ final class App
             'styles' => $this->_styles,
             'base' => $this->_base,
             'breadcrumbs' => $this->_breadcrumbs,
+            'meta' => $this->metaView(),
             'list' => $this->_list,
             'content' => $this->_item->content,
         ];
@@ -220,5 +276,12 @@ final class App
             'data' => $data,
             'flags' => $flags,
         ];
+    }
+
+    public function redirect($name)
+    {
+        $url = (strpos($name, '//') === false) ? $this->_base . $name : $name;
+        header('Location: ' . $url);
+        exit;
     }
 }

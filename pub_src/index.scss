@@ -28,6 +28,7 @@ $visitedLinkColor: #A0A;
 $hoverLinkBgColor: #FFF;
 $hoverLinkColor: $redColor;
 $sysColor: $greenColor;
+$highColor: #FFA;
 
 $normalFont: Serif;
 $headerFont: Sans-Serif;
@@ -125,7 +126,7 @@ div#list {
 
     fieldset {
         margin: 0.3em;
-        border: 1px solid #000;
+        border: 1px solid $greyColor;
         padding: 0;
     }
 
@@ -140,7 +141,7 @@ div#list {
 
         li.highlighted,
         li.highlighted a {
-            background-color: #FFA;
+            background-color: $highColor;
         }
     }
 
@@ -202,6 +203,13 @@ div#list {
 }
 
 div#main {
+    div#meta {
+        background-color: $highColor;
+        color: $linkColor;
+        font-size: 0.8em;
+        font-family: $headerFont;
+    }
+
     div#content {
         margin-top: 1em;
         margin-left: 2em;
