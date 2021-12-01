@@ -229,11 +229,11 @@ final class App
     {
         $name = $this->_name;
         $meta = $this->_files[$name];
-        if (Sys::user()->hasPriv('edit')) {
-            $meta['edit'] = true;
-            $meta['name'] = $name;
-        }
-        if (isset($meta['time']) || isset($meta['user']) || isset($meta['edit'])) {
+        if (isset($meta['isDir']) && !$meta['isDir']) {
+            if (Sys::user()->hasPriv('edit')) {
+                $meta['edit'] = true;
+                $meta['name'] = $name;
+            }
             return View::renderHtml('meta', $meta);
         }
         return '';

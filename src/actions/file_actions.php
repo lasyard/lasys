@@ -27,7 +27,7 @@ final class FileActions extends Actions
         $name = $this->name;
         $item = FileItem::get($path, $name, false);
         $item->delete();
-        echo '<p class="sys center">Item "' . $name . '" deleted.</p>';
+        View::render('deleted', ['name' => $name, 'url' => $this->base]);
     }
 
     public function actionPost($sizeLimit = 65536)
