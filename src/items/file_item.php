@@ -1,5 +1,5 @@
 <?php
-abstract class FileItem
+class FileItem
 {
     use Getter;
 
@@ -10,13 +10,16 @@ abstract class FileItem
         $this->_file = $file;
     }
 
-    public static function get($path, $name)
+    public static function get($path, $name, $check = true)
     {
         $files = glob($path . '/' . $name . '.*');
         if (!$files) {
             throw new RuntimeException('Cannot find file "' . $name . '".');
         }
         $file = $files[0];
+        if (!$check) {
+            return new FileItem($file);
+        }
         $ext = pathinfo($file, PATHINFO_EXTENSION);
         switch ($ext) {
             case 'txt':

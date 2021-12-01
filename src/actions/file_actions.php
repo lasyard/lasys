@@ -25,9 +25,9 @@ final class FileActions extends Actions
     {
         $path = $this->path;
         $name = $this->name;
-        $item = FileItem::get($path, $name);
-        $item->detele();
-        echo 'Item "' . $item->file . '" deleted.';
+        $item = FileItem::get($path, $name, false);
+        $item->delete();
+        echo '<p class="sys center">Item "' . $name . '" deleted.</p>';
     }
 
     public function actionPost($sizeLimit = 65536)

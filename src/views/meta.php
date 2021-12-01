@@ -10,7 +10,7 @@
             const r = confirm('Are you sure to delete "<?php echo $name; ?>"?');
             if (r) {
                 Ajax.delete(function(res, type) {
-                    alert(res);
+                    byId('main').innerHTML = res;
                 });
             }
         });
