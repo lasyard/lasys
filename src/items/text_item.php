@@ -8,7 +8,6 @@ final class TextItem extends FileItem
 
     public function __construct($file)
     {
-        parent::__construct($file);
         $lines = file($file, FILE_IGNORE_NEW_LINES);
         $this->_title = array_shift($lines);
         $this->_content = $this->render($lines);

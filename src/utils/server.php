@@ -35,4 +35,9 @@ final class Server
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strcasecmp($_SERVER['HTTP_X_REQUESTED_WITH'], 'xmlhttprequest') == 0;
     }
+
+    public static function requestMethod()
+    {
+        return getenv('REQUEST_METHOD');
+    }
 }

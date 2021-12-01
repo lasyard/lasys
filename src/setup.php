@@ -29,6 +29,8 @@ set_include_path(
         . PATH_SEPARATOR . __DIR__
         . PATH_SEPARATOR . __DIR__ . '/utils'
         . PATH_SEPARATOR . __DIR__ . '/items'
+        . PATH_SEPARATOR .  ACTIONS_PATH
+        . PATH_SEPARATOR . __DIR__ . '/actions'
 );
 // Load it for autoload has not been enabled.
 require_once 'str.php';

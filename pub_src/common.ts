@@ -10,6 +10,10 @@ export function dateCmp(a: string, b: string) {
     return objCmp(Date.parse(a), Date.parse(b));
 }
 
+export function byId(id: string) {
+    return document.getElementById(id);
+}
+
 (String.prototype as { [key: string]: any }).capitalize = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };

@@ -14,7 +14,7 @@ final class ConfigTest extends TestCase
         $conf = new Config('non-exist');
         $this->assertTrue($conf->recursive);
         $this->assertTrue($conf->listedOnly);
-        $this->assertFalse($conf->orderBy);
+        $this->assertFalse($conf->order);
         $this->assertEmpty($conf->list);
     }
 

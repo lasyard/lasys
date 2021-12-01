@@ -1,2 +1,2 @@
-export { objCmp, numCmp, dateCmp } from './common';
-export { Ajax } from './ajax';
+export * from './common';
+export * from './ajax';

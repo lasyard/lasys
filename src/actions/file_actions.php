@@ -1,19 +1,38 @@
 <?php
-final class FileAction extends Action
+final class FileActions extends Actions
 {
-    public function upload($title, $accept = '*', $fieldName = 'file', $sizeLimit = 65536)
+    public const FILE_FIELD_NAME = 'file';
+
+    public function actionGet()
     {
-        if (!isset($_FILES[$fieldName]['error'])) {
-            // Show upload form.
-            View::render('upload', [
-                'title' => $title,
-                'fieldName' => $fieldName,
-                'sizeLimit' => $sizeLimit,
-                'accept' => $accept,
-            ]);
-            return;
-        }
-        $file = $_FILES[$fieldName];
+        $path = $this->path;
+        $name = $this->name;
+        $item = FileItem::get($path, $name);
+        $mtime = $item->time();
+        $this->_httpHeaders = [
+            'Cache-Control: no-cache',
+            'ETag: "' . md5(Sys::user()->name . $mtime) . '"',
+        ];
+        $this->_title = $item->title;
+        return $item->content;
+    }
+
+    public function actionPut()
+    {
+    }
+
+    public function actionDelete()
+    {
+        $path = $this->path;
+        $name = $this->name;
+        $item = FileItem::get($path, $name);
+        $item->detele();
+        echo 'Item "' . $item->file . '" deleted.';
+    }
+
+    public function actionPost($sizeLimit = 65536)
+    {
+        $file = $_FILES[self::FILE_FIELD_NAME];
         // Handle uploading.
         if (is_array($file['error'])) {
             throw new RuntimeException('Invalid parameters.');
@@ -35,7 +54,7 @@ final class FileAction extends Action
         if (!is_uploaded_file($file['tmp_name'])) {
             throw new RuntimeException('Uploaded file error!');
         }
-        $path = Sys::app()->path();
+        $path = $this->path;
         $name = $file['name'];
         if (
             Str::isValidFileName($name)
@@ -51,5 +70,16 @@ final class FileAction extends Action
             Sys::app()->redirect($bn);
         }
         throw new RuntimeException('Cannot save uploaded file "' . $name . '".');
+    }
+
+    public function actionUploadForm($title, $accept = '*', $sizeLimit = 65536)
+    {
+        View::render('upload', [
+            'title' => $title,
+            'fieldName' => self::FILE_FIELD_NAME,
+            'action' => $this->base,
+            'accept' => $accept,
+            'sizeLimit' => $sizeLimit,
+        ]);
     }
 }

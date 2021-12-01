@@ -7,10 +7,20 @@ final class Config
 
     private const DEFAULT = [
         'recursive' => true,
-        'listedOnly' => true,
+        'exclusive' => true,
+        'order' => false,
+        'defaultItem' => 'index',
+        'defaultType' => self::FILE,
         'excludes' => ['.*', 'index.*', '_*'],
-        'orderBy' => false,
         'list' => [],
+    ];
+
+    private const RECURSIVE_CONF = [
+        'recursive',
+        'exclusive',
+        'order',
+        'defaultItem',
+        'defaultType',
     ];
 
     private $_path;
@@ -42,24 +52,50 @@ final class Config
         $conf[$opt] = array_unique($conf[$opt] ?? [] + $this->_conf[$opt]);
     }
 
+    private function defaultActions($item)
+    {
+        $actions = [
+            'GET' => null,
+            'PUT' => null,
+            'POST' => null,
+            'DELETE' => null,
+        ];
+        if (!isset($item['actions'])) {
+            switch ($item['type']) {
+                case self::FILE:
+                    $actions['GET'] = FileActions::get();
+                    $actions['PUT'] = FileActions::put();
+                    $actions['DELETE'] = FileActions::delete();
+                    break;
+                case self::PHP:
+                    $actions['GET'] = Actions::default();
+                    break;
+            }
+        } else if ($item['actions'] instanceof Actions) {
+            $actions['GET'] = $item['actions'];
+        } else if (is_array($item['actions'])) {
+            Arr::copyKeys($actions, $item['actions'], 'GET', 'PUT', 'POST', 'DELETE');
+        }
+        return $actions;
+    }
+
     private function read()
     {
         $file = $this->_path . '/list.php';
         $conf = is_file($file) ? include $file : [];
         $recursive = $this->_conf['recursive'];
-        $this->setDefault($conf, 'recursive', $recursive);
-        $this->setDefault($conf, 'listedOnly', $recursive);
+        foreach (self::RECURSIVE_CONF as $c) {
+            $this->setDefault($conf, $c, $recursive);
+        }
         $this->mergeArray($conf, 'excludes');
-        $this->setDefault($conf, 'orderBy', $recursive);
         $this->setDefault($conf, 'list');
         foreach ($conf['list'] as &$item) {
             if (is_string($item)) {
                 $item = ['title' => $item];
             }
-            $item['type'] = $item['type'] ?? self::FILE;
+            $item['type'] = $item['type'] ?? $conf['defaultType'];
             $item['hidden'] = $item['hidden'] ?? false;
-            $item['action'] = $item['action'] ?? '';
-            $item['args'] = $item['args'] ?? [];
+            $item['actions'] = $this->defaultActions($item);
             $item['priv'] = $item['priv'] ?? '';
         }
         $this->_conf = $conf;
@@ -81,7 +117,7 @@ final class Config
 
     public function excluded($file)
     {
-        if ($this->_conf['listedOnly'] && !isset($this->_conf['list'][pathinfo($file, PATHINFO_FILENAME)])) {
+        if ($this->_conf['exclusive'] && !isset($this->_conf['list'][pathinfo($file, PATHINFO_FILENAME)])) {
             return true;
         }
         foreach ($this->_conf['excludes'] as $p) {
@@ -92,23 +128,22 @@ final class Config
         return false;
     }
 
-    public function resolveTitle($name)
+    public function title($name)
     {
         return $this->_conf['list'][$name]['title'] ?? Str::captalize($name);
     }
 
-    public function resolve($path, $name)
+    public function action($name)
     {
-        $this->checkPriv($name);
-        $list = $this->_conf['list'];
-        $type = $list[$name]['type'] ?? 'file';
-        if ($type == self::FILE) {
-            return FileItem::get($path, $name);
-        } else if ($type == self::PHP) {
-            $item = $list[$name];
-            return Action::get($item['action'], $item['args']);
+        if ($name === '') {
+            $name = $this->_conf['defaultItem'];
         }
-        return new ErrorItem('Unsupported item type "' . $type . '".');
+        $this->checkPriv($name);
+        $item = $this->_conf['list'][$name];
+        if (isset($item)) {
+            return $item['actions'][Server::requestMethod()];
+        }
+        return null;
     }
 
     public function isDir($name)

@@ -1,9 +1,11 @@
 export class Ajax {
-    public static post(
-        data: any,
+    private static call(
         onload: (response: any, type: XMLHttpRequestResponseType) => any,
-        url = '',
-        type = 'text/plain'
+        method: string,
+        data: any,
+        url: string,
+        accept: string,
+        type = 'text/plain',
     ) {
         const xhr = new XMLHttpRequest();
         xhr.onload = function () {
@@ -13,10 +15,28 @@ export class Ajax {
                 alert('Ajax request received status ' + this.status + '.');
             }
         };
-        xhr.open('POST', url);
+        xhr.open(method, url);
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.setRequestHeader('Content-Type', type);
-        xhr.setRequestHeader('Accept', type);
+        xhr.setRequestHeader('Accept', accept);
         xhr.send(data);
+    }
+
+    public static post(
+        onload: (response: any, type: XMLHttpRequestResponseType) => any,
+        data = '',
+        url = '',
+        type = 'text/plain',
+        accept = 'text/plain'
+    ) {
+        this.call(onload, 'POST', data, url, accept, type);
+    }
+
+    public static delete(
+        onload: (response: any, type: XMLHttpRequestResponseType) => any,
+        url = '',
+        accept = 'text/plain'
+    ) {
+        this.call(onload, 'DELETE', '', url, accept);
     }
 }

@@ -14,7 +14,8 @@ final class App
     private $_name;
     private $_list;
     private $_files;
-    private $_item;
+    private $_action = null;
+    private $_vars;
 
     public function __construct()
     {
@@ -25,16 +26,6 @@ final class App
         session_start();
     }
 
-    public function base()
-    {
-        return $this->_base;
-    }
-
-    public function path()
-    {
-        return $this->_path;
-    }
-
     public function run()
     {
         list($this->_base, $args) = Server::getHomeAndPath();
@@ -42,59 +33,87 @@ final class App
         $this->_path = DATA_PATH;
         $conf = new Config(CONF_PATH);
         $title = null;
-        $item = null;
-        try {
-            while (!empty($args)) {
-                $name = array_shift($args);
-                if (empty($name)) {
-                    continue;
-                }
-                $this->_name = $name;
-                if ($conf->isDir($name) || is_dir($this->_path . '/' . $name)) {
-                    if ($this->_base != $this->_home) {
-                        $this->_breadcrumbs[] = [
-                            'text' => $title,
-                            'url' => $this->_base,
-                        ];
-                    }
-                    $this->_path .= '/' . $name;
-                    $this->_base .= $name . '/';
-                    $title = $conf->resolveTitle($name);
-                    $conf->shift($name);
-                } else {
-                    $item = $conf->resolve($this->_path, $name);
-                    break;
-                }
+        while (!empty($args)) {
+            $name = array_shift($args);
+            if ($name == '') {
+                continue;
             }
-            if ($item === null) {
-                $this->_name = '';
-                $item = $conf->resolve($this->_path, 'index');
-            }
-        } catch (Exception $e) {
-            $item = new ErrorItem($e->getMessage());
-        }
-        $this->_files = $this->createFileList($conf);
-        if (method_exists($item, 'cook')) {
-            try {
-                $item->cook($args);
-            } catch (Exception $e) {
-                $item = new ErrorItem($e->getMessage());
+            $this->_name = $name;
+            if ($conf->isDir($name) || is_dir($this->_path . '/' . $name)) {
+                if ($this->_base != $this->_home) {
+                    $this->_breadcrumbs[] = [
+                        'text' => $title,
+                        'url' => $this->_base,
+                    ];
+                }
+                $this->_path .= '/' . $name;
+                $this->_base .= $name . '/';
+                $title = $conf->title($name);
+                $conf->shift($name);
+            } else {
+                $this->_action = $this->resolve($conf);
+                break;
             }
         }
+        if ($this->_action === null) {
+            $this->_name = '';
+            $this->_action = $this->resolve($conf);
+        }
+        if (Server::requestMethod() == 'HEAD') {
+            // Seems never run to this.
+            $this->header();
+            exit;
+        }
+        // This is needed when cooking.
+        $this->createFileList($conf);
+        $this->_action->cook($args, $this->_base, $this->_path, $this->_name);
         $this->_list = $this->createItemList($conf, $name);
-        $this->_item = $item;
         $this->_title = APP_TITLE;
         if ($this->_path != DATA_PATH || !empty($name)) {
-            $this->_title .= ' - ' . $item->title ?? $conf->resolveTitle($name);
+            $this->_title .= ' - ' . $this->_action->title ?? $conf->title($name);
         }
         $this->addScript('js/main');
         $this->addStyle('css/main');
         $this->addStyle('lib/bootstrap-icons');
-        $httpHeaders = $item->httpHeaders;
-        if (!empty($httpHeaders)) {
-            foreach ($httpHeaders as $header) header($header);
-        }
+        $this->_vars = [
+            'home' => $this->_home,
+            'title' => $this->_title,
+            'datum' => $this->_datum,
+            'scripts' => $this->_scripts,
+            'styles' => $this->_styles,
+            'base' => $this->_base,
+            'breadcrumbs' => $this->_breadcrumbs,
+            'meta' => $this->metaView(),
+            'list' => $this->_list,
+            'content' => $this->_action->content,
+        ];
+        $this->header();
         $this->view('main');
+    }
+
+    private function resolve($conf)
+    {
+        $action = $conf->action($this->_name);
+        if ($action) {
+            return $action;
+        }
+        switch (Server::requestMethod()) {
+            case 'GET':
+                return FileActions::get();
+            case 'DELETE':
+                return FileActions::delete();
+        }
+        return Actions::default();
+    }
+
+    private function header()
+    {
+        $httpHeaders = $this->_action->httpHeaders;
+        if (isset($httpHeaders)) {
+            foreach ($httpHeaders as $header) {
+                header($header);
+            }
+        }
     }
 
     private function createItemList($conf, $selected)
@@ -124,7 +143,7 @@ final class App
             $list0[] = [
                 'text' => $title ?? $item['title'] ?? Str::captalize($name),
                 'url' => $base . $name . ($isDir ? '/' : ''),
-                'selected' => $name == $selected,
+                'selected' => $name === $selected,
             ];
         }
         $list1 = [];
@@ -132,11 +151,11 @@ final class App
             $list1[] = [
                 'text' => $file['title'] ?? Str::captalize($name),
                 'url' => $base . $name . ($file['isDir'] ? '/' : ''),
-                'selected' => $name == $selected,
+                'selected' => $name === $selected,
             ];
         }
-        if ($conf->orderBy) {
-            usort($list1, $conf->orderBy);
+        if ($conf->order) {
+            usort($list1, $conf->order);
         }
         return array_merge($list0, $list1);
     }
@@ -146,7 +165,8 @@ final class App
         $path = $this->_path;
         $dh = @opendir($path);
         if (!$dh) {
-            return [];
+            $this->_files = [];
+            return;
         }
         $files = [];
         while (($file = readdir($dh)) !== false) {
@@ -169,7 +189,12 @@ final class App
             }
         }
         closedir($dh);
-        return $files;
+        $this->_files = array_filter($files, function ($v) {
+            return array_key_exists('isDir', $v);
+        });
+        if (count($this->_files) < count($files)) {
+            $this->saveMeta();
+        }
     }
 
     public function addFile($name, $fileInfo)
@@ -202,8 +227,13 @@ final class App
 
     private function metaView()
     {
-        $meta = $this->_files[$this->_name];
-        if (isset($meta['time']) || isset($meta['user'])) {
+        $name = $this->_name;
+        $meta = $this->_files[$name];
+        if (Sys::user()->hasPriv('edit')) {
+            $meta['edit'] = true;
+            $meta['name'] = $name;
+        }
+        if (isset($meta['time']) || isset($meta['user']) || isset($meta['edit'])) {
             return View::renderHtml('meta', $meta);
         }
         return '';
@@ -211,19 +241,7 @@ final class App
 
     public function view($view, $extraVars = [])
     {
-        $appVars = [
-            'home' => $this->_home,
-            'title' => $this->_title,
-            'datum' => $this->_datum,
-            'scripts' => $this->_scripts,
-            'styles' => $this->_styles,
-            'base' => $this->_base,
-            'breadcrumbs' => $this->_breadcrumbs,
-            'meta' => $this->metaView(),
-            'list' => $this->_list,
-            'content' => $this->_item->content,
-        ];
-        View::render($view, array_merge($appVars, $extraVars));
+        View::render($view, array_merge($this->_vars, $extraVars));
     }
 
     public function pubUrl($args)

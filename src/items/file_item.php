@@ -26,13 +26,13 @@ abstract class FileItem
         }
     }
 
-    public function httpHeaders()
+    public function time()
     {
-        $mtime = filemtime($this->_file);
-        return [
-            'Cache-Control: public, max-age=345600',
-            'ETag: "' . $mtime . '"',
-            'Last-Modified: ' . gmdate(DATE_RFC7231, $mtime),
-        ];
+        return filemtime($this->_file);
+    }
+
+    public function delete()
+    {
+        unlink($this->_file);
     }
 }
