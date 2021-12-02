@@ -7,6 +7,7 @@ final class SetupTest extends TestCase
     public function test()
     {
         require_once 'src/setup.php';
+        $this->assertSame(DIRECTORY_SEPARATOR, DS);
         $this->assertSame('unknown', SITE);
         $this->assertSame('data', DATA_DIR);
         $this->assertSame('pub', PUB_DIR);

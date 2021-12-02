@@ -14,6 +14,11 @@ final class Str
         return implode(' ', $words);
     }
 
+    public static function pathUrl($path)
+    {
+        return str_replace(DS, '/', $path);
+    }
+
     public static function filterLinks($txt)
     {
         return preg_replace(

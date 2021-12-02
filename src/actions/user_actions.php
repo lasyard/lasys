@@ -9,7 +9,7 @@ final class UserActions extends Actions
     public function actionLoginForm()
     {
         if (Sys::user()->isGuest) {
-            Sys::app()->addScript('js/login');
+            Sys::app()->addScript('js' . DS . 'login');
             View::render('login');
             return;
         }

@@ -5,7 +5,7 @@ final class Common
     {
     }
 
-    public static function getOutput($fun, $params)
+    public static function getOutput($fun, $params = [])
     {
         ob_start();
         try {
@@ -15,9 +15,9 @@ final class Common
             throw $e;
         }
         $buffer = ob_get_clean();
-        if (empty($result)) {
-            $result = $buffer;
+        if (empty($buffer)) {
+            return $result;
         }
-        return $result;
+        return $buffer;
     }
 }

@@ -27,6 +27,13 @@ final class Server
             $path = substr_replace($path, '', 0, strlen($prefix));
             $home .= $prefix;
         }
+        if (
+            self::requestMethod() == 'GET'
+            && $_GET['raw'] == true
+            && strpos($_SERVER['HTTP_REFERER'], $home) === 0
+        ) {
+            self::rawFile(DATA_PATH . DS . $path);
+        }
         return [$home, explode('/', $path)];
     }
 
@@ -38,6 +45,25 @@ final class Server
 
     public static function requestMethod()
     {
-        return getenv('REQUEST_METHOD');
+        return $_SERVER['REQUEST_METHOD'];
+    }
+
+    public static function rawFile($path)
+    {
+        if (!is_file($path)) {
+            header('HTTP/1.0 404 Not Found');
+            exit;
+        }
+        $type = (new finfo(FILEINFO_MIME))->file($path);
+        header('Cache-Control: public, max-age=3456000');
+        $mtime = filemtime($path);
+        header('ETag: "' . md5($mtime) . '"');
+        header('Last-Modified: ' . gmdate(DATE_RFC7231, $mtime));
+        header('Content-Type: ' . $type);
+        header('Accept-Ranges: none');
+        header('Accept-Length: ' . filesize($path));
+        header('Content-Disposition: attachment; filename="' . basename($path) . '"');
+        header('Content-Transfer-Encoding: binary');
+        readfile($path);
     }
 }

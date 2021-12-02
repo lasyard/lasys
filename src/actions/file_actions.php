@@ -3,30 +3,40 @@ final class FileActions extends Actions
 {
     public const FILE_FIELD_NAME = 'file';
 
-    public function actionGet()
+    private function getParser($name)
     {
-        $path = $this->path;
-        $name = $this->name;
-        $item = FileItem::get($path, $name);
-        $mtime = $item->time();
-        $this->_httpHeaders = [
-            'Cache-Control: no-cache',
-            'ETag: "' . md5(Sys::user()->name . $mtime) . '"',
-        ];
-        $this->_title = $item->title;
-        return $item->content;
+        $ext = pathinfo($name, PATHINFO_EXTENSION);
+        switch ($ext) {
+            case 'txt':
+                return new TextParser($this->path . DS . $name);
+            case 'png':
+            case 'jpg':
+                return new ImageParser($this->base . $name);
+            default:
+                throw new RuntimeException('Unsupported file type "' . $ext . '".');
+        }
     }
 
-    public function actionPut()
+    public function actionGet()
     {
+        $name = $this->name;
+        $file = $this->path . DS . $name;
+        if (!is_file($file)) {
+            throw new RuntimeException('Cannot find file "' . $name . '".');
+        }
+        $this->_httpHeaders = [
+            'Cache-Control: no-cache',
+            'ETag: "' . md5(Sys::user()->name . filemtime($file)) . '"',
+        ];
+        $parser = $this->getParser($name);
+        $this->_title = $parser->title;
+        echo $parser->content;
     }
 
     public function actionDelete()
     {
-        $path = $this->path;
         $name = $this->name;
-        $item = FileItem::get($path, $name, false);
-        $item->delete();
+        unlink($this->path . DS . $name);
         View::render('deleted', ['name' => $name, 'url' => $this->base]);
     }
 
@@ -58,16 +68,18 @@ final class FileActions extends Actions
         $name = $file['name'];
         if (
             Str::isValidFileName($name)
-            && move_uploaded_file($file['tmp_name'], $path . '/' . $name)
+            && move_uploaded_file($file['tmp_name'], $path . DS . $name)
         ) {
-            $bn = pathinfo($name, PATHINFO_FILENAME);
-            $item = FileItem::get($path, $bn);
-            Sys::app()->addFile($bn, [
-                'title' => $item->title,
+            $info = [
                 'time' => $_SERVER['REQUEST_TIME'],
                 'user' => Sys::user()->name,
-            ]);
-            Sys::app()->redirect($bn);
+            ];
+            $parser = $this->getParser($name);
+            if ($parser->title) {
+                $info['title'] = $parser->title;
+            }
+            Sys::app()->addFile($name, $info);
+            Sys::app()->redirect($name);
         }
         throw new RuntimeException('Cannot save uploaded file "' . $name . '".');
     }

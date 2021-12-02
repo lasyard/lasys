@@ -54,18 +54,11 @@ final class Config
 
     private function defaultActions($item)
     {
-        $actions = [
-            'GET' => null,
-            'PUT' => null,
-            'POST' => null,
-            'DELETE' => null,
-        ];
+        $actions = [];
         if (!isset($item['actions'])) {
             switch ($item['type']) {
                 case self::FILE:
                     $actions['GET'] = FileActions::get();
-                    $actions['PUT'] = FileActions::put();
-                    $actions['DELETE'] = FileActions::delete();
                     break;
                 case self::PHP:
                     $actions['GET'] = Actions::default();
@@ -81,7 +74,7 @@ final class Config
 
     private function read()
     {
-        $file = $this->_path . '/list.php';
+        $file = $this->_path . DS . 'list.php';
         $conf = is_file($file) ? include $file : [];
         $recursive = $this->_conf['recursive'];
         foreach (self::RECURSIVE_CONF as $c) {
@@ -111,13 +104,13 @@ final class Config
     public function shift($name)
     {
         $this->checkPriv($name);
-        $this->_path .= '/' . $name;
+        $this->_path .= DS . $name;
         $this->read();
     }
 
     public function excluded($file)
     {
-        if ($this->_conf['exclusive'] && !isset($this->_conf['list'][pathinfo($file, PATHINFO_FILENAME)])) {
+        if ($this->_conf['exclusive'] && !isset($this->_conf['list'][$file])) {
             return true;
         }
         foreach ($this->_conf['excludes'] as $p) {

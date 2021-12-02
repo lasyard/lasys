@@ -15,10 +15,10 @@ final class View
     public static function render($layout, $vars = [])
     {
         extract($vars);
-        if (is_file(VIEWS_PATH . '/' . $layout . '.php')) { // In user view path.
-            require VIEWS_PATH . '/' . $layout . '.php';
-        } else if (is_file(__DIR__ . '/../views/' . $layout . '.php')) { // In sys view path.
-            require __DIR__ . '/../views/' . $layout . '.php';
+        if (is_file(VIEWS_PATH . DS . $layout . '.php')) { // In user view path.
+            require VIEWS_PATH . DS . $layout . '.php';
+        } else if (is_file(__DIR__ . DS . '..' . DS . 'views' . DS . $layout . '.php')) { // In sys view path.
+            require __DIR__ . DS . '..' . DS . 'views' . DS . $layout . '.php';
         }
     }
 }

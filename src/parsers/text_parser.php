@@ -1,5 +1,5 @@
 <?php
-final class TextItem extends FileItem
+final class TextParser
 {
     use Getter;
 

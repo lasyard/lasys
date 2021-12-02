@@ -19,17 +19,19 @@ final class App
 
     public function __construct()
     {
-        define('CONF_PATH', ROOT_PATH . '/configs');
-        require_once CONF_PATH . '/defs.php';
+        define('CONF_PATH', ROOT_PATH . DIRECTORY_SEPARATOR . 'configs');
+        require_once CONF_PATH . DIRECTORY_SEPARATOR . 'defs.php';
+        // DS is not define till here.
         require_once 'setup.php';
-        session_cache_limiter('public');
-        session_start();
     }
 
     public function run()
     {
-        list($this->_base, $args) = Server::getHomeAndPath();
-        $this->_home = $this->_base;
+        list($this->_home, $args) = Server::getHomeAndPath();
+        define('PUB_URL', $this->_home . Str::pathUrl(PUB_DIR) . '/');
+        session_cache_limiter('public');
+        session_start();
+        $this->_base = $this->_home;
         $this->_path = DATA_PATH;
         $conf = new Config(CONF_PATH);
         $title = null;
@@ -39,14 +41,14 @@ final class App
                 continue;
             }
             $this->_name = $name;
-            if ($conf->isDir($name) || is_dir($this->_path . '/' . $name)) {
+            if ($conf->isDir($name) || is_dir($this->_path . DS . $name)) {
                 if ($this->_base != $this->_home) {
                     $this->_breadcrumbs[] = [
                         'text' => $title,
                         'url' => $this->_base,
                     ];
                 }
-                $this->_path .= '/' . $name;
+                $this->_path .= DS . $name;
                 $this->_base .= $name . '/';
                 $title = $conf->title($name);
                 $conf->shift($name);
@@ -72,9 +74,9 @@ final class App
         if ($this->_path != DATA_PATH || !empty($name)) {
             $this->_title .= ' - ' . $this->_action->title ?? $conf->title($name);
         }
-        $this->addScript('js/main');
-        $this->addStyle('css/main');
-        $this->addStyle('lib/bootstrap-icons');
+        $this->addScript('js' . DS . 'main');
+        $this->addStyle('css' . DS . 'main');
+        $this->addStyle('lib' . DS . 'bootstrap-icons');
         $this->_vars = [
             'home' => $this->_home,
             'title' => $this->_title,
@@ -116,6 +118,15 @@ final class App
         }
     }
 
+    private function makeItem($name, $info, $selected)
+    {
+        return [
+            'text' => $info['title'] ?? Str::captalize(pathinfo($name, PATHINFO_FILENAME)),
+            'url' => $this->_base . $name . ($info['isDir'] ? '/' : ''),
+            'selected' => $name === $selected,
+        ];
+    }
+
     private function createItemList($conf, $selected)
     {
         $base = $this->_base;
@@ -128,31 +139,23 @@ final class App
                 }
                 continue;
             }
-            $isDir = false;
             if ($item['type'] == Config::FILE) {
                 if (array_key_exists($name, $files)) {
-                    $isDir = $files[$name]['isDir'];
-                    $title = $files[$name]['title'];
+                    $file = $files[$name];
+                    $item['isDir'] = $file['isDir'];
+                    $item['title'] = $file['title'] ?? $item['title'];
                     unset($files[$name]);
                 } else {
                     continue;
                 }
             } else if ($item['type'] == Config::DIR) {
-                $isDir = true;
+                $item['isDir'] = true;
             }
-            $list0[] = [
-                'text' => $title ?? $item['title'] ?? Str::captalize($name),
-                'url' => $base . $name . ($isDir ? '/' : ''),
-                'selected' => $name === $selected,
-            ];
+            $list0[] = $this->makeItem($name, $item, $selected);
         }
         $list1 = [];
         foreach ($files as $name => $file) {
-            $list1[] = [
-                'text' => $file['title'] ?? Str::captalize($name),
-                'url' => $base . $name . ($file['isDir'] ? '/' : ''),
-                'selected' => $name === $selected,
-            ];
+            $list1[] = $this->makeItem($name, $file, $selected);
         }
         if ($conf->order) {
             usort($list1, $conf->order);
@@ -173,19 +176,17 @@ final class App
             if ($file == self::META_FILE) {
                 $files = array_merge_recursive(
                     $files,
-                    json_decode(file_get_contents("$path/$file"), true)
+                    json_decode(file_get_contents($path . DS . $file), true)
                 );
                 continue;
             }
             if ($conf->excluded($file)) {
                 continue;
             }
-            if (is_dir("$path/$file")) {
-                $name = $file;
-                $files[$name]['isDir'] = true;
+            if (is_dir($path . DS . $file)) {
+                $files[$file]['isDir'] = true;
             } else {
-                $name = pathinfo($file, PATHINFO_FILENAME);
-                $files[$name]['isDir'] = false;
+                $files[$file]['isDir'] = false;
             }
         }
         closedir($dh);
@@ -219,7 +220,7 @@ final class App
                 mkdir($path, 0775, true);
             }
             file_put_contents(
-                $path . '/' . App::META_FILE,
+                $path . DS . App::META_FILE,
                 json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
             );
         }
@@ -229,7 +230,7 @@ final class App
     {
         $name = $this->_name;
         $meta = $this->_files[$name];
-        if (isset($meta['isDir']) && !$meta['isDir']) {
+        if (isset($meta) && !$meta['isDir']) {
             if (Sys::user()->hasPriv('edit')) {
                 $meta['edit'] = true;
                 $meta['name'] = $name;
@@ -244,16 +245,11 @@ final class App
         View::render($view, array_merge($this->_vars, $extraVars));
     }
 
-    public function pubUrl($args)
-    {
-        return $this->_home . PUB_DIR . '/' . $args;
-    }
-
     public function addScript($file)
     {
         if (
             !$this->tryAddScript($file . '.js')
-            && !$this->tryAddScript('sys/' . $file . '.js')
+            && !$this->tryAddScript('sys' . DS . $file . '.js')
         ) {
             $this->_scripts[] = $file;
         }
@@ -261,8 +257,8 @@ final class App
 
     private function tryAddScript($file)
     {
-        if (is_file(PUB_PATH . '/' . $file)) {
-            $this->_scripts[] = $this->pubUrl($file);
+        if (is_file(PUB_PATH . DS . $file)) {
+            $this->_scripts[] = PUB_URL . Str::pathUrl($file);
             return true;
         }
         return false;
@@ -272,7 +268,7 @@ final class App
     {
         if (
             !$this->tryAddStyle($file . '.css')
-            && !$this->tryAddStyle('sys/' . $file . '.css')
+            && !$this->tryAddStyle('sys' . DS . $file . '.css')
         ) {
             $this->_styles[] = $file;
         }
@@ -280,8 +276,8 @@ final class App
 
     private function tryAddStyle($file)
     {
-        if (is_file(PUB_PATH . '/' . $file)) {
-            $this->_styles[] = $this->pubUrl($file);
+        if (is_file(PUB_PATH . DS . $file)) {
+            $this->_styles[] = PUB_URL . Str::pathUrl($file);
             return true;
         }
         return false;
