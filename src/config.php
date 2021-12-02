@@ -1,26 +1,19 @@
 <?php
 final class Config
 {
-    public const FILE = 'file';
-    public const PHP = 'php';
-    public const DIR = 'dir';
-
     private const DEFAULT = [
-        'recursive' => true,
+        'isDir' => false,
         'exclusive' => true,
         'order' => false,
         'defaultItem' => 'index',
-        'defaultType' => self::FILE,
         'excludes' => ['.*', 'index.*', '_*'],
         'list' => [],
     ];
 
     private const RECURSIVE_CONF = [
-        'recursive',
         'exclusive',
         'order',
         'defaultItem',
-        'defaultType',
     ];
 
     private $_path;
@@ -56,14 +49,7 @@ final class Config
     {
         $actions = [];
         if (!isset($item['actions'])) {
-            switch ($item['type']) {
-                case self::FILE:
-                    $actions['GET'] = FileActions::get();
-                    break;
-                case self::PHP:
-                    $actions['GET'] = Actions::default();
-                    break;
-            }
+            $actions['GET'] = FileActions::get();
         } else if ($item['actions'] instanceof Actions) {
             $actions['GET'] = $item['actions'];
         } else if (is_array($item['actions'])) {
@@ -76,9 +62,8 @@ final class Config
     {
         $file = $this->_path . DS . 'list.php';
         $conf = is_file($file) ? include $file : [];
-        $recursive = $this->_conf['recursive'];
         foreach (self::RECURSIVE_CONF as $c) {
-            $this->setDefault($conf, $c, $recursive);
+            $this->setDefault($conf, $c, true);
         }
         $this->mergeArray($conf, 'excludes');
         $this->setDefault($conf, 'list');
@@ -86,10 +71,18 @@ final class Config
             if (is_string($item)) {
                 $item = ['title' => $item];
             }
-            $item['type'] = $item['type'] ?? $conf['defaultType'];
-            $item['hidden'] = $item['hidden'] ?? false;
             $item['actions'] = $this->defaultActions($item);
             $item['priv'] = $item['priv'] ?? '';
+        }
+        if (isset($conf['traits'])) {
+            $traits = $conf['traits'];
+            if (is_array($traits)) {
+                foreach ($traits as $trait) {
+                    $trait($conf, $this->_conf);
+                }
+            } else {
+                $traits($conf, $this->_conf);
+            }
         }
         $this->_conf = $conf;
     }
@@ -121,6 +114,12 @@ final class Config
         return false;
     }
 
+    public function hidden($name)
+    {
+        $item = $this->_conf['list'][$name];
+        return $item['hidden'] || !isset($item['actions']['GET']);
+    }
+
     public function title($name)
     {
         return $this->_conf['list'][$name]['title'] ?? Str::captalize($name);
@@ -141,6 +140,28 @@ final class Config
 
     public function isDir($name)
     {
-        return $this->_conf['list'][$name]['type'] == self::DIR;
+        return $this->_conf['list'][$name]['isDir'];
+    }
+
+    public static function inheritDefault()
+    {
+        return function (&$conf, $oldConf) {
+            $conf['list'][$conf['defaultItem']]['actions']['GET']
+                = $oldConf['list'][$oldConf['defaultItem']]['actions']['GET'];
+            $conf['list'][$conf['defaultItem']]['hidden']
+                = $oldConf['list'][$oldConf['defaultItem']]['hidden'];
+        };
+    }
+
+    public static function doUpload($title, $accept = '*', $sizeLimit = 65536)
+    {
+        return function (&$conf, $oldConf) use ($title, $accept, $sizeLimit) {
+            $conf['list'][$conf['defaultItem']]['actions']['POST'] = FileActions::post($sizeLimit);
+            $conf['list']['upload'] = [
+                'title' => '<i class="bi bi-upload sys button"></i>',
+                'priv' => 'edit',
+            ];
+            $conf['list']['upload']['actions']['GET'] = FileActions::uploadForm($title, $accept, $sizeLimit);
+        };
     }
 }

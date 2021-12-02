@@ -129,27 +129,20 @@ final class App
 
     private function createItemList($conf, $selected)
     {
-        $base = $this->_base;
         $files = $this->_files;
         $list0 = [];
         foreach ($conf->list as $name => $item) {
-            if ($item['hidden'] || !Sys::user()->hasPriv($item['priv'])) {
+            if ($conf->hidden($name) || !Sys::user()->hasPriv($item['priv'])) {
                 if (array_key_exists($name, $files)) {
                     unset($files[$name]);
                 }
                 continue;
             }
-            if ($item['type'] == Config::FILE) {
-                if (array_key_exists($name, $files)) {
-                    $file = $files[$name];
-                    $item['isDir'] = $file['isDir'];
-                    $item['title'] = $file['title'] ?? $item['title'];
-                    unset($files[$name]);
-                } else {
-                    continue;
-                }
-            } else if ($item['type'] == Config::DIR) {
-                $item['isDir'] = true;
+            if (array_key_exists($name, $files)) {
+                $file = $files[$name];
+                $item['isDir'] = $file['isDir'];
+                $item['title'] = $file['title'] ?? $item['title'];
+                unset($files[$name]);
             }
             $list0[] = $this->makeItem($name, $item, $selected);
         }
@@ -214,16 +207,14 @@ final class App
                 $json[$name] = $res;
             }
         }
-        if (!empty($json)) {
-            $path = $this->_path;
-            if (!is_dir($path)) {
-                mkdir($path, 0775, true);
-            }
-            file_put_contents(
-                $path . DS . App::META_FILE,
-                json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
-            );
+        $path = $this->_path;
+        if (!is_dir($path)) {
+            mkdir($path, 0775, true);
         }
+        file_put_contents(
+            $path . DS . App::META_FILE,
+            json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+        );
     }
 
     private function metaView()
