@@ -29,7 +29,7 @@ final class Server
         }
         if (
             self::requestMethod() == 'GET'
-            && $_GET['raw'] == true
+            && !empty($_GET['raw'])
             && strpos($_SERVER['HTTP_REFERER'], $home) === 0
         ) {
             self::rawFile(DATA_PATH . DS . $path);

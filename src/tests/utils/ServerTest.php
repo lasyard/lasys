@@ -16,6 +16,7 @@ final class ServerTest extends TestCase
             'SERVER_PORT' => 80,
             'REQUEST_URI' => '/workspace/',
             'PHP_SELF' => '/workspace/index.php',
+            'REQUEST_METHOD' => 'GET',
         ];
         list($base, $path) = Server::getHomeAndPath();
         $this->assertSame('http://www.lasys.org/workspace/', $base);
@@ -29,6 +30,7 @@ final class ServerTest extends TestCase
             'SERVER_PORT' => 80,
             'REQUEST_URI' => '/workspace/a/b/c?name=test',
             'PHP_SELF' => '/workspace/a/index.php',
+            'REQUEST_METHOD' => 'GET',
         ];
         list($base, $path) = Server::getHomeAndPath();
         $this->assertSame('http://www.lasys.org/workspace/a/', $base);
@@ -43,6 +45,7 @@ final class ServerTest extends TestCase
             'SERVER_PORT' => 80,
             'REQUEST_URI' => '/workspace/a/b/c?name=test',
             'PHP_SELF' => '/workspace/a/index.php',
+            'REQUEST_METHOD' => 'GET',
         ];
         list($base, $path) = Server::getHomeAndPath();
         $this->assertSame('https://www.lasys.org:80/workspace/a/', $base);
