@@ -143,6 +143,18 @@ final class Config
         return $this->_conf['list'][$name]['isDir'];
     }
 
+    public static function orderByTime($descend = true)
+    {
+        if ($descend) {
+            return function ($b, $a) {
+                return $a['time'] <=> $b['time'];
+            };
+        }
+        return function ($a, $b) {
+            return $a['time'] <=> $b['time'];
+        };
+    }
+
     public static function inheritDefault()
     {
         return function (&$conf, $oldConf) {

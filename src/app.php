@@ -148,7 +148,9 @@ final class App
         }
         $list1 = [];
         foreach ($files as $name => $file) {
-            $list1[] = $this->makeItem($name, $file, $selected);
+            $item = $this->makeItem($name, $file, $selected);
+            $item['time'] = $file['time'] ?? 0;
+            $list1[] = $item;
         }
         if ($conf->order) {
             usort($list1, $conf->order);
