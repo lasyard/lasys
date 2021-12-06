@@ -61,6 +61,11 @@ final class User
         throw new RuntimeException('Wrong user name or password!');
     }
 
+    public function id()
+    {
+        return $this->_user ? $this->_user['id'] : null;
+    }
+
     public function name()
     {
         return $this->_user ? $this->_user['name'] : self::GUEST;

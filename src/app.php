@@ -204,7 +204,7 @@ final class App
     {
         $json = [];
         foreach ($this->_files as $name => $file) {
-            $res = Arr::transKeys($file, 'title', 'time', 'user');
+            $res = Arr::transKeys($file, 'title', 'time', 'uid', 'uname');
             if (!empty($res)) {
                 $json[$name] = $res;
             }
@@ -219,18 +219,29 @@ final class App
         );
     }
 
+    public function checkEditPriv($name)
+    {
+        $meta = $this->_files[$name];
+        if (isset($meta)) {
+            $user = Sys::user();
+            if ($user->hasPriv('edit') && $user->id === $meta['uid'] || $user->hasPriv('edit0')) {
+                return true;
+            }
+            return false;
+        }
+        return null;
+    }
+
     private function metaView()
     {
         $name = $this->_name;
         $meta = $this->_files[$name];
-        if (isset($meta) && !$meta['isDir']) {
-            if (Sys::user()->hasPriv('edit')) {
-                $meta['edit'] = true;
-                $meta['name'] = $name;
-            }
-            return View::renderHtml('meta', $meta);
+        $priv = $this->checkEditPriv($name);
+        if ($priv) {
+            $meta['edit'] = true;
+            $meta['name'] = $name;
         }
-        return '';
+        return $priv != null ? View::renderHtml('meta', $meta) : '';
     }
 
     public function view($view, $extraVars = [])

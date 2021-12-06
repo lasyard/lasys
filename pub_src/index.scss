@@ -49,6 +49,11 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+em {
+    font-style: inherit;
+    text-decoration: underline;
+}
+
 .left {
     text-align: left;
 }

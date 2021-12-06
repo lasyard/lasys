@@ -66,13 +66,19 @@ final class FileActions extends Actions
         }
         $path = $this->path;
         $name = $file['name'];
+        if (Sys::app()->checkEditPriv($name) === false) {
+            throw new RuntimeException('You do not have privilege to modify "' . $name . '".');
+        }
+        $newFile = $path . DS . $name;
         if (
             Str::isValidFileName($name)
-            && move_uploaded_file($file['tmp_name'], $path . DS . $name)
+            && move_uploaded_file($file['tmp_name'], $newFile)
         ) {
+            $user = Sys::user();
             $info = [
                 'time' => $_SERVER['REQUEST_TIME'],
-                'user' => Sys::user()->name,
+                'uid' => $user->id,
+                'uname' => $user->name,
             ];
             $parser = $this->getParser($name);
             if ($parser->title) {

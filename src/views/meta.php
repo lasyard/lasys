@@ -1,5 +1,5 @@
 <span class="nobr">
-    Created at <?php echo date('Y.m.d h:i:s', $time); ?> by <?php echo $user; ?>
+    <em><?php echo date('Y.m.d h:i:s', $time); ?></em> by <?php echo $uname; ?>
 </span>
 <?php if ($edit) { ?>
     <span class="nobr">
