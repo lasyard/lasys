@@ -1,6 +1,6 @@
 <fieldset>
     <legend><?php echo $title; ?></legend>
-    <form enctype="multipart/form-data" action="<?php echo $action ?? ''; ?>" method="POST">
+    <form enctype="multipart/form-data" action="<?php echo $action ?? ''; ?>" method="<?php echo $method ?? 'POST'; ?>">
         <div class="field">
             <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo $sizeLimit; ?>" />
         </div>

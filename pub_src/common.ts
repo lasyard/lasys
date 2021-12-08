@@ -14,11 +14,16 @@ export function byId(id: string) {
     return document.getElementById(id);
 }
 
-(String.prototype as { [key: string]: any }).capitalize = function () {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-};
+export function onLoad(fun: (this: Window, ev: Event) => any) {
+    window.addEventListener('load', fun);
+}
 
-(String.prototype as { [key: string]: any }).html = function () {
-    const str = this.replace(/[<>&]/gm, (s: String) => "&#" + s.charCodeAt(0) + ";");
-    return str.replace(/\r\n/gm, '<br />');
-};
+export function capitalize(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function html(str: string) {
+    return str
+        .replace(/[<>&]/gm, (s: String) => "&#" + s.charCodeAt(0) + ";")
+        .replace(/\r\n/gm, '<br />');
+}

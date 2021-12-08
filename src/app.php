@@ -11,6 +11,7 @@ final class App
     private $_breadcrumbs = [];
     private $_base;
     private $_path;
+    private $_conf;
     private $_name;
     private $_list;
     private $_files;
@@ -33,7 +34,7 @@ final class App
         session_start();
         $this->_base = $this->_home;
         $this->_path = DATA_PATH;
-        $conf = new Config(CONF_PATH);
+        $this->_conf = new Config(CONF_PATH);
         $title = null;
         while (!empty($args)) {
             $name = array_shift($args);
@@ -41,7 +42,7 @@ final class App
                 continue;
             }
             $this->_name = $name;
-            if ($conf->isDir($name) || is_dir($this->_path . DS . $name)) {
+            if ($this->isDir()) {
                 if ($this->_base != $this->_home) {
                     $this->_breadcrumbs[] = [
                         'text' => $title,
@@ -50,29 +51,43 @@ final class App
                 }
                 $this->_path .= DS . $name;
                 $this->_base .= $name . '/';
-                $title = $conf->title($name);
-                $conf->shift($name);
+                $title = $this->_conf->title($name);
+                if ($this->hasPriv($name)) {
+                    $this->_conf->shift($name);
+                } else {
+                    $this->_action = Actions::error('You do not have privilege to view "' . $name . '".');
+                    break;
+                }
             } else {
-                $this->_action = $this->resolve($conf);
+                $this->_action = $this->_conf->action($name);
                 break;
             }
         }
         if ($this->_action === null) {
             $this->_name = '';
-            $this->_action = $this->resolve($conf);
+            $this->_action = $this->_conf->action($this->_name);
         }
-        if (Server::requestMethod() == 'HEAD') {
+        $method = Server::requestMethod();
+        if ($method == 'HEAD') {
             // Seems never run to this.
             $this->header();
             exit;
         }
-        // This is needed when cooking.
-        $this->createFileList($conf);
-        $this->_action->cook($args, $this->_base, $this->_path, $this->_name);
-        $this->_list = $this->createItemList($conf, $name);
+        // This is needed when calling action->do, e.g., for file uploading.
+        $this->createFileList();
+        if ($this->hasPriv($this->_name, $method)) {
+            $this->_action->do($args, $this->_base, $this->_path, $this->_name);
+        } else {
+            $this->_action->doError('You do not have privilege to do this.');
+        }
+        if (Server::isAjaxRequest()) {
+            echo $this->_action->content;
+            exit;
+        }
+        $this->_list = $this->createItemList();
         $this->_title = APP_TITLE;
-        if ($this->_path != DATA_PATH || !empty($name)) {
-            $this->_title .= ' - ' . $this->_action->title ?? $conf->title($name);
+        if ($this->_path != DATA_PATH || !empty($this->_name)) {
+            $this->_title .= ' - ' . $this->_action->title ?? $this->_conf->title($this->_name);
         }
         $this->addScript('js' . DS . 'main');
         $this->addStyle('css' . DS . 'main');
@@ -91,21 +106,6 @@ final class App
         ];
         $this->header();
         $this->view('main');
-    }
-
-    private function resolve($conf)
-    {
-        $action = $conf->action($this->_name);
-        if ($action) {
-            return $action;
-        }
-        switch (Server::requestMethod()) {
-            case 'GET':
-                return FileActions::get();
-            case 'DELETE':
-                return FileActions::delete();
-        }
-        return Actions::default();
     }
 
     private function header()
@@ -127,12 +127,14 @@ final class App
         ];
     }
 
-    private function createItemList($conf, $selected)
+    private function createItemList()
     {
+        $conf = $this->_conf;
+        $selected = $this->_name;
         $files = $this->_files;
         $list0 = [];
         foreach ($conf->list as $name => $item) {
-            if ($conf->hidden($name) || !Sys::user()->hasPriv($item['priv'])) {
+            if ($conf->hidden($name) || !$this->hasPriv($name)) {
                 if (array_key_exists($name, $files)) {
                     unset($files[$name]);
                 }
@@ -158,8 +160,13 @@ final class App
         return array_merge($list0, $list1);
     }
 
-    private function createFileList($conf)
+    private function createFileList()
     {
+        $conf = $this->_conf;
+        $this->_files = [];
+        if (!$conf->editable) {
+            return;
+        }
         $path = $this->_path;
         $dh = @opendir($path);
         if (!$dh) {
@@ -219,29 +226,52 @@ final class App
         );
     }
 
-    public function checkEditPriv($name)
+    private function isDir()
     {
-        $meta = $this->_files[$name];
-        if (isset($meta)) {
-            $user = Sys::user();
-            if ($user->hasPriv('edit') && $user->id === $meta['uid'] || $user->hasPriv('edit0')) {
-                return true;
-            }
-            return false;
+        return $this->_conf->isDir($this->_name) || is_dir($this->_path . DS . $this->_name);
+    }
+
+    private function hasPriv($name, $method = 'GET')
+    {
+        $user = Sys::user();
+        if ($user->hasPriv('admin')) {
+            return true;
         }
-        return null;
+        $conf = $this->_conf;
+        $priv = $conf->priv($name, $method);
+        foreach ($priv as $p) {
+            if ($p === 'owner') {
+                $meta = $this->_files[$name];
+                if (isset($meta) && $user->id === $meta['uid']) {
+                    continue;
+                }
+                return false;
+            }
+            if (!$user->hasPriv($p)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private function metaView()
     {
+        if (!$this->_conf->editable) {
+            return '';
+        }
         $name = $this->_name;
         $meta = $this->_files[$name];
-        $priv = $this->checkEditPriv($name);
-        if ($priv) {
-            $meta['edit'] = true;
+        if (isset($meta)) {
+            if ($this->hasPriv($name, 'PUT')) {
+                $meta['edit'] = true;
+            }
+            if ($this->hasPriv($name, 'DELETE')) {
+                $meta['delete'] = true;
+            }
             $meta['name'] = $name;
+            return View::renderHtml('meta', $meta);
         }
-        return $priv != null ? View::renderHtml('meta', $meta) : '';
+        return '';
     }
 
     public function view($view, $extraVars = [])

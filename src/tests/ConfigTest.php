@@ -12,9 +12,13 @@ final class ConfigTest extends TestCase
     public function testDefault()
     {
         $conf = new Config('non-exist');
-        $this->assertTrue($conf->exclusive);
+        $this->assertFalse($conf->editable);
         $this->assertFalse($conf->order);
         $this->assertSame('index', $conf->defaultItem);
+        $this->assertSame(
+            ['GET' => [], 'POST' => ['edit'], 'PUT' => ['owner', 'edit'], 'DELETE' => ['owner', 'edit']],
+            $conf->defaultPriv
+        );
         $this->assertEmpty($conf->list);
     }
 

@@ -23,8 +23,8 @@ class Actions
             $class = static::class;
             if (!isset(self::$_cache[$class][$method])) {
                 self::$_cache[$class][$method] = new static($method);
-                return self::$_cache[$class][$method];
             }
+            return self::$_cache[$class][$method];
         }
         $actions = new static($method, $args);
         if (!$actions instanceof Actions) {
@@ -43,23 +43,23 @@ class Actions
         $this->_args = $args;
     }
 
-    public function cook($pathVars, $base, $path, $name)
+    public function do($pathVars, $base, $path, $name)
     {
         $this->_pathVars = $pathVars;
         $this->_base = $base;
         $this->_path = $path;
         $this->_name = $name;
         try {
-            $content = Common::getOutput([$this, $this->_method], $this->_args);
+            $this->_content = Common::getOutput([$this, $this->_method], $this->_args);
         } catch (Exception $e) {
-            $this->_title = 'Error';
-            $content = View::renderHtml('error', ['message' => $e->getMessage()]);
+            $this->doError($e->getMessage());
         }
-        if (Server::isAjaxRequest()) {
-            echo $content;
-            exit;
-        }
-        $this->_content = $content;
+    }
+
+    public function doError($msg)
+    {
+        $this->_title = 'Error';
+        $this->_content = View::renderHtml('error', ['message' => $msg]);
     }
 
     public function actionDefault(...$args)
@@ -79,12 +79,8 @@ class Actions
         echo '</p>';
     }
 
-    public function actionError($msg)
+    public function actionError(...$args)
     {
-        $this->_title = 'Error';
-        // This action does not cook, so set content directly.
-        $this->_content = View::renderHtml('error', [
-            'message' => $msg
-        ]);
+        $this->doError($args[0]);
     }
 }

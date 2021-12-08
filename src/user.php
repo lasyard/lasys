@@ -76,27 +76,18 @@ final class User
         return $this->_user == null;
     }
 
-    public function hasPriv($privDefs)
+    public function hasPriv($priv)
     {
-        $user = $this->_user;
-        foreach (explode(' ', $privDefs) as $privDef) {
-            @list($priv, $site) = explode('@', $privDef, 2);
-            if (!empty($priv)) {
-                if ($user == null) {
-                    continue;
-                }
-                $privs = $user['priv'];
-                if (!in_array($priv, $privs)) {
-                    continue;
-                }
-            }
-            if (!empty($site)) {
-                if ($site != SITE) {
-                    continue;
-                }
-            }
+        if (empty($priv)) {
             return true;
         }
-        return false;
+        if ($this->_user == null) {
+            return false;
+        }
+        $privs = $this->_user['priv'];
+        if (in_array('admin', $privs)) {
+            return true;
+        }
+        return in_array($priv, $privs);
     }
 }

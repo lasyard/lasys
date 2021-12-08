@@ -1,6 +1,7 @@
 <?php
 final class FileActions extends Actions
 {
+    public const FILE_SIZE_LIMIT = 65536;
     public const FILE_FIELD_NAME = 'file';
 
     private function getParser($name)
@@ -33,6 +34,11 @@ final class FileActions extends Actions
         echo $parser->content;
     }
 
+    public function actionPut($sizeLimit = self::FILE_SIZE_LIMIT)
+    {
+        $this->doUpload($sizeLimit, $this->name, true);
+    }
+
     public function actionDelete()
     {
         $name = $this->name;
@@ -40,7 +46,23 @@ final class FileActions extends Actions
         View::render('deleted', ['name' => $name, 'url' => $this->base]);
     }
 
-    public function actionPost($sizeLimit = 65536)
+    public function actionPost($sizeLimit = self::FILE_SIZE_LIMIT)
+    {
+        $this->doUpload($sizeLimit);
+    }
+
+    public function actionUploadForm($title, $accept = '*', $sizeLimit = self::FILE_SIZE_LIMIT)
+    {
+        View::render('upload', [
+            'title' => $title,
+            'fieldName' => self::FILE_FIELD_NAME,
+            'action' => $this->base,
+            'accept' => $accept,
+            'sizeLimit' => $sizeLimit,
+        ]);
+    }
+
+    private function doUpload($sizeLimit = 65536, $fileName = null, $overwrite = false)
     {
         $file = $_FILES[self::FILE_FIELD_NAME];
         // Handle uploading.
@@ -65,11 +87,11 @@ final class FileActions extends Actions
             throw new RuntimeException('Uploaded file error!');
         }
         $path = $this->path;
-        $name = $file['name'];
-        if (Sys::app()->checkEditPriv($name) === false) {
-            throw new RuntimeException('You do not have privilege to modify "' . $name . '".');
-        }
+        $name = $fileName ?? $file['name'];
         $newFile = $path . DS . $name;
+        if (!$overwrite && (is_file($newFile) || is_dir($newFile))) {
+            throw new RuntimeException('File "' . $name . '" exists.');
+        }
         if (
             Str::isValidFileName($name)
             && move_uploaded_file($file['tmp_name'], $newFile)
@@ -88,16 +110,5 @@ final class FileActions extends Actions
             Sys::app()->redirect($name);
         }
         throw new RuntimeException('Cannot save uploaded file "' . $name . '".');
-    }
-
-    public function actionUploadForm($title, $accept = '*', $sizeLimit = 65536)
-    {
-        View::render('upload', [
-            'title' => $title,
-            'fieldName' => self::FILE_FIELD_NAME,
-            'action' => $this->base,
-            'accept' => $accept,
-            'sizeLimit' => $sizeLimit,
-        ]);
     }
 }

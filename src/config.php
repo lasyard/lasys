@@ -2,18 +2,24 @@
 final class Config
 {
     private const DEFAULT = [
-        'isDir' => false,
-        'exclusive' => true,
+        'editable' => false,
         'order' => false,
         'defaultItem' => 'index',
+        'defaultPriv' => [
+            'GET' => [],
+            'POST' => ['edit'],
+            'PUT' => ['owner', 'edit'],
+            'DELETE' => ['owner', 'edit']
+        ],
         'excludes' => ['.*', 'index.*', '_*'],
         'list' => [],
     ];
 
     private const RECURSIVE_CONF = [
-        'exclusive',
+        'editable',
         'order',
         'defaultItem',
+        'defaultPriv',
     ];
 
     private $_path;
@@ -45,19 +51,6 @@ final class Config
         $conf[$opt] = array_unique($conf[$opt] ?? [] + $this->_conf[$opt]);
     }
 
-    private function defaultActions($item)
-    {
-        $actions = [];
-        if (!isset($item['actions'])) {
-            $actions['GET'] = FileActions::get();
-        } else if ($item['actions'] instanceof Actions) {
-            $actions['GET'] = $item['actions'];
-        } else if (is_array($item['actions'])) {
-            Arr::copyKeys($actions, $item['actions'], 'GET', 'PUT', 'POST', 'DELETE');
-        }
-        return $actions;
-    }
-
     private function read()
     {
         $file = $this->_path . DS . 'list.php';
@@ -71,8 +64,15 @@ final class Config
             if (is_string($item)) {
                 $item = ['title' => $item];
             }
-            $item['actions'] = $this->defaultActions($item);
-            $item['priv'] = $item['priv'] ?? '';
+            if (is_array($item['priv'])) {
+                $item['priv'] = array_map(function ($v) {
+                    return explode(' ', $v);
+                }, $item['priv']);
+            } else if (isset($item['priv'])) {
+                $item['priv'] = ['GET' => explode(' ', $item['priv'])];
+            } else {
+                $item['priv'] = $conf['defaultPriv'];
+            }
         }
         if (isset($conf['traits'])) {
             $traits = $conf['traits'];
@@ -87,25 +87,14 @@ final class Config
         $this->_conf = $conf;
     }
 
-    private function checkPriv($name)
-    {
-        if (!Sys::user()->hasPriv($this->_conf['list'][$name]['priv'])) {
-            throw new RuntimeException('You do not have privilege to access this item.');
-        }
-    }
-
     public function shift($name)
     {
-        $this->checkPriv($name);
         $this->_path .= DS . $name;
         $this->read();
     }
 
     public function excluded($file)
     {
-        if ($this->_conf['exclusive'] && !isset($this->_conf['list'][$file])) {
-            return true;
-        }
         foreach ($this->_conf['excludes'] as $p) {
             if (fnmatch($p, $file)) {
                 return true;
@@ -117,7 +106,7 @@ final class Config
     public function hidden($name)
     {
         $item = $this->_conf['list'][$name];
-        return $item['hidden'] || !isset($item['actions']['GET']);
+        return $item['hidden'] ?? false;
     }
 
     public function title($name)
@@ -125,17 +114,44 @@ final class Config
         return $this->_conf['list'][$name]['title'] ?? Str::captalize($name);
     }
 
+    public function priv($name, $method = 'GET')
+    {
+        $name = $name ?? $this->_conf['defaultItem'];
+        $item = $this->_conf['list'][$name];
+        $priv = (isset($item['priv']) ? $item['priv'] : $this->_conf['defaultPriv']);
+        return $priv[$method] ?? ['admin'];
+    }
+
     public function action($name)
     {
-        if ($name === '') {
-            $name = $this->_conf['defaultItem'];
-        }
-        $this->checkPriv($name);
+        $name = $name ?? $this->_conf['defaultItem'];
         $item = $this->_conf['list'][$name];
+        $method = Server::requestMethod();
         if (isset($item)) {
-            return $item['actions'][Server::requestMethod()];
+            $action = $item[$method];
         }
-        return null;
+        if (!$action) {
+            if ($this->_conf['editable']) {
+                switch ($method) {
+                    case 'GET':
+                        $action = FileActions::get();
+                        break;
+                    case 'PUT':
+                        $action = FileActions::put();
+                        break;
+                    case 'DELETE':
+                        $action = FileActions::delete();
+                        break;
+                    case 'POST':
+                        $action = FileActions::post();
+                        break;
+                    default:
+                }
+            } else if ($method == 'GET') {
+                $action = FileActions::get();
+            }
+        }
+        return $action ?? Actions::default();
     }
 
     public function isDir($name)
@@ -158,22 +174,25 @@ final class Config
     public static function inheritDefault()
     {
         return function (&$conf, $oldConf) {
-            $conf['list'][$conf['defaultItem']]['actions']['GET']
-                = $oldConf['list'][$oldConf['defaultItem']]['actions']['GET'];
-            $conf['list'][$conf['defaultItem']]['hidden']
-                = $oldConf['list'][$oldConf['defaultItem']]['hidden'];
+            Arr::copyKeys(
+                $conf['list'][$conf['defaultItem']],
+                $oldConf['list'][$conf['defaultItem']],
+                'GET',
+                'hidden',
+                'title'
+            );
         };
     }
 
     public static function doUpload($title, $accept = '*', $sizeLimit = 65536)
     {
         return function (&$conf, $oldConf) use ($title, $accept, $sizeLimit) {
-            $conf['list'][$conf['defaultItem']]['actions']['POST'] = FileActions::post($sizeLimit);
+            $conf['editable'] = true;
             $conf['list']['upload'] = [
                 'title' => '<i class="bi bi-upload sys button"></i>',
-                'priv' => 'edit',
+                'GET' => FileActions::uploadForm($title, $accept, $sizeLimit),
+                'priv' => ['GET' => ['edit']],
             ];
-            $conf['list']['upload']['actions']['GET'] = FileActions::uploadForm($title, $accept, $sizeLimit);
         };
     }
 }

@@ -14,7 +14,10 @@ module.exports = {
                 type: 'window',
             },
         },
-        'js/login.js': './pub_src/login.ts',
+        'js/login.js': {
+            import: './pub_src/login.ts',
+            dependOn: 'js/main.js',
+        },
         // MiniCssExtractPlugin will add `.css`.
         'css/main': './pub_src/index.scss',
     },
