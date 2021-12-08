@@ -64,7 +64,7 @@ final class App
             }
         }
         if ($this->_action === null) {
-            $this->_name = '';
+            $this->_name = $this->_conf->defaultItem;
             $this->_action = $this->_conf->action($this->_name);
         }
         $method = Server::requestMethod();
@@ -262,14 +262,14 @@ final class App
         $name = $this->_name;
         $meta = $this->_files[$name];
         if (isset($meta)) {
-            if ($this->hasPriv($name, 'PUT')) {
-                $meta['edit'] = true;
-            }
-            if ($this->hasPriv($name, 'DELETE')) {
-                $meta['delete'] = true;
-            }
-            $meta['name'] = $name;
-            return View::renderHtml('meta', $meta);
+            return View::renderHtml('meta', [
+                'name' => $name,
+                'uname' => $meta['uname'],
+                'time' => $meta['time'],
+                'edit' => $this->hasPriv($name, 'PUT'),
+                'delete' => $this->hasPriv($name, 'DELETE'),
+                'accept' => $this->_conf->accept,
+            ]);
         }
         return '';
     }

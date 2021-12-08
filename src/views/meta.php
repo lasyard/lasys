@@ -11,7 +11,11 @@
 </span>
 <?php if ($edit) { ?>
     <div id="edit-form-div" style="display:none">
-        <?php View::render('upload', ['title' => '更新 ' . $name, 'method' => 'PUT']); ?>
+        <?php View::render('upload', [
+            'title' => '更新 ' . $name,
+            'method' => 'PUT',
+            'accept' => $accept
+        ]); ?>
     </div>
     <script>
         const v = byId('edit-form-div');

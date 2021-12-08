@@ -3,6 +3,7 @@ final class Config
 {
     private const DEFAULT = [
         'editable' => false,
+        'accept' => 'text/plain',
         'order' => false,
         'defaultItem' => 'index',
         'defaultPriv' => [
@@ -17,6 +18,7 @@ final class Config
 
     private const RECURSIVE_CONF = [
         'editable',
+        'accept',
         'order',
         'defaultItem',
         'defaultPriv',
@@ -116,7 +118,6 @@ final class Config
 
     public function priv($name, $method = 'GET')
     {
-        $name = $name ?? $this->_conf['defaultItem'];
         $item = $this->_conf['list'][$name];
         $priv = (isset($item['priv']) ? $item['priv'] : $this->_conf['defaultPriv']);
         return $priv[$method] ?? ['admin'];
@@ -124,7 +125,6 @@ final class Config
 
     public function action($name)
     {
-        $name = $name ?? $this->_conf['defaultItem'];
         $item = $this->_conf['list'][$name];
         $method = Server::requestMethod();
         if (isset($item)) {
