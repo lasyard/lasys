@@ -97,6 +97,9 @@ final class Config
 
     public function excluded($file)
     {
+        if (array_key_exists($file, $this->_conf['list'])) {
+            return true;
+        }
         foreach ($this->_conf['excludes'] as $p) {
             if (fnmatch($p, $file)) {
                 return true;
@@ -154,9 +157,10 @@ final class Config
         return $action ?? Actions::default();
     }
 
-    public function isDir($name)
+    public function dirOrFile($name)
     {
-        return $this->_conf['list'][$name]['isDir'];
+        $file = $this->_path . DS . $name;
+        return is_dir($file) ? true : (is_file($file . '.php') ? false : null);
     }
 
     public static function orderByTime($descend = true)

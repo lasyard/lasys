@@ -10,20 +10,15 @@ export function dateCmp(a: string, b: string) {
     return objCmp(Date.parse(a), Date.parse(b));
 }
 
-export function byId(id: string) {
-    return document.getElementById(id);
-}
-
-export function onLoad(fun: (this: Window, ev: Event) => any) {
-    window.addEventListener('load', fun);
-}
-
 export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export function html(str: string) {
-    return str
-        .replace(/[<>&]/gm, (s: String) => "&#" + s.charCodeAt(0) + ";")
-        .replace(/\r\n/gm, '<br />');
+export function textBuilder() {
+    let text = '';
+    const p = (str: string) => {
+        text += str + '\n';
+    }
+    p.text = () => text;
+    return p;
 }

@@ -42,7 +42,7 @@ final class App
                 continue;
             }
             $this->_name = $name;
-            if ($this->isDir()) {
+            if ($this->isDir($name)) {
                 if ($this->_base != $this->_home) {
                     $this->_breadcrumbs[] = [
                         'text' => $title,
@@ -134,19 +134,10 @@ final class App
         $files = $this->_files;
         $list0 = [];
         foreach ($conf->list as $name => $item) {
-            if ($conf->hidden($name) || !$this->hasPriv($name)) {
-                if (array_key_exists($name, $files)) {
-                    unset($files[$name]);
-                }
-                continue;
+            if (!$conf->hidden($name) && $this->hasPriv($name)) {
+                $item['isDir'] = $this->isDir($name);
+                $list0[] = $this->makeItem($name, $item, $selected);
             }
-            if (array_key_exists($name, $files)) {
-                $file = $files[$name];
-                $item['isDir'] = $file['isDir'];
-                $item['title'] = $file['title'] ?? $item['title'];
-                unset($files[$name]);
-            }
-            $list0[] = $this->makeItem($name, $item, $selected);
         }
         $list1 = [];
         foreach ($files as $name => $file) {
@@ -226,9 +217,10 @@ final class App
         );
     }
 
-    private function isDir()
+    private function isDir($name)
     {
-        return $this->_conf->isDir($this->_name) || is_dir($this->_path . DS . $this->_name);
+        $f = $this->_conf->dirOrFile($name);
+        return $f ?? is_dir($this->_path . DS . $name);
     }
 
     private function hasPriv($name, $method = 'GET')

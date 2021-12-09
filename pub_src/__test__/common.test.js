@@ -3,7 +3,7 @@ import {
     numCmp,
     dateCmp,
     capitalize,
-    html,
+    textBuilder,
 } from '../common';
 
 test('objCmp("a", "b") == -1', () => {
@@ -30,6 +30,10 @@ test('capitalize("abc") == "Abc"', () => {
     expect(capitalize('abc')).toBe('Abc');
 });
 
-test('html("<a>") == "&#60;a&#62;"', () => {
-    expect(html('<a>')).toBe('&#60;a&#62;');
+test('textBuilder', () => {
+    const p = textBuilder();
+    p('abc');
+    p('def');
+    p('ghi');
+    expect(p.text()).toBe("abc\ndef\nghi\n");
 });
