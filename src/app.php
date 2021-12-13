@@ -213,7 +213,7 @@ final class App
         }
         file_put_contents(
             $path . DS . App::META_FILE,
-            json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+            json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . PHP_EOL
         );
     }
 

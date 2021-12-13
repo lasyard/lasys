@@ -62,9 +62,11 @@ final class Config
         }
         $this->mergeArray($conf, 'excludes');
         $this->setDefault($conf, 'list');
-        foreach ($conf['list'] as &$item) {
+        foreach ($conf['list'] as $name => &$item) {
             if (is_string($item)) {
                 $item = ['title' => $item];
+            } else if ($item instanceof Actions) {
+                $item = ['title' => Str::captalize($name), 'GET' => $item];
             }
             if (is_array($item['priv'])) {
                 $item['priv'] = array_map(function ($v) {
