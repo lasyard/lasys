@@ -13,11 +13,12 @@ final class Server
             $protocol = 'http';
         }
         $host = $_SERVER['HTTP_HOST'];
-        $port = $_SERVER['SERVER_PORT'];
         $home = $protocol . '://' . $host;
-        if ($protocol == 'http' && $port != 80 || $protocol == 'https' && $port != 443) {
-            $home .= ":$port";
-        }
+        // Seems that `$_SERVER['HTTP_HOST']` contains the port part of url.
+        // $port = $_SERVER['SERVER_PORT'];
+        // if ($protocol == 'http' && $port != 80 || $protocol == 'https' && $port != 443) {
+        //     $home .= ":$port";
+        // }
         $path = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
         $prefix = dirname($_SERVER['PHP_SELF']);
         if (substr($prefix, -1) != '/') {

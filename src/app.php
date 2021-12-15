@@ -251,19 +251,23 @@ final class App
         if (!$this->_conf->editable) {
             return '';
         }
+        $files = $this->_files;
         $name = $this->_name;
-        $meta = $this->_files[$name];
-        if (isset($meta)) {
-            return View::renderHtml('meta', [
-                'name' => $name,
-                'uname' => $meta['uname'],
-                'time' => $meta['time'],
-                'edit' => $this->hasPriv($name, 'PUT'),
-                'delete' => $this->hasPriv($name, 'DELETE'),
-                'accept' => $this->_conf->accept,
-            ]);
+        if (!array_key_exists($name, $files)) {
+            return '';
         }
-        return '';
+        $meta = $files[$name];
+        if (!isset($meta)) {
+            return '';
+        }
+        return View::renderHtml('meta', [
+            'name' => $name,
+            'uname' => $meta['uname'],
+            'time' => $meta['time'],
+            'edit' => $this->hasPriv($name, 'PUT'),
+            'delete' => $this->hasPriv($name, 'DELETE'),
+            'accept' => $this->_conf->accept,
+        ]);
     }
 
     public function view($view, $extraVars = [])

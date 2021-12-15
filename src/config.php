@@ -68,12 +68,14 @@ final class Config
             } else if ($item instanceof Actions) {
                 $item = ['title' => Str::captalize($name), 'GET' => $item];
             }
-            if (is_array($item['priv'])) {
-                $item['priv'] = array_map(function ($v) {
-                    return explode(' ', $v);
-                }, $item['priv']);
-            } else if (isset($item['priv'])) {
-                $item['priv'] = ['GET' => explode(' ', $item['priv'])];
+            if (isset($item['priv'])) {
+                if (is_array($item['priv'])) {
+                    $item['priv'] = array_map(function ($v) {
+                        return explode(' ', $v);
+                    }, $item['priv']);
+                } else {
+                    $item['priv'] = ['GET' => explode(' ', $item['priv'])];
+                }
             } else {
                 $item['priv'] = $conf['defaultPriv'];
             }
@@ -123,16 +125,22 @@ final class Config
 
     public function priv($name, $method = 'GET')
     {
-        $item = $this->_conf['list'][$name];
-        $priv = (isset($item['priv']) ? $item['priv'] : $this->_conf['defaultPriv']);
-        return $priv[$method] ?? ['admin'];
+        $list = $this->_conf['list'];
+        if (array_key_exists($name, $list)) {
+            $item = $list[$name];
+            $priv = (isset($item['priv']) ? $item['priv'] : $this->_conf['defaultPriv']);
+            return $priv[$method] ?? ['admin'];
+        }
+        return ['admin'];
     }
 
     public function action($name)
     {
-        $item = $this->_conf['list'][$name];
+        $list = $this->_conf['list'];
         $method = Server::requestMethod();
-        if (isset($item)) {
+        $action = null;
+        if (isset($list[$name])) {
+            $item = $list[$name];
             $action = $item[$method];
         }
         if (!$action) {

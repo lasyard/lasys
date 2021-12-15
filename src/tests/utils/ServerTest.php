@@ -13,7 +13,6 @@ final class ServerTest extends TestCase
     {
         $_SERVER = [
             'HTTP_HOST' => 'www.lasys.org',
-            'SERVER_PORT' => 80,
             'REQUEST_URI' => '/workspace/',
             'PHP_SELF' => '/workspace/index.php',
             'REQUEST_METHOD' => 'GET',
@@ -40,9 +39,8 @@ final class ServerTest extends TestCase
     public function testGetHomeAndPath2()
     {
         $_SERVER = [
-            'HTTP_HOST' => 'www.lasys.org',
+            'HTTP_HOST' => 'www.lasys.org:80',
             'HTTPS' => 'on',
-            'SERVER_PORT' => 80,
             'REQUEST_URI' => '/workspace/a/b/c?name=test',
             'PHP_SELF' => '/workspace/a/index.php',
             'REQUEST_METHOD' => 'GET',
