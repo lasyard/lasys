@@ -62,6 +62,17 @@ final class FileActions extends Actions
         ]);
     }
 
+    public static function updateForm($title, $accept = '*', $sizeLimit = self::FILE_SIZE_LIMIT)
+    {
+        View::render('upload', [
+            'title' => $title,
+            'fieldName' => self::FILE_FIELD_NAME,
+            'action' => '?' . Server::KEY . '=' . Server::PUT,
+            'accept' => $accept,
+            'sizeLimit' => $sizeLimit,
+        ]);
+    }
+
     private function doUpload($sizeLimit = 65536, $fileName = null, $overwrite = false)
     {
         $file = $_FILES[self::FILE_FIELD_NAME];

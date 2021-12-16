@@ -5,6 +5,10 @@ final class User
 
     const GUEST = 'Guest';
 
+    public const OWNER = 'owner';
+    public const ADMIN = 'admin';
+    public const EDIT = 'edit';
+
     private $_user;
 
     public function __construct()

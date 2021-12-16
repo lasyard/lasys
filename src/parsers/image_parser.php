@@ -8,6 +8,6 @@ final class ImageParser
 
     public function __construct($url)
     {
-        $this->_content = '<img src="' . $url . '?raw=1" />';
+        $this->_content = '<img src="' . $url . '?' . Server::KEY . '=' . Server::RAW . '" />';
     }
 }

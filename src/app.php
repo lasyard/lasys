@@ -28,7 +28,7 @@ final class App
 
     public function run()
     {
-        list($this->_home, $args) = Server::getHomeAndPath();
+        list($this->_home, $args, $key) = Server::getHomeAndPath();
         define('PUB_URL', $this->_home . Str::pathUrl(PUB_DIR) . '/');
         session_cache_limiter('public');
         session_start();
@@ -59,28 +59,27 @@ final class App
                     break;
                 }
             } else {
-                $this->_action = $this->_conf->action($name);
+                $this->_action = $this->_conf->action($name, $key);
                 break;
             }
         }
         if ($this->_action === null) {
             $this->_name = $this->_conf->defaultItem;
-            $this->_action = $this->_conf->action($this->_name);
+            $this->_action = $this->_conf->action($this->_name, $key);
         }
-        $method = Server::requestMethod();
-        if ($method == 'HEAD') {
+        if ($key == Server::HEAD) {
             // Seems never run to this.
             $this->header();
             exit;
         }
         // This is needed when calling action->do, e.g., for file uploading.
         $this->createFileList();
-        if ($this->hasPriv($this->_name, $method)) {
+        if ($this->hasPriv($this->_name, $key)) {
             $this->_action->do($args, $this->_base, $this->_path, $this->_name);
         } else {
             $this->_action->doError('You do not have privilege to do this.');
         }
-        if (Server::isAjaxRequest()) {
+        if (Server::isAjax($key)) {
             echo $this->_action->content;
             exit;
         }
@@ -223,16 +222,16 @@ final class App
         return $f ?? is_dir($this->_path . DS . $name);
     }
 
-    private function hasPriv($name, $method = 'GET')
+    private function hasPriv($name, $key = Server::GET)
     {
         $user = Sys::user();
-        if ($user->hasPriv('admin')) {
+        if ($user->hasPriv(User::ADMIN)) {
             return true;
         }
         $conf = $this->_conf;
-        $priv = $conf->priv($name, $method);
+        $priv = $conf->priv($name, $key);
         foreach ($priv as $p) {
-            if ($p === 'owner') {
+            if ($p === User::OWNER) {
                 $meta = $this->_files[$name];
                 if (isset($meta) && $user->id === $meta['uid']) {
                     continue;
@@ -264,9 +263,10 @@ final class App
             'name' => $name,
             'uname' => $meta['uname'],
             'time' => $meta['time'],
-            'edit' => $this->hasPriv($name, 'PUT'),
-            'delete' => $this->hasPriv($name, 'DELETE'),
+            'edit' => $this->hasPriv($name, Server::PUT),
+            'delete' => $this->hasPriv($name, Server::AJAX_DELETE),
             'accept' => $this->_conf->accept,
+            'sizeLimit' => $this->_conf->sizeLimit,
         ]);
     }
 

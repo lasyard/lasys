@@ -1,27 +1,39 @@
 <?php
 final class Config
 {
+    public const EDITABLE = 'editable';
+    public const SIZE_LIMIT = 'sizeLimit';
+    public const ACCEPT = 'accept';
+    public const ORDER = 'order';
+    public const DEFAULT_ITEM = 'defaultItem';
+    public const DEFAULT_PRIV = 'defaultPriv';
+    public const EXCLUDES = 'excludes';
+    public const LIST = 'list';
+    public const TRAITS = 'traits';
+    public const TITLE = 'title';
+    public const PRIV = 'priv';
+    public const HIDDEN = 'hidden';
+
     private const DEFAULT = [
-        'editable' => false,
-        'accept' => 'text/plain',
-        'order' => false,
-        'defaultItem' => 'index',
-        'defaultPriv' => [
-            'GET' => [],
-            'POST' => ['edit'],
-            'PUT' => ['owner', 'edit'],
-            'DELETE' => ['owner', 'edit']
+        self::EDITABLE => false,
+        self::SIZE_LIMIT => FileActions::FILE_SIZE_LIMIT,
+        self::ACCEPT => 'text/plain',
+        self::ORDER => false,
+        self::DEFAULT_ITEM => 'index',
+        self::DEFAULT_PRIV => [
+            Server::GET => [],
         ],
-        'excludes' => ['.*', 'index.*', '_*'],
-        'list' => [],
+        self::EXCLUDES => ['.*', 'index.*', '_*'],
+        self::LIST => [],
     ];
 
     private const RECURSIVE_CONF = [
-        'editable',
-        'accept',
-        'order',
-        'defaultItem',
-        'defaultPriv',
+        self::EDITABLE,
+        self::SIZE_LIMIT,
+        self::ACCEPT,
+        self::ORDER,
+        self::DEFAULT_ITEM,
+        self::DEFAULT_PRIV,
     ];
 
     private $_path;
@@ -60,28 +72,28 @@ final class Config
         foreach (self::RECURSIVE_CONF as $c) {
             $this->setDefault($conf, $c, true);
         }
-        $this->mergeArray($conf, 'excludes');
-        $this->setDefault($conf, 'list');
-        foreach ($conf['list'] as $name => &$item) {
+        $this->mergeArray($conf, self::EXCLUDES);
+        $this->setDefault($conf, self::LIST);
+        foreach ($conf[self::LIST] as $name => &$item) {
             if (is_string($item)) {
-                $item = ['title' => $item];
+                $item = [self::TITLE => $item];
             } else if ($item instanceof Actions) {
-                $item = ['title' => Str::captalize($name), 'GET' => $item];
+                $item = [self::TITLE => Str::captalize($name), Server::GET => $item];
             }
-            if (isset($item['priv'])) {
-                if (is_array($item['priv'])) {
-                    $item['priv'] = array_map(function ($v) {
+            if (isset($item[self::PRIV])) {
+                if (is_array($item[self::PRIV])) {
+                    $item[self::PRIV] = array_map(function ($v) {
                         return explode(' ', $v);
-                    }, $item['priv']);
+                    }, $item[self::PRIV]);
                 } else {
-                    $item['priv'] = ['GET' => explode(' ', $item['priv'])];
+                    $item[self::PRIV] = [Server::GET => explode(' ', $item[self::PRIV])];
                 }
             } else {
-                $item['priv'] = $conf['defaultPriv'];
+                $item[self::PRIV] = $conf[self::DEFAULT_PRIV];
             }
         }
-        if (isset($conf['traits'])) {
-            $traits = $conf['traits'];
+        if (isset($conf[self::TRAITS])) {
+            $traits = $conf[self::TRAITS];
             if (is_array($traits)) {
                 foreach ($traits as $trait) {
                     $trait($conf, $this->_conf);
@@ -101,10 +113,10 @@ final class Config
 
     public function excluded($file)
     {
-        if (array_key_exists($file, $this->_conf['list'])) {
+        if (array_key_exists($file, $this->_conf[self::LIST])) {
             return true;
         }
-        foreach ($this->_conf['excludes'] as $p) {
+        foreach ($this->_conf[self::EXCLUDES] as $p) {
             if (fnmatch($p, $file)) {
                 return true;
             }
@@ -114,53 +126,49 @@ final class Config
 
     public function hidden($name)
     {
-        $item = $this->_conf['list'][$name];
-        return $item['hidden'] ?? false;
+        $item = $this->_conf[self::LIST][$name];
+        return $item[self::HIDDEN] ?? false;
     }
 
     public function title($name)
     {
-        return $this->_conf['list'][$name]['title'] ?? Str::captalize($name);
+        return $this->_conf[self::LIST][$name][self::TITLE] ?? Str::captalize($name);
     }
 
-    public function priv($name, $method = 'GET')
+    public function priv($name, $key = Server::GET)
     {
-        $list = $this->_conf['list'];
-        if (array_key_exists($name, $list)) {
-            $item = $list[$name];
-            $priv = (isset($item['priv']) ? $item['priv'] : $this->_conf['defaultPriv']);
-            return $priv[$method] ?? ['admin'];
-        }
-        return ['admin'];
+        $list = $this->_conf[self::LIST];
+        $priv = array_key_exists($name, $list) ? $list[$name][self::PRIV] : $this->_conf[self::DEFAULT_PRIV];
+        return $priv[$key] ?? [User::ADMIN];
     }
 
-    public function action($name)
+    public function action($name, $key)
     {
-        $list = $this->_conf['list'];
-        $method = Server::requestMethod();
+        $conf = $this->_conf;
+        $list = $conf[self::LIST];
         $action = null;
-        if (isset($list[$name])) {
-            $item = $list[$name];
-            $action = $item[$method];
+        if (isset($list[$name][$key])) {
+            $action = $list[$name][$key];
         }
         if (!$action) {
-            if ($this->_conf['editable']) {
-                switch ($method) {
-                    case 'GET':
+            if ($conf[self::EDITABLE]) {
+                switch ($key) {
+                    case Server::GET:
                         $action = FileActions::get();
                         break;
-                    case 'PUT':
-                        $action = FileActions::put();
+                    case Server::PUT:
+                        if ($conf[self::SIZE_LIMIT] == FileActions::FILE_SIZE_LIMIT) {
+                            $action = FileActions::put();
+                        } else {
+                            $action = FileActions::put($conf[self::SIZE_LIMIT]);
+                        }
                         break;
-                    case 'DELETE':
+                    case Server::AJAX_DELETE:
                         $action = FileActions::delete();
-                        break;
-                    case 'POST':
-                        $action = FileActions::post();
                         break;
                     default:
                 }
-            } else if ($method == 'GET') {
+            } else if ($key == Server::GET) {
                 $action = FileActions::get();
             }
         }
@@ -185,27 +193,50 @@ final class Config
         };
     }
 
+    public static function orderByName($descend = false)
+    {
+        if (!$descend) {
+            return function ($a, $b) {
+                return strnatcasecmp($a['text'], $b['text']);
+            };
+        }
+        return function ($b, $a) {
+            return strnatcasecmp($a['text'], $b['text']);
+        };
+    }
+
     public static function inheritDefault()
     {
         return function (&$conf, $oldConf) {
             Arr::copyKeys(
-                $conf['list'][$conf['defaultItem']],
-                $oldConf['list'][$conf['defaultItem']],
-                'GET',
-                'hidden',
-                'title'
+                $conf[self::LIST][$conf[self::DEFAULT_ITEM]],
+                $oldConf[self::LIST][$conf[self::DEFAULT_ITEM]],
+                Server::GET,
+                self::HIDDEN,
+                self::TITLE,
+                self::PRIV,
             );
         };
     }
 
-    public static function doUpload($title, $accept = '*', $sizeLimit = 65536)
+    public static function doUpload($title, $accept = '*', $sizeLimit = FileActions::FILE_SIZE_LIMIT)
     {
         return function (&$conf, $oldConf) use ($title, $accept, $sizeLimit) {
-            $conf['editable'] = true;
-            $conf['list']['upload'] = [
-                'title' => '<i class="bi bi-upload sys button"></i>',
-                'GET' => FileActions::uploadForm($title, $accept, $sizeLimit),
-                'priv' => ['GET' => ['edit']],
+            $conf[self::EDITABLE] = true;
+            $conf[self::ACCEPT] = $accept;
+            if ($sizeLimit != FileActions::FILE_SIZE_LIMIT) {
+                $conf[self::SIZE_LIMIT] = $sizeLimit;
+                $conf[self::LIST][$conf[self::DEFAULT_ITEM]][Server::POST] = FileActions::post($sizeLimit);
+            } else {
+                $conf[self::LIST][$conf[self::DEFAULT_ITEM]][Server::POST] = FileActions::post();
+            }
+            $conf[self::LIST][$conf[self::DEFAULT_ITEM]][self::PRIV][Server::POST] = [User::EDIT];
+            $conf[self::DEFAULT_PRIV][Server::PUT] = [User::OWNER, User::EDIT];
+            $conf[self::DEFAULT_PRIV][Server::AJAX_DELETE] = [User::OWNER, User::EDIT];
+            $conf[self::LIST]['upload'] = [
+                self::TITLE => '<i class="bi bi-upload sys button"></i>',
+                Server::GET => FileActions::uploadForm($title, $accept, $sizeLimit),
+                self::PRIV => [Server::GET => [User::EDIT]],
             ];
         };
     }

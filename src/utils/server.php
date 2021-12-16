@@ -1,6 +1,19 @@
 <?php
 final class Server
 {
+    public const KEY = '_key_';
+    public const RAW = 'raw';
+    public const INVALID = 'invalid';
+    public const HEAD = 'head';
+    public const AJAX_GET = 'ajaxGet';
+    public const GET = 'get';
+    public const AJAX_POST = 'ajaxPost';
+    public const POST = 'post';
+    public const AJAX_PUT = 'ajaxPut';
+    public const PUT = 'put';
+    public const AJAX_DELETE = 'ajaxDelete';
+    public const DELETE = 'delete';
+
     private function __construct()
     {
     }
@@ -28,25 +41,54 @@ final class Server
             $path = substr_replace($path, '', 0, strlen($prefix));
             $home .= $prefix;
         }
-        if (
-            self::requestMethod() == 'GET'
-            && !empty($_GET['raw'])
-            && strpos($_SERVER['HTTP_REFERER'], $home) === 0
-        ) {
+        $key = self::requestKey();
+        if ($key == self::RAW && strpos($_SERVER['HTTP_REFERER'], $home) === 0) {
             self::rawFile(DATA_PATH . DS . $path);
         }
-        return [$home, explode('/', $path)];
+        return [$home, explode('/', $path), $key];
     }
 
-    public static function isAjaxRequest()
+    public static function isAjax($key)
+    {
+        return in_array($key, [self::AJAX_GET, self::AJAX_POST, self::AJAX_PUT, self::AJAX_DELETE]);
+    }
+
+    private static function isAjaxRequest()
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strcasecmp($_SERVER['HTTP_X_REQUESTED_WITH'], 'xmlhttprequest') == 0;
     }
 
-    public static function requestMethod()
+    private static function requestKey()
     {
-        return $_SERVER['REQUEST_METHOD'];
+        // Form method can only be `GET` or `POST`, so use a url parameter to simulate PUT and DELETE.
+        switch ($_SERVER['REQUEST_METHOD']) {
+            case 'GET':
+                if (isset($_GET[self::KEY]) && $_GET[self::KEY] == self::RAW) {
+                    return self::RAW;
+                }
+                return self::isAjaxRequest() ? self::AJAX_GET : self::GET;
+            case 'POST':
+                if (self::isAjaxRequest()) {
+                    return self::AJAX_POST;
+                }
+                if (isset($_GET[self::KEY])) {
+                    return $_GET[self::KEY];
+                }
+                return self::POST;
+            case 'PUT':
+                if (self::isAjaxRequest()) {
+                    return self::AJAX_PUT;
+                }
+            case 'DELETE':
+                if (self::isAjaxRequest()) {
+                    return self::AJAX_DELETE;
+                }
+            case 'HEAD':
+                return self::HEAD;
+            default:
+        }
+        return self::INVALID;
     }
 
     public static function rawFile($path)

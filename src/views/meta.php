@@ -1,5 +1,5 @@
 <span class="nobr">
-    <em><?php echo date('Y.m.d h:i:s', $time); ?></em> by <?php echo $uname; ?>
+    <em><?php echo date('Y.m.d H:i:s', $time); ?></em> by <?php echo $uname; ?>
 </span>
 <span class="nobr" style="float:right">
     <?php if ($edit) { ?>
@@ -11,11 +11,7 @@
 </span>
 <?php if ($edit) { ?>
     <div id="edit-form-div" style="display:none">
-        <?php View::render('upload', [
-            'title' => '更新 ' . $name,
-            'method' => 'PUT',
-            'accept' => $accept
-        ]); ?>
+        <?php FileActions::updateForm('更新 ' . $name, $accept, $sizeLimit); ?>
     </div>
     <script>
         const v = byId('edit-form-div');
