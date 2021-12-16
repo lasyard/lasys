@@ -117,8 +117,9 @@ div#bar {
     clear: both;
     z-index: 1000;
 
-    img {
+    img#logo {
         vertical-align: top;
+        float: left;
     }
 
     a {
