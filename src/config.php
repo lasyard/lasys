@@ -22,6 +22,7 @@ final class Config
         self::DEFAULT_ITEM => 'index',
         self::DEFAULT_PRIV => [
             Server::GET => [],
+            Server::AJAX_GET => [],
         ],
         self::EXCLUDES => ['.*', 'index.*', '_*'],
         self::LIST => [],

@@ -142,7 +142,7 @@ final class Db extends PDO
             for ($count = 0;;) {
                 $v = [];
                 foreach ($row as $key => $value) {
-                    if ($fields[$key]['skipped']) {
+                    if (isset($fields[$key]['skipped']) && $fields[$key]['skipped']) {
                         continue;
                     }
                     if (!isset($value)) {

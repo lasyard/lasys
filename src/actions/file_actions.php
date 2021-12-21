@@ -103,6 +103,9 @@ final class FileActions extends Actions
         if (!$overwrite && (is_file($newFile) || is_dir($newFile))) {
             throw new RuntimeException('File "' . $name . '" exists.');
         }
+        if (!is_dir($path)) {
+            mkdir($path, 0775, true);
+        }
         if (
             Str::isValidFileName($name)
             && move_uploaded_file($file['tmp_name'], $newFile)

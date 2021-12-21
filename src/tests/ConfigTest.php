@@ -15,7 +15,7 @@ final class ConfigTest extends TestCase
         $this->assertFalse($conf->editable);
         $this->assertFalse($conf->order);
         $this->assertSame('index', $conf->defaultItem);
-        $this->assertSame([Server::GET => []], $conf->defaultPriv);
+        $this->assertSame([Server::GET => [], Server::AJAX_GET => []], $conf->defaultPriv);
         $this->assertEmpty($conf->list);
     }
 
