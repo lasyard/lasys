@@ -18,6 +18,7 @@ $whiteColor: #FFF;
 $blackColor: #000;
 $bgColor:#DEF;
 $bgColor1: #BDF;
+// This is the same as selection color.
 $bgColor2: #7BF;
 $bgColor3: #5AF;
 $bgColor4: #39F;
@@ -260,7 +261,7 @@ div.error {
     border: 1px solid $hotColor;
 }
 
-span.nobr {
+.nobr {
     white-space: nowrap;
 }
 
@@ -280,4 +281,5 @@ img {
 
 @import 'form';
 @import 'text';
+@import 'stylized';
 @import 'tool_tip';

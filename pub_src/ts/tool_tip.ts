@@ -10,7 +10,7 @@ export class ToolTip {
     private cb: (context: any) => { title?: string, body: string } | string;
 
     private constructor() {
-        this.spanTitle = Tag.of('span').className('nobr');
+        this.spanTitle = Tag.of('span');
         this.divBody = Tag.of('div');
         const self = this;
         this.divTip = Tag.of('div').id('-tool-tip-')
@@ -53,14 +53,25 @@ export class ToolTip {
             this.spanTitle.html(info.title);
             this.divBody.html(info.body);
         }
+        const x = e.pageX;
+        const y = e.pageY;
         const divTip = this.divTip;
-        divTip.style({ left: e.pageX + 'px', top: e.pageY + 'px', display: 'block' });
-        if (e.clientX + divTip.get().offsetWidth > window.innerWidth) {
-            divTip.style({ left: e.pageX - divTip.get().offsetWidth + 'px' });;
+        divTip.style({ left: x + 'px', top: y + 'px', display: 'block' });
+        const width = divTip.get().offsetWidth;
+        const right = e.clientX + width / 2 - document.documentElement.clientWidth;
+        let left = x - width / 2;
+        if (left < 0) {
+            left = 0;
+        } else if (right > 0) {
+            left = left - right;
         }
-        if (e.clientY + divTip.get().offsetHeight > window.innerHeight) {
-            divTip.style({ top: e.pageY - divTip.get().offsetHeight + 'px' });;
+        const height = divTip.get().offsetHeight;
+        const bottom = e.clientY + height - document.documentElement.clientHeight;
+        let top = y;
+        if (bottom > 0) {
+            top = y - height;
         }
+        divTip.style({ left: left + 'px', top: top + 'px', display: 'block' });
         e.stopPropagation();
     }
 }

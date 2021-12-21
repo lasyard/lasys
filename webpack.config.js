@@ -20,6 +20,10 @@ module.exports = {
             import: SRC_DIR + 'ts/login.ts',
             dependOn: 'js/main.js',
         },
+        'js/db_table.js': {
+            import: SRC_DIR + 'ts/db_table.ts',
+            dependOn: 'js/main.js',
+        },
         // MiniCssExtractPlugin will add `.css`.
         'css/main': SRC_DIR + 'scss/index.scss',
     },

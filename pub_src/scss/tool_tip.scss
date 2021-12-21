@@ -2,7 +2,7 @@ div#-tool-tip- {
     @extend .border;
     border-radius: 0.8em;
     font-size: 0.8em;
-    background: $bgColor2;
+    background: $bgColor1;
     display: none;
     position: absolute;
     max-width: 80%;
@@ -15,12 +15,14 @@ div#-tool-tip- {
         width: 100%;
 
         >span:first-child {
-            display: inline-block;
-            margin-right: 1.5em;
+            @extend .nobr;
+            margin-right: 3em;
         }
 
         >i:last-child {
-            float: right;
+            position: absolute;
+            top: 0;
+            right: 0;
         }
     }
 

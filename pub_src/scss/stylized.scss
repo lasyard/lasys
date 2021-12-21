@@ -1,0 +1,45 @@
+table.stylized {
+    @extend .border;
+    width: 100%;
+
+    @mixin cell {
+        @extend .border;
+        padding: 0.3em;
+    }
+
+    tr.header {
+        position: sticky;
+        top: $barHeight;
+    }
+
+    tr.top {
+        position: sticky;
+        top: $barHeight * 2;
+    }
+
+    tr.def {
+        background: $bgColor;
+    }
+
+    tr.alt {
+        background: $bgColor1;
+    }
+
+    th {
+        @include cell;
+        font-family: Sans-Serif;
+        background: $bgColor3;
+    }
+
+    td {
+        @include cell;
+        font-family: Serif;
+    }
+
+    td.left-label,
+    td.top-label {
+        font-family: Sans-Serif;
+        background: $highColor;
+        text-align: center;
+    }
+}
