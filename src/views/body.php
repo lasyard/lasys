@@ -3,7 +3,7 @@
     <div id="breadcrumbs">
         <?php
         foreach ($breadcrumbs as $b) {
-            echo ' <i class="green bi bi-chevron-double-right"></i> ' . Html::link($b);
+            echo ' <i class="bi bi-chevron-double-right sys"></i> ' . Html::link($b);
         }
         ?>
     </div>
@@ -16,7 +16,7 @@
 </div>
 <div id="list">
     <fieldset>
-        <legend><i class="bi bi-files red"></i> 文件列表</legend>
+        <legend><i class="bi bi-files sys"></i> 文件列表</legend>
         <ul>
             <?php
             foreach ($list as $item) {

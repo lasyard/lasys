@@ -14,7 +14,7 @@ class Actions
     private $_name;
     private $_content;
 
-    protected $_httpHeaders = Sys::NO_CACHE_HEADERS;
+    protected $_httpHeaders = [];
     protected $_title;
 
     public static function __callStatic($method, $args)

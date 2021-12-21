@@ -14,21 +14,19 @@
     }
 }
 
-$redColor: #F55;
-$greenColor: #0A0;
 $whiteColor: #FFF;
 $blackColor: #000;
-$greyColor: #999;
-
 $bgColor:#DEF;
-$fgColor: $blackColor;
-$barColor: $whiteColor;
+$bgColor1: #BDF;
+$bgColor2: #7BF;
+$bgColor3: #5AF;
+$bgColor4: #39F;
+$bgColor5: #18F;
 $linkColor:#55F;
-$visitedLinkColor: #A0A;
-$hoverLinkBgColor: #FFF;
-$hoverLinkColor: $redColor;
-$sysColor: $greenColor;
+$visitedColor: #A0A;
+$sysColor: #0A0;
 $highColor: #FFA;
+$hotColor: #F55;
 $lineColor: #AAA;
 
 $normalFont: Serif;
@@ -42,7 +40,7 @@ $listWidth: 18rem;
 body {
     margin: 0 !important;
     background-color: $bgColor !important;
-    color: $fgColor;
+    color: $blackColor;
     font-family: $normalFont;
     font-weight: normal;
     line-height: 1.5;
@@ -53,6 +51,10 @@ body {
 em {
     font-style: inherit;
     text-decoration: underline;
+}
+
+.border {
+    border: 1px solid $lineColor;
 }
 
 .left {
@@ -73,18 +75,6 @@ em {
     margin-right: auto;
 }
 
-.red {
-    color: $redColor;
-}
-
-.green {
-    color: $greenColor;
-}
-
-.black {
-    color: $blackColor;
-}
-
 a {
     background: transparent;
     text-decoration: none;
@@ -94,12 +84,12 @@ a {
     }
 
     &:visited {
-        color: $visitedLinkColor;
+        color: $visitedColor;
     }
 
     &:hover {
-        background: $hoverLinkBgColor;
-        color: $hoverLinkColor;
+        background: $whiteColor;
+        color: $hotColor;
     }
 }
 
@@ -113,8 +103,8 @@ div#bar {
     top: 0;
     width: 100%;
     height: $barHeight;
-    background: $fgColor;
-    color: $barColor;
+    background: $blackColor;
+    color: $whiteColor;
     clear: both;
     z-index: 1000;
 
@@ -124,7 +114,7 @@ div#bar {
     }
 
     a {
-        color: $fgColor;
+        color: $blackColor;
     }
 }
 
@@ -132,8 +122,8 @@ div#list {
     font-family: $headerFont;
 
     fieldset {
+        @extend .border;
         margin: 0.3em;
-        border: 1px solid $greyColor;
         padding: 0;
     }
 
@@ -158,8 +148,8 @@ div#list {
     }
 
     .button {
+        @extend .border;
         display: inline-block;
-        border: 1px solid $greyColor;
         border-radius: 8px;
         width: $listWidth - 5rem;
         text-align: center;
@@ -249,7 +239,7 @@ h1 {
 
 h2 {
     font-size: 1.5em;
-    border-bottom: 2px ridge $bgColor;
+    border-bottom: 1px ridge $bgColor;
 }
 
 h3 {
@@ -265,9 +255,9 @@ h5 {
 }
 
 div.error {
-    color: $redColor;
+    color: $hotColor;
     text-align: center;
-    border: 1px solid $redColor;
+    border: 1px solid $hotColor;
 }
 
 span.nobr {
@@ -275,12 +265,12 @@ span.nobr {
 }
 
 table {
-    border: 1px solid $greyColor;
+    @extend .border;
     border-collapse: collapse;
 
     th,
     td {
-        border: 1px solid $greyColor;
+        @extend .border;
     }
 }
 
@@ -290,3 +280,4 @@ img {
 
 @import 'form';
 @import 'text';
+@import 'tool_tip';

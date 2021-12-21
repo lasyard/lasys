@@ -73,7 +73,7 @@ export class Tag {
         return this;
     }
 
-    public born() {
+    public emerge() {
         document.body.appendChild(this.element);
         return this;
     }

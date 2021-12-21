@@ -1,0 +1,30 @@
+div#-tool-tip- {
+    @extend .border;
+    border-radius: 0.8em;
+    font-size: 0.8em;
+    background: $bgColor2;
+    display: none;
+    position: absolute;
+    max-width: 80%;
+    z-index: 10;
+
+    >div:first-child {
+        border-radius: 0.3em 0.3em 0 0;
+        color: $highColor;
+        background: $bgColor5;
+        width: 100%;
+
+        >span:first-child {
+            display: inline-block;
+            margin-right: 1.5em;
+        }
+
+        >i:last-child {
+            float: right;
+        }
+    }
+
+    >div:last-child {
+        padding: 0.3em;
+    }
+}

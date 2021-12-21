@@ -30,7 +30,7 @@ final class App
     {
         list($this->_home, $args, $key) = Server::getHomeAndPath();
         define('PUB_URL', $this->_home . Str::pathUrl(PUB_DIR) . '/');
-        session_cache_limiter('public');
+        session_cache_limiter('nocache');
         session_start();
         $this->_base = $this->_home;
         $this->_path = DATA_PATH;

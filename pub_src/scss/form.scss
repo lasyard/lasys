@@ -1,13 +1,13 @@
 div#content {
     fieldset {
+        @extend .border;
+        margin: 0.5em 0;
+        padding: 0;
+
         legend {
             font-family: Sans-Serif;
             font-size: 0.8em;
         }
-
-        margin: 0.5em 0;
-        border: 1px solid $lineColor;
-        padding: 0;
 
         form {
             div.field {
@@ -32,7 +32,7 @@ div#content {
                 }
 
                 div.checkbox-group {
-                    border: 1px solid grey;
+                    @extend .border;
                     padding: 1px;
                     display: inline-block;
                     width: 80%;
