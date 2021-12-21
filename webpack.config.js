@@ -5,21 +5,23 @@ const {
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
+const SRC_DIR = './pub_src/';
+
 module.exports = {
     mode: 'production',
     entry: {
         'js/main.js': {
-            import: './pub_src/index.ts',
+            import: SRC_DIR + 'ts/index.ts',
             library: {
                 type: 'window',
             },
         },
         'js/login.js': {
-            import: './pub_src/login.ts',
+            import: SRC_DIR + 'ts/login.ts',
             dependOn: 'js/main.js',
         },
         // MiniCssExtractPlugin will add `.css`.
-        'css/main': './pub_src/index.scss',
+        'css/main': SRC_DIR + 'scss/index.scss',
     },
     output: {
         path: path.resolve(__dirname, 'pub'),

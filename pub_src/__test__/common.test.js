@@ -4,7 +4,7 @@ import {
     dateCmp,
     capitalize,
     textBuilder,
-} from '../common';
+} from '../ts/common';
 
 test('objCmp("a", "b") == -1', () => {
     expect(objCmp('a', 'b')).toBe(-1);

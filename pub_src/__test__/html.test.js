@@ -4,15 +4,15 @@
 
 import {
     html,
-    newTag
-} from '../html';
+    Tag
+} from '../ts/html';
 
 test('html("<a>") == "&#60;a&#62;"', () => {
     expect(html('<a>')).toBe('&#60;a&#62;');
 });
 
-test('newTag', () => {
-    const div = newTag('div', 'foo bar', 'id', 'class');
+test('Tag', () => {
+    const div = Tag.of('div').add('foo bar').id('id').className('class').get();
     expect(div.tagName).toBe('DIV');
     // Why this is undefined?
     expect(div.innerText).toBe(undefined);

@@ -19,7 +19,19 @@ export class Ajax {
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.setRequestHeader('Content-Type', type);
         xhr.setRequestHeader('Accept', accept);
-        xhr.send(data);
+        if (data) {
+            xhr.send(data);
+        } else {
+            xhr.send();
+        }
+    }
+
+    public static get(
+        onload: (response: any, type: XMLHttpRequestResponseType) => any,
+        url = '',
+        accept = 'application/json'
+    ) {
+        this.call(onload, 'GET', '', url, accept);
     }
 
     public static post(
