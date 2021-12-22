@@ -12,7 +12,7 @@ test('html("<a>") == "&#60;a&#62;"', () => {
 });
 
 test('Tag', () => {
-    const div = Tag.of('div').add('foo bar').id('id').className('class').get();
+    const div = Tag.of('div').add('foo bar').id('id').cls('class').get();
     expect(div.tagName).toBe('DIV');
     // Why this is undefined?
     expect(div.innerText).toBe(undefined);

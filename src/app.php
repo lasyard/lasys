@@ -146,7 +146,7 @@ final class App
             $btns[] = [
                 'text' => '<i class="bi bi-chevron-double-left"></i>',
                 'url' => dirname($this->_base),
-                'title' => 'Up Level',
+                'title' => 'Upper Level',
                 'selected' => false,
             ];
         }

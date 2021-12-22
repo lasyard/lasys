@@ -4,6 +4,8 @@ export function html(str: string) {
         .replace(/\r\n/gm, '<br />');
 }
 
+export type TagList = (Tag | string)[];
+
 export class Tag {
     private element: HTMLElement;
 
@@ -13,6 +15,18 @@ export class Tag {
 
     public static of(name: string) {
         return new Tag(document.createElement(name));
+    }
+
+    public static p(...tags: TagList) {
+        return Tag.of('p').add(...tags);
+    }
+
+    public static br() {
+        return Tag.of('br');
+    }
+
+    public static bi(icon: string) {
+        return Tag.of('i').cls('bi bi-' + icon);
     }
 
     public static byId(id: string) {
@@ -29,8 +43,8 @@ export class Tag {
         return this;
     }
 
-    public className(className: string) {
-        this.element.className = className;
+    public cls(cls: string) {
+        this.element.className = cls;
         return this;
     }
 
@@ -53,8 +67,10 @@ export class Tag {
         return this;
     }
 
-    public add(tag: Tag | string) {
-        this.element.appendChild(typeof tag === 'string' ? new Text(tag) : tag.element);
+    public add(...tags: TagList) {
+        for (let tag of tags) {
+            this.element.appendChild(typeof tag === 'string' ? new Text(tag) : tag.element);
+        }
         return this;
     }
 

@@ -16,7 +16,7 @@ export class ToolTip {
         this.divTip = Tag.of('div').id('-tool-tip-')
             .add(Tag.of('div')
                 .add(this.spanTitle)
-                .add(Tag.of('i').className('bi bi-x-circle sys').event('click', this.hide.bind(this))))
+                .add(Tag.bi('x-circle sys').event('click', this.hide.bind(this))))
             .add(this.divBody)
             .event('click', (e) => e.stopPropagation())
             .emerge();

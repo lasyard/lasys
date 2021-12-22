@@ -34,6 +34,17 @@ table.stylized {
     td {
         @include cell;
         font-family: Serif;
+
+        p.icon-list {
+            font-size: 0.8em;
+            margin-left: 2em;
+            text-indent: -1em;
+
+            >i.bi:first-child {
+                margin-right: 0.8em;
+                color: $bgColor5;
+            }
+        }
     }
 
     td.left-label,

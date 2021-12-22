@@ -1,4 +1,4 @@
-import { Tag, onLoad, Ajax } from './index';
+import { Tag, onLoad, Ajax, TagList } from './index';
 
 interface Record {
     [index: string]: any;
@@ -6,7 +6,7 @@ interface Record {
 
 interface ColumnDefinition {
     th: string;
-    td: ((data: Record) => any) | string;
+    td: string | ((data: Record) => string | Tag | TagList);
     width?: string;
 }
 
@@ -18,13 +18,11 @@ interface DbTableConfig {
 
 export class DbTable {
     private recs: Record[];
-    private cols: ColumnDefinition[];
     private conf: DbTableConfig;
     private divData: Tag = null;
 
     private constructor(recs: Record[]) {
         this.recs = recs;
-        this.cols = [];
     }
 
     public static of(recs: Record[]) {
@@ -57,7 +55,7 @@ export class DbTable {
             return;
         }
         const colgroup = Tag.of('colgroup');
-        const headers = Tag.of('tr').className('header');
+        const headers = Tag.of('tr').cls('header');
         const columns = this.conf.columns ? this.conf.columns : 1;
         const cols = this.conf.cols;
         for (let i = 0; i < columns; ++i) {
@@ -66,9 +64,7 @@ export class DbTable {
                 Tag.of('th').add(col.th).putInto(headers);
             }
         }
-        const table = Tag.of('table').className('stylized')
-            .add(colgroup)
-            .add(headers);
+        const table = Tag.of('table').cls('stylized').add(colgroup, headers);
         let alt = false;
         let count = 0;
         let colCount = 0;
@@ -79,13 +75,22 @@ export class DbTable {
         }
         for (const rec of recs) {
             if (colCount == 0) {
-                tr = Tag.of('tr').className(alt ? 'alt' : 'def');
+                tr = Tag.of('tr').cls(alt ? 'alt' : 'def');
                 alt = !alt;
             }
             for (const col of cols) {
-                Tag.of('td')
-                    .add(typeof col.td === 'string' ? rec[col.td] : col.td(rec))
-                    .putInto(tr);
+                const td = Tag.of('td');
+                if (typeof col.td === 'string') {
+                    td.add(rec[col.td]);
+                } else if (typeof col.td === 'function') {
+                    const v = col.td(rec);
+                    if (Array.isArray(v)) {
+                        td.add(...v);
+                    } else {
+                        td.add(v);
+                    }
+                }
+                tr.add(td);
             }
             colCount++;
             if (colCount == columns) {

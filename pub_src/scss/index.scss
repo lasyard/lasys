@@ -282,6 +282,10 @@ table {
     th,
     td {
         @extend .border;
+
+        p {
+            margin: 0;
+        }
     }
 }
 
