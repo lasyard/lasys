@@ -10,7 +10,7 @@
 
 @media screen and (min-resolution: 96dpi) {
     html {
-        font-size: 20px;
+        font-size: 18px;
     }
 }
 
@@ -23,6 +23,7 @@ $bgColor2: #7BF;
 $bgColor3: #5AF;
 $bgColor4: #39F;
 $bgColor5: #18F;
+$transBgColor: rgba(85, 170, 255, 0.5);
 $linkColor:#55F;
 $visitedColor: #A0A;
 $sysColor: #0A0;
@@ -38,6 +39,12 @@ $letterSpacing: 0.1em;
 $barHeight: 31px;
 $listWidth: 18rem;
 
+@mixin ribbon {
+    position: sticky;
+    left: $listWidth;
+    top: $barHeight;
+}
+
 body {
     margin: 0 !important;
     background-color: $bgColor !important;
@@ -49,13 +56,16 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-em {
-    font-style: inherit;
-    text-decoration: underline;
-}
-
 .border {
     border: 1px solid $lineColor;
+}
+
+.hot {
+    color: $hotColor;
+}
+
+.sys {
+    color: $sysColor !important;
 }
 
 .left {
@@ -76,6 +86,10 @@ em {
     margin-right: auto;
 }
 
+.nobr {
+    white-space: nowrap;
+}
+
 a {
     background: transparent;
     text-decoration: none;
@@ -94,8 +108,9 @@ a {
     }
 }
 
-.sys {
-    color: $sysColor !important;
+em {
+    font-style: inherit;
+    text-decoration: underline;
 }
 
 div#bar {
@@ -109,23 +124,43 @@ div#bar {
     clear: both;
     z-index: 1000;
 
-    img#logo {
+    img {
         vertical-align: top;
-        float: left;
     }
 
     a {
-        color: $blackColor;
+        color: $whiteColor;
     }
+
+    span#user {
+        float: right;
+    }
+}
+
+@mixin list-box {
+    @extend .border;
+    margin: 0.5rem;
+    padding: 0;
 }
 
 div#list {
     font-family: $headerFont;
 
+    div#buttons {
+        @include list-box;
+        margin-top: 0;
+        background-color: $transBgColor;
+        font-size: 0.8em;
+        text-align: right;
+    }
+
     fieldset {
-        @extend .border;
-        margin: 0.3em;
-        padding: 0;
+        @include list-box;
+
+        legend {
+            font-family: Sans-Serif;
+            font-size: 0.8em;
+        }
     }
 
     ul {
@@ -133,7 +168,7 @@ div#list {
         padding: 0;
 
         li {
-            margin: 1ex 1ex 1ex 4ex;
+            margin: 0.5em;
             padding: 0;
         }
 
@@ -141,19 +176,6 @@ div#list {
         li.highlighted a {
             background-color: $highColor;
         }
-    }
-
-    p {
-        margin-left: 1ex;
-        padding: 0;
-    }
-
-    .button {
-        @extend .border;
-        display: inline-block;
-        border-radius: 8px;
-        width: $listWidth - 5rem;
-        text-align: center;
     }
 }
 
@@ -165,6 +187,10 @@ div#list {
         width: $listWidth;
         float: left;
         margin-bottom: $barHeight;
+
+        div#buttons {
+            @include ribbon;
+        }
     }
 
     div#main {
@@ -174,19 +200,12 @@ div#list {
         margin-bottom: $barHeight;
 
         div#meta {
-            position: sticky;
-            left: $listWidth;
-            top: $barHeight;
+            @include ribbon;
         }
     }
 
-    div#breadcrumbs {
-        display: inline-block;
+    span#breadcrumbs {
         font-family: $headerFont;
-
-        a {
-            color: $whiteColor;
-        }
     }
 }
 
@@ -208,8 +227,7 @@ div#list {
 
 div#main {
     div#meta {
-        background-color: $highColor;
-        color: $linkColor;
+        background-color: $transBgColor;
         font-size: 0.8em;
         font-family: $headerFont;
     }
@@ -234,7 +252,7 @@ h5 {
 
 h1 {
     font-family: $titleFont;
-    font-size: 2.0em;
+    font-size: 2em;
     text-align: center;
 }
 
@@ -251,18 +269,10 @@ h4 {
     font-size: 1em;
 }
 
-h5 {
-    font-size: 0.8em;
-}
-
 div.error {
     color: $hotColor;
     text-align: center;
     border: 1px solid $hotColor;
-}
-
-.nobr {
-    white-space: nowrap;
 }
 
 table {

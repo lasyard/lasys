@@ -12,6 +12,7 @@ final class Config
     public const TRAITS = 'traits';
     public const TITLE = 'title';
     public const PRIV = 'priv';
+    public const BUTTON = 'button';
     public const HIDDEN = 'hidden';
 
     private const DEFAULT = [
@@ -235,7 +236,8 @@ final class Config
             $conf[self::DEFAULT_PRIV][Server::PUT] = [User::OWNER, User::EDIT];
             $conf[self::DEFAULT_PRIV][Server::AJAX_DELETE] = [User::OWNER, User::EDIT];
             $conf[self::LIST]['upload'] = [
-                self::TITLE => '<i class="bi bi-upload sys button"></i>',
+                self::TITLE => 'Upload',
+                self::BUTTON => '<i class="bi bi-upload"></i>',
                 Server::GET => FileActions::uploadForm($title, $accept, $sizeLimit),
                 self::PRIV => [Server::GET => [User::EDIT]],
             ];

@@ -33,11 +33,8 @@ final class User
         if (isset($_SESSION['user'])) {
             $this->_user = null;
             session_unset();
-            session_destroy();
-            session_write_close();
-            unset($_COOKIE['id']);
-            unset($_COOKIE['password']);
-            setcookie(session_name(), '', 0, '/');
+            // Cause 'Segmentation fault' in Apache 2.4/PHP 8.1 using Chrome cached, don't know why.
+            // setcookie('PHPSESSID', '', 0, '/');
             setcookie('id', '', 0, '/');
             setcookie('password', '', 0, '/');
         }

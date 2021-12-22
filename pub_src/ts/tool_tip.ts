@@ -79,5 +79,7 @@ export class ToolTip {
 declare const toolTipCallback: (data: any) => any;
 
 onLoad(function () {
-    ToolTip.get().callback(toolTipCallback);
+    if (typeof toolTipCallback === 'function') {
+        ToolTip.get().callback(toolTipCallback);
+    }
 });
