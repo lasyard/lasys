@@ -9,6 +9,8 @@ final class Icon
     public const UPLOAD = '<i class="bi bi-upload"></i>';
     public const EDIT = '<i class="bi bi-pencil-square"></i>';
     public const DELETE = '<i class="bi bi-x-square"></i>';
+    public const INSERT = '<i class="bi bi-plus-square"></i>';
+    public const INFO = '<i class="bi bi-info-circle"></i>';
 
     private function __construct()
     {

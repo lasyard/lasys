@@ -18,14 +18,14 @@ final class FileActions extends Actions
         }
     }
 
-    private function buildButtons()
+    private function buildMeta()
     {
         $buttons = [];
         $editForm = null;
         if ($this->hasPriv(Server::PUT)) {
             $buttons[] = '<span id="-meta-btn-edit-">' . Icon::EDIT . '</span>';
             $editForm = View::renderHtml('upload', [
-                'title' => 'Update ' . $this->name,
+                'title' => Icon::EDIT . ' ' . $this->name,
                 'fieldName' => self::FILE_FIELD_NAME,
                 'action' => '?' . Server::KEY . '=' . Server::PUT,
                 'accept' => $this->conf()->accept,
@@ -35,7 +35,7 @@ final class FileActions extends Actions
         if ($this->hasPriv(Server::AJAX_DELETE)) {
             $buttons[] = '<span id="-meta-btn-delete-">' . Icon::DELETE . '</span>';
         }
-        return [$buttons, $editForm];
+        return ['buttons' => $buttons, 'editForm' => $editForm];
     }
 
     public function actionGet()
@@ -53,13 +53,7 @@ final class FileActions extends Actions
         $this->_title = $parser->title;
         $info = $this->info($name);
         if ($info) {
-            list($buttons, $editForm) = $this->buildButtons();
-            View::render('meta', [
-                'uname' => $info['uname'],
-                'time' => $info['time'],
-                'buttons' => $buttons,
-                'editForm' => $editForm,
-            ]);
+            View::render('meta', array_merge($info, $this->buildMeta()));
         }
         echo $parser->content;
     }

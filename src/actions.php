@@ -94,6 +94,15 @@ class Actions
         return Sys::app()->conf();
     }
 
+    protected function attr($name)
+    {
+        $conf = Sys::app()->conf();
+        if (isset($conf->list[$this->_name])) {
+            return $conf->list[$this->_name][$name];
+        }
+        return null;
+    }
+
     protected function info()
     {
         return Sys::app()->info($this->_name);

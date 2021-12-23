@@ -140,8 +140,13 @@ final class Config
     public function priv($name, $key = Server::GET)
     {
         $list = $this->_conf[self::LIST];
-        $priv = array_key_exists($name, $list) ? $list[$name][self::PRIV] : $this->_conf[self::DEFAULT_PRIV];
-        return $priv[$key] ?? [User::ADMIN];
+        if (array_key_exists($name, $list)) {
+            $priv = $list[$name][self::PRIV];
+            if (array_key_exists($key, $priv)) {
+                return $priv[$key];
+            }
+        }
+        return $this->_conf[self::DEFAULT_PRIV][$key] ?? [User::ADMIN];
     }
 
     public function action($name, $key)
@@ -226,12 +231,8 @@ final class Config
         return function (&$conf, $oldConf) use ($title, $accept, $sizeLimit) {
             $conf[self::EDITABLE] = true;
             $conf[self::ACCEPT] = $accept;
-            if ($sizeLimit != FileActions::FILE_SIZE_LIMIT) {
-                $conf[self::SIZE_LIMIT] = $sizeLimit;
-                $conf[self::LIST][$conf[self::DEFAULT_ITEM]][Server::POST] = FileActions::post($sizeLimit);
-            } else {
-                $conf[self::LIST][$conf[self::DEFAULT_ITEM]][Server::POST] = FileActions::post();
-            }
+            $conf[self::SIZE_LIMIT] = $sizeLimit;
+            $conf[self::LIST][$conf[self::DEFAULT_ITEM]][Server::POST] = FileActions::post();
             $conf[self::LIST][$conf[self::DEFAULT_ITEM]][self::PRIV][Server::POST] = [User::EDIT];
             $conf[self::DEFAULT_PRIV][Server::PUT] = [User::OWNER, User::EDIT];
             $conf[self::DEFAULT_PRIV][Server::AJAX_DELETE] = [User::OWNER, User::EDIT];

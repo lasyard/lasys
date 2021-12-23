@@ -24,21 +24,24 @@ final class Html
         return $html;
     }
 
-    public static function input($type, $name, $attrs = [])
+    public static function input($name, $type, $required = false, $attrs = [])
     {
-        if ($type == 'textarea') {
-            $html = '<textarea name="' . $name . '"';
-            foreach ($attrs as $key => $value) {
-                $html .= ' ' . $key . '="' . $value . '"';
-            }
-            $html .= '></textarea>';
-        } else {
-            $html = '<input type="' . $type . '" name="' . $name . '"';
-            foreach ($attrs as $key => $value) {
-                $html .= ' ' . $key . '="' . $value . '"';
-            }
-            $html .= ' />';
+        switch ($type) {
+            case 'textarea':
+                $html = '<textarea name="' . $name . '"';
+                $end = '></textarea>';
+                break;
+            default:
+                $html = '<input name="' . $name . '" type="' . $type . '"';
+                $end = '></input>';
         }
+        if ($required) {
+            $html .= ' required';
+        }
+        foreach ($attrs as $key => $value) {
+            $html .= ' ' . $key . '="' . $value . '"';
+        }
+        $html .= $end;
         return $html;
     }
 }

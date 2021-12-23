@@ -7,6 +7,7 @@ final class Db extends PDO
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION SQL_BIG_SELECTS=1',
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_STRINGIFY_FETCHES => false,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ]);
     }
 
@@ -22,6 +23,20 @@ final class Db extends PDO
         $st = $this->prepare($sql);
         $st->execute($paras);
         return $st->fetchAll();
+    }
+
+    public function insert($tbl, $kv)
+    {
+        $sql = 'insert into ' . $tbl . '(' . join(', ', array_keys($kv)) . ')'
+            . ' values(' . join(', ', array_fill(0, count($kv), '?')) . ')';
+        $st = $this->prepare($sql);
+        $st->execute(array_values($kv));
+        return $st->rowCount();
+    }
+
+    public function getColumns($tbl)
+    {
+        return $this->getAll('show columns from ' . $tbl);
     }
 
     public function getLastModTime($tbl)

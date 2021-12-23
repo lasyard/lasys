@@ -6,6 +6,9 @@
             echo ' by ', $uname;
         } ?>
     </span>
+    <?php if (!empty($msg)) { ?>
+        <span class="msg"><?php echo ' ', Icon::INFO, ' ', $msg; ?></span>
+    <?php } ?>
     <span class="buttons">
         <?php
         foreach ($buttons as $button) {
