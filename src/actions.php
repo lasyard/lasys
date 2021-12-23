@@ -83,4 +83,19 @@ class Actions
     {
         $this->doError($args[0]);
     }
+
+    protected function hasPriv($key = Server::GET)
+    {
+        return Sys::app()->hasPriv($this->_name, $key);
+    }
+
+    protected function conf()
+    {
+        return Sys::app()->conf();
+    }
+
+    protected function info()
+    {
+        return Sys::app()->info($this->_name);
+    }
 }

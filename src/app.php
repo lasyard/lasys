@@ -98,7 +98,6 @@ final class App
             'styles' => $this->_styles,
             'base' => $this->_base,
             'breadcrumbs' => $this->_breadcrumbs,
-            'meta' => $this->metaView(),
             'buttons' => $list['buttons'],
             'files' => $list['files'],
             'content' => $this->_action->content,
@@ -244,7 +243,7 @@ final class App
         return $f ?? is_dir($this->_path . DS . $name);
     }
 
-    private function hasPriv($name, $key = Server::GET)
+    public function hasPriv($name, $key = Server::GET)
     {
         $user = Sys::user();
         if ($user->hasPriv(User::ADMIN)) {
@@ -267,29 +266,21 @@ final class App
         return true;
     }
 
-    private function metaView()
+    public function conf()
     {
-        if (!$this->_conf->editable) {
-            return '';
-        }
+        return $this->_conf;
+    }
+
+    public function info($name)
+    {
         $files = $this->_files;
-        $name = $this->_name;
-        if (!array_key_exists($name, $files)) {
-            return '';
+        if (array_key_exists($name, $files)) {
+            $meta = $files[$name];
+            if (isset($meta)) {
+                return $meta;
+            }
         }
-        $meta = $files[$name];
-        if (!isset($meta)) {
-            return '';
-        }
-        return View::renderHtml('meta', [
-            'name' => $name,
-            'uname' => $meta['uname'],
-            'time' => $meta['time'],
-            'edit' => $this->hasPriv($name, Server::PUT),
-            'delete' => $this->hasPriv($name, Server::AJAX_DELETE),
-            'accept' => $this->_conf->accept,
-            'sizeLimit' => $this->_conf->sizeLimit,
-        ]);
+        return null;
     }
 
     public function view($view, $extraVars = [])

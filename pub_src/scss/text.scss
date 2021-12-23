@@ -1,5 +1,9 @@
-div#content {
+div#main {
     div.text {
+        @extend .centered;
+        margin-top: 1em;
+        max-width: (1em+$letterSpacing)*40;
+
         p {
             text-indent: 2em+$letterSpacing*2;
         }

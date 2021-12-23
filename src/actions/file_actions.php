@@ -18,6 +18,26 @@ final class FileActions extends Actions
         }
     }
 
+    private function buildButtons()
+    {
+        $buttons = [];
+        $editForm = null;
+        if ($this->hasPriv(Server::PUT)) {
+            $buttons[] = '<i id="-meta-btn-edit-" class="bi bi-pencil-square"></i>';
+            $editForm = View::renderHtml('upload', [
+                'title' => 'Update ' . $this->name,
+                'fieldName' => self::FILE_FIELD_NAME,
+                'action' => '?' . Server::KEY . '=' . Server::PUT,
+                'accept' => $this->conf()->accept,
+                'sizeLimit' => $this->conf()->sizeLimit,
+            ]);
+        }
+        if ($this->hasPriv(Server::AJAX_DELETE)) {
+            $buttons[] = '<i id="-meta-btn-delete-" class="bi bi-x-square"></i>';
+        }
+        return [$buttons, $editForm];
+    }
+
     public function actionGet()
     {
         $name = $this->name;
@@ -31,12 +51,22 @@ final class FileActions extends Actions
         ];
         $parser = $this->getParser($name);
         $this->_title = $parser->title;
+        $info = $this->info($name);
+        if ($info) {
+            list($buttons, $editForm) = $this->buildButtons();
+            View::render('meta', [
+                'uname' => $info['uname'],
+                'time' => $info['time'],
+                'buttons' => $buttons,
+                'editForm' => $editForm,
+            ]);
+        }
         echo $parser->content;
     }
 
-    public function actionPut($sizeLimit = self::FILE_SIZE_LIMIT)
+    public function actionPut()
     {
-        $this->doUpload($sizeLimit, $this->name, true);
+        $this->doUpload($this->name, true);
     }
 
     public function actionDelete()
@@ -46,35 +76,25 @@ final class FileActions extends Actions
         View::render('deleted', ['name' => $name, 'url' => $this->base]);
     }
 
-    public function actionPost($sizeLimit = self::FILE_SIZE_LIMIT)
+    public function actionPost()
     {
-        $this->doUpload($sizeLimit);
+        $this->doUpload();
     }
 
-    public function actionUploadForm($title, $accept = '*', $sizeLimit = self::FILE_SIZE_LIMIT)
+    public function actionUploadForm($title)
     {
         View::render('upload', [
             'title' => $title,
             'fieldName' => self::FILE_FIELD_NAME,
             'action' => $this->base,
-            'accept' => $accept,
-            'sizeLimit' => $sizeLimit,
+            'accept' => $this->conf()->accept,
+            'sizeLimit' => $this->conf()->sizeLimit,
         ]);
     }
 
-    public static function updateForm($title, $accept = '*', $sizeLimit = self::FILE_SIZE_LIMIT)
+    private function doUpload($fileName = null, $overwrite = false)
     {
-        View::render('upload', [
-            'title' => $title,
-            'fieldName' => self::FILE_FIELD_NAME,
-            'action' => '?' . Server::KEY . '=' . Server::PUT,
-            'accept' => $accept,
-            'sizeLimit' => $sizeLimit,
-        ]);
-    }
-
-    private function doUpload($sizeLimit = 65536, $fileName = null, $overwrite = false)
-    {
+        $sizeLimit = $this->conf()->sizeLimit;
         $file = $_FILES[self::FILE_FIELD_NAME];
         // Handle uploading.
         if (is_array($file['error'])) {

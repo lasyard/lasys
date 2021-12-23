@@ -90,6 +90,10 @@ body {
     white-space: nowrap;
 }
 
+.buttons {
+    letter-spacing: 0.3em;
+}
+
 a {
     background: transparent;
     text-decoration: none;
@@ -146,7 +150,7 @@ div#bar {
 div#list {
     font-family: $headerFont;
 
-    div#buttons {
+    div.buttons {
         @include list-box;
         margin-top: 0;
         background-color: $transBgColor;
@@ -188,7 +192,7 @@ div#list {
         float: left;
         margin-bottom: $barHeight;
 
-        div#buttons {
+        div.buttons {
             @include ribbon;
         }
     }
@@ -230,16 +234,15 @@ div#main {
         background-color: $transBgColor;
         font-size: 0.8em;
         font-family: $headerFont;
+
+        span.buttons {
+            @extend .nobr;
+            float: right;
+        }
     }
 
-    div#content {
-        margin-top: 1em;
-        margin-left: 2em;
-        margin-right: 2em;
-
-        img {
-            @extend .centered
-        }
+    img {
+        @extend .centered
     }
 }
 

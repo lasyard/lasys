@@ -16,7 +16,7 @@
 </div>
 <div id="list">
     <?php if (!empty($buttons)) { ?>
-        <div id="buttons">
+        <div class="buttons">
             <?php
             foreach ($buttons as $btn) {
                 echo Html::link($btn);
@@ -41,10 +41,5 @@
     </fieldset>
 </div>
 <div id="main">
-    <?php if (!empty($meta)) { ?>
-        <div id="meta"><?php echo $meta; ?></div>
-    <?php } ?>
-    <div id="content">
-        <?php echo $content; ?>
-    </div>
+    <?php echo $content; ?>
 </div>

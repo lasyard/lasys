@@ -11,7 +11,7 @@ final class DbActions extends Actions
 
     public function actionAjaxGet()
     {
-        $sql = 'select * from tbl_' . $this->name;
+        $sql = 'select * from ' . $this->name;
         $data = Sys::db()->getAll($sql);
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
