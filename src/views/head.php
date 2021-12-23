@@ -4,7 +4,7 @@
 <script>
     <?php
     foreach ($datum as $data) {
-        echo 'const ' . $data['name'] . ' = ' . json_encode($data['data'], $data['flags']) . ';' . PHP_EOL;
+        echo $data . PHP_EOL;
     }
     ?>
 </script>

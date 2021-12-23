@@ -15,12 +15,12 @@ final class Html
         return '<script type="text/javascript" src="' . $script . '"></script>' . PHP_EOL;
     }
 
-    public static function link($link, $attrs = [])
+    public static function link($text, $url, $title = null, $target = null)
     {
-        $html = '<a href="' . $link['url'] . '"';
-        $html .= (!empty($link['title']) ? ' title="' . $link['title'] . '"' : '');
-        $html .= (!empty($link['target']) ? ' target="' . $link['target'] . '"' : '');
-        $html .= '>' . $link['text'] . '</a>';
+        $html = '<a href="' . $url . '"';
+        $html .= (isset($title) ? ' title="' . $title . '"' : '');
+        $html .= (isset($target) ? ' target="' . $target . '"' : '');
+        $html .= '>' . $text . '</a>';
         return $html;
     }
 

@@ -199,11 +199,11 @@ final class Config
     {
         if (!$descend) {
             return function ($a, $b) {
-                return strnatcasecmp($a['text'], $b['text']);
+                return strnatcasecmp($a['name'], $b['name']);
             };
         }
         return function ($b, $a) {
-            return strnatcasecmp($a['text'], $b['text']);
+            return strnatcasecmp($a['name'], $b['name']);
         };
     }
 
@@ -237,7 +237,7 @@ final class Config
             $conf[self::DEFAULT_PRIV][Server::AJAX_DELETE] = [User::OWNER, User::EDIT];
             $conf[self::LIST]['upload'] = [
                 self::TITLE => 'Upload',
-                self::BUTTON => '<i class="bi bi-upload"></i>',
+                self::BUTTON => Icon::UPLOAD,
                 Server::GET => FileActions::uploadForm($title, $accept, $sizeLimit),
                 self::PRIV => [Server::GET => [User::EDIT]],
             ];

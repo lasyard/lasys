@@ -7,7 +7,6 @@ final class App
     private $_datum = [];
     private $_scripts = [];
     private $_styles = [];
-    private $_breadcrumbs = [];
     private $_base;
     private $_path;
     private $_conf;
@@ -34,6 +33,7 @@ final class App
         $this->_path = DATA_PATH;
         $this->_conf = new Config(CONF_PATH);
         $title = null;
+        $breadcrumbs = [];
         while (!empty($args)) {
             $name = array_shift($args);
             if ($name == '') {
@@ -42,10 +42,7 @@ final class App
             $this->_name = $name;
             if ($this->isDir($name)) {
                 if ($this->_base != $this->_home) {
-                    $this->_breadcrumbs[] = [
-                        'text' => $title,
-                        'url' => $this->_base,
-                    ];
+                    $breadcrumbs[] = Html::link($title, $this->_base);
                 }
                 $this->_path .= DS . $name;
                 $this->_base .= $name . '/';
@@ -97,7 +94,7 @@ final class App
             'scripts' => $this->_scripts,
             'styles' => $this->_styles,
             'base' => $this->_base,
-            'breadcrumbs' => $this->_breadcrumbs,
+            'breadcrumbs' => $breadcrumbs,
             'buttons' => $list['buttons'],
             'files' => $list['files'],
             'content' => $this->_action->content,
@@ -118,57 +115,50 @@ final class App
 
     private function makeButton($name, $info)
     {
-        return [
-            'text' => $info[Config::BUTTON],
-            'title' => $info[Config::TITLE] ?? Str::captalize($name),
-            'url' => $this->_base . $name,
-        ];
+        return Html::link($info[Config::BUTTON], $this->_base . $name, $info[Config::TITLE] ?? Str::captalize($name));
     }
 
-    private function makeItem($name, $info, $selected)
+    private function makeItem($name, $info)
     {
+        $title = $info[Config::TITLE] ?? Str::captalize(pathinfo($name, PATHINFO_FILENAME));
+        $li = ($name === $this->_name) ? '<li class="highlighted">' : '<li>';
+        $li .= Html::link($title, $this->_base . $name . ($info['isDir'] ? '/' : ''));
+        $li .= $info['isDir'] ? Icon::FOLDER : '';
+        $li .= '</li>';
         return [
-            'text' => $info[Config::TITLE] ?? Str::captalize(pathinfo($name, PATHINFO_FILENAME)),
-            'url' => $this->_base . $name . ($info['isDir'] ? '/' : ''),
-            'selected' => $name === $selected,
+            'name' => $title,
+            'time' => $info['time'] ?? 0,
+            'li' => $li,
         ];
     }
 
     private function createItemList()
     {
         $conf = $this->_conf;
-        $selected = $this->_name;
         $files = $this->_files;
         $list0 = [];
-        $btns = [];
+        $buttons = [];
         if ($this->_base != $this->_home) {
-            $btns[] = [
-                'text' => '<i class="bi bi-chevron-double-left"></i>',
-                'url' => dirname($this->_base),
-                'title' => 'Upper Level',
-                'selected' => false,
-            ];
+            $buttons[] = Html::link(Icon::UPPER_LEVEL, dirname($this->_base), 'Upper Level');
         }
-        foreach ($conf->list as $name => $v) {
+        foreach ($conf->list as $name => $info) {
             if (!$conf->hidden($name) && $this->hasPriv($name)) {
-                $v['isDir'] = $this->isDir($name);
-                if (isset($v[Config::BUTTON])) {
-                    $btns[] = $this->makeButton($name, $v);
+                if (isset($info[Config::BUTTON])) {
+                    $buttons[] = $this->makeButton($name, $info);
                 } else {
-                    $list0[] = $this->makeItem($name, $v, $selected);
+                    $info['isDir'] = $this->isDir($name);
+                    $list0[] = $this->makeItem($name, $info);
                 }
             }
         }
         $list1 = [];
         foreach ($files as $name => $file) {
-            $item = $this->makeItem($name, $file, $selected);
-            $item['time'] = $file['time'] ?? 0;
-            $list1[] = $item;
+            $list1[] = $this->makeItem($name, $file);
         }
         if ($conf->order) {
             usort($list1, $conf->order);
         }
-        return ['buttons' => $btns, 'files' => array_merge($list0, $list1)];
+        return ['buttons' => $buttons, 'files' => array_column(array_merge($list0, $list1), 'li')];
     }
 
     private function createFileList()
@@ -328,11 +318,7 @@ final class App
 
     public function addData($name, $data, $flags = JSON_UNESCAPED_UNICODE)
     {
-        $this->_datum[] = [
-            'name' => $name,
-            'data' => $data,
-            'flags' => $flags,
-        ];
+        $this->_datum[] = 'const ' . $name . ' = ' . json_encode($data, $flags) . ';';
     }
 
     public function redirect($name)

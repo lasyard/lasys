@@ -23,7 +23,7 @@ final class FileActions extends Actions
         $buttons = [];
         $editForm = null;
         if ($this->hasPriv(Server::PUT)) {
-            $buttons[] = '<i id="-meta-btn-edit-" class="bi bi-pencil-square"></i>';
+            $buttons[] = '<span id="-meta-btn-edit-">' . Icon::EDIT . '</span>';
             $editForm = View::renderHtml('upload', [
                 'title' => 'Update ' . $this->name,
                 'fieldName' => self::FILE_FIELD_NAME,
@@ -33,7 +33,7 @@ final class FileActions extends Actions
             ]);
         }
         if ($this->hasPriv(Server::AJAX_DELETE)) {
-            $buttons[] = '<i id="-meta-btn-delete-" class="bi bi-x-square"></i>';
+            $buttons[] = '<span id="-meta-btn-delete-">' . Icon::DELETE . '</span>';
         }
         return [$buttons, $editForm];
     }

@@ -29,7 +29,7 @@ final class HtmlTest extends TestCase
     {
         $this->assertSame(
             '<a href="http://lasys.org" target="_blank">lasys</a>',
-            Html::link(['text' => 'lasys', 'url' => 'http://lasys.org', 'target' => '_blank'])
+            Html::link('lasys', 'http://lasys.org', null, '_blank')
         );
     }
 

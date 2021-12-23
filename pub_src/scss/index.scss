@@ -175,6 +175,10 @@ div#list {
         li {
             margin: 0.5em;
             padding: 0;
+
+            >i.bi {
+                float: right;
+            }
         }
 
         li.highlighted,

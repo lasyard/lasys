@@ -1,4 +1,4 @@
-div#content {
+div#main {
     fieldset {
         @extend .border;
         margin: 0.5em 0;
@@ -13,7 +13,7 @@ div#content {
             div.field {
                 width: 100%;
 
-                div.label {
+                span.label {
                     display: inline-block;
                     font-weight: bold;
                     text-align: right;
