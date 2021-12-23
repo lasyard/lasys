@@ -4,7 +4,6 @@ final class App
     public const META_FILE = 'list.json';
 
     private $_home;
-    private $_title;
     private $_datum = [];
     private $_scripts = [];
     private $_styles = [];
@@ -82,9 +81,10 @@ final class App
             echo $this->_action->content;
             exit;
         }
-        $this->_title = APP_TITLE;
-        if ($this->_path != DATA_PATH || !empty($this->_name)) {
-            $this->_title .= ' - ' . $this->_action->title ?? $this->_conf->title($this->_name);
+        $title = APP_TITLE;
+        $subTitle = $this->_action->title ?? $this->_conf->title($this->_name);
+        if ($subTitle) {
+            $title .= $subTitle;
         }
         $this->addScript('js' . DS . 'main');
         $this->addStyle('css' . DS . 'main');
@@ -92,7 +92,7 @@ final class App
         $list = $this->createItemList();
         $this->_vars = [
             'home' => $this->_home,
-            'title' => $this->_title,
+            'title' => $title,
             'datum' => $this->_datum,
             'scripts' => $this->_scripts,
             'styles' => $this->_styles,

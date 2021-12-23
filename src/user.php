@@ -43,7 +43,7 @@ final class User
     private function check($id, $password)
     {
         $db = Sys::db();
-        $user = $db->getOne('select * from tbl_user where id = ?', [$id]);
+        $user = $db->getOne('select * from tbl_user where id = ?', $id);
         if ($user) {
             $hash = $user['password_hash'];
             if (hash_equals($hash, crypt($password, $hash))) {

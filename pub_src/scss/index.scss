@@ -43,6 +43,7 @@ $listWidth: 18rem;
     position: sticky;
     left: $listWidth;
     top: $barHeight;
+    z-index: 1000;
 }
 
 body {

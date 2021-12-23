@@ -10,18 +10,37 @@ final class Db extends PDO
         ]);
     }
 
-    public function getOne($sql, $paras = [])
+    public function getOne($sql, ...$paras)
     {
         $st = $this->prepare($sql);
         $st->execute($paras);
         return $st->fetch();
     }
 
-    public function getAll($sql, $paras = [])
+    public function getAll($sql, ...$paras)
     {
         $st = $this->prepare($sql);
         $st->execute($paras);
         return $st->fetchAll();
+    }
+
+    public function getLastModTime($tbl)
+    {
+        $r = $this->getOne(
+            <<<'EOS'
+            select
+                unix_timestamp(create_time) as ctime,
+                unix_timestamp(update_time) as mtime
+            from information_schema.tables
+            where
+                table_name = ?
+            EOS,
+            $tbl
+        );
+        if (isset($r['mtime'])) {
+            return $r['mtime'];
+        }
+        return $r['ctime'];
     }
 
     // Does not support dependencies induced by foreign keys.

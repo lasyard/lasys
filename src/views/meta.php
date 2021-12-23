@@ -1,6 +1,10 @@
 <div id="meta">
     <span class="nobr">
-        <em><?php echo date('Y.m.d H:i:s', $time); ?></em> by <?php echo $uname; ?>
+        <em><?php echo date('Y.m.d H:i:s', $time); ?></em>
+        <?php
+        if (isset($uname)) {
+            echo ' by ', $uname;
+        } ?>
     </span>
     <span class="buttons">
         <?php
