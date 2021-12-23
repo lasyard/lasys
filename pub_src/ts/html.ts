@@ -84,6 +84,11 @@ export class Tag {
         return this;
     }
 
+    public clear() {
+        this.element.innerHTML = '';
+        return this;
+    }
+
     public putIntoHtml(element: HTMLElement) {
         element.appendChild(this.element);
         return this;

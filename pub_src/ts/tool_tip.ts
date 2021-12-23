@@ -1,5 +1,12 @@
-import { onLoad } from './html';
+import { onLoad, TagList } from './html';
 import { Tag } from './index';
+
+interface ToolTipInfo {
+    title?: string;
+    body: string | Tag | TagList;
+}
+
+type ToolTipCallback = (context: any) => string | ToolTipInfo;
 
 export class ToolTip {
     private static toolTip: ToolTip = null;
@@ -7,7 +14,7 @@ export class ToolTip {
     private divTip: Tag;
     private spanTitle: Tag;
     private divBody: Tag;
-    private cb: (context: any) => { title?: string, body: string } | string;
+    private cb: ToolTipCallback;
 
     private constructor() {
         this.spanTitle = Tag.of('span');
@@ -41,17 +48,28 @@ export class ToolTip {
         this.divTip.style({ display: 'none' });
     }
 
-    public callback(cb: (context: any) => { title?: string; body: string; } | string) {
+    public callback(cb: ToolTipCallback) {
         this.cb = cb;
     }
 
     private show(e: MouseEvent, context: any) {
         const info = this.cb(context);
+        this.spanTitle.clear();
+        this.divBody.clear();
         if (typeof info === 'string') {
-            this.divBody.html(info);
+            this.divBody.add(info);
         } else {
-            this.spanTitle.html(info.title);
-            this.divBody.html(info.body);
+            if (info.title) {
+                this.spanTitle.add(info.title);
+            }
+            const bd = info.body;
+            if (typeof bd === 'string') {
+                this.divBody.add(bd);
+            } else if (Array.isArray(bd)) {
+                this.divBody.add(...bd);
+            } else {
+                this.divBody.add(bd);
+            }
         }
         const x = e.pageX;
         const y = e.pageY;
@@ -76,7 +94,7 @@ export class ToolTip {
     }
 }
 
-declare const toolTipCallback: (data: any) => any;
+declare const toolTipCallback: ToolTipCallback;
 
 onLoad(function () {
     if (typeof toolTipCallback === 'function') {
