@@ -1,8 +1,25 @@
 <?php
 final class FileActions extends Actions
 {
-    public const FILE_SIZE_LIMIT = 65536;
+    // configs
+    public const UPLOAD_TITLE = 'file:uploadTitle';
+    public const SIZE_LIMIT = 'file:sizeLimit';
+    public const ACCEPT = 'file:accept';
+    public const ORDER = 'file:order';
+
+    public const DEFAULT = [
+        self::UPLOAD_TITLE => 'Upload',
+        self::SIZE_LIMIT => 65536,
+        self::ACCEPT => 'text/plain',
+    ];
+
     public const FILE_FIELD_NAME = 'file';
+    public const UPLOAD_ITEM = '-upload-';
+
+    public static function default($confName)
+    {
+        return Sys::app()->conf($confName) ?? static::DEFAULT[$confName] ?? null;
+    }
 
     private function getParser($name)
     {
@@ -22,17 +39,17 @@ final class FileActions extends Actions
     {
         $buttons = [];
         $editForm = null;
-        if ($this->hasPriv(Server::PUT)) {
+        if ($this->hasPrivOf(Server::POST_UPDATE)) {
             $buttons[] = '<span id="-meta-btn-edit-">' . Icon::EDIT . '</span>';
             $editForm = View::renderHtml('upload', [
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'fieldName' => self::FILE_FIELD_NAME,
-                'action' => '?' . Server::KEY . '=' . Server::PUT,
-                'accept' => $this->conf()->accept,
-                'sizeLimit' => $this->conf()->sizeLimit,
+                'action' => Server::QUERY_POST_UPDATE,
+                'accept' => self::default(self::ACCEPT),
+                'sizeLimit' => self::default(self::SIZE_LIMIT),
             ]);
         }
-        if ($this->hasPriv(Server::AJAX_DELETE)) {
+        if ($this->hasPrivOf(Server::AJAX_DELETE)) {
             $buttons[] = '<span id="-meta-btn-delete-">' . Icon::DELETE . '</span>';
         }
         return ['buttons' => $buttons, 'editForm' => $editForm];
@@ -58,12 +75,7 @@ final class FileActions extends Actions
         echo $parser->content;
     }
 
-    public function actionPut()
-    {
-        $this->doUpload($this->name, true);
-    }
-
-    public function actionDelete()
+    public function actionAjaxDelete()
     {
         $name = $this->name;
         unlink($this->path . DS . $name);
@@ -75,20 +87,25 @@ final class FileActions extends Actions
         $this->doUpload();
     }
 
-    public function actionUploadForm($title)
+    public function actionPostUpdate()
+    {
+        $this->doUpload($this->name, true);
+    }
+
+    public function actionUploadForm()
     {
         View::render('upload', [
-            'title' => $title,
+            'title' => self::default(self::UPLOAD_TITLE),
             'fieldName' => self::FILE_FIELD_NAME,
             'action' => $this->base,
-            'accept' => $this->conf()->accept,
-            'sizeLimit' => $this->conf()->sizeLimit,
+            'accept' => self::default(self::ACCEPT),
+            'sizeLimit' => self::default(self::SIZE_LIMIT),
         ]);
     }
 
     private function doUpload($fileName = null, $overwrite = false)
     {
-        $sizeLimit = $this->conf()->sizeLimit;
+        $sizeLimit = self::default(self::SIZE_LIMIT);
         $file = $_FILES[self::FILE_FIELD_NAME];
         // Handle uploading.
         if (is_array($file['error'])) {
@@ -138,5 +155,53 @@ final class FileActions extends Actions
             Sys::app()->redirect($name);
         }
         throw new RuntimeException('Cannot save uploaded file "' . $name . '".');
+    }
+
+    public static function action($readOnly, $type)
+    {
+        if ($readOnly) {
+            if ($type == Server::GET) {
+                return FileActions::get()->priv();
+            }
+        } else {
+            switch ($type) {
+                case Server::GET:
+                    return  FileActions::get()->priv();
+                    break;
+                case Server::POST_UPDATE:
+                    return  FileActions::postUpdate()->priv(User::OWNER, User::EDIT);
+                    break;
+                case Server::AJAX_DELETE:
+                    return  FileActions::ajaxDelete()->priv(User::OWNER, User::EDIT);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return null;
+    }
+
+    public static function byTime($descend = true)
+    {
+        if ($descend) {
+            return function ($b, $a) {
+                return $a['time'] <=> $b['time'];
+            };
+        }
+        return function ($a, $b) {
+            return $a['time'] <=> $b['time'];
+        };
+    }
+
+    public static function byName($descend = false)
+    {
+        if (!$descend) {
+            return function ($a, $b) {
+                return strnatcasecmp($a['name'], $b['name']);
+            };
+        }
+        return function ($b, $a) {
+            return strnatcasecmp($a['name'], $b['name']);
+        };
     }
 }

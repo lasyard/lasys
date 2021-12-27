@@ -1,11 +1,18 @@
+enum MimeType {
+    TEXT = 'text/plain',
+    HTML = 'text/html',
+    JSON = 'application/json',
+    JS = 'text/javascript',
+}
+
 export class Ajax {
     private static call(
         onload: (response: any, type: XMLHttpRequestResponseType) => any,
         method: string,
         data: any,
         url: string,
-        accept: string,
-        type = 'text/plain',
+        accept: MimeType,
+        type = MimeType.JSON,
     ) {
         const xhr = new XMLHttpRequest();
         xhr.onload = function () {
@@ -29,17 +36,26 @@ export class Ajax {
     public static get(
         onload: (response: any, type: XMLHttpRequestResponseType) => any,
         url = '',
-        accept = 'application/json'
+        accept = MimeType.JSON,
     ) {
         this.call(onload, 'GET', '', url, accept);
+    }
+
+    public static put(
+        onload: (response: any, type: XMLHttpRequestResponseType) => any,
+        data = '',
+        url = '',
+        accept = MimeType.JSON,
+    ) {
+        this.call(onload, 'PUT', data, url, accept);
     }
 
     public static post(
         onload: (response: any, type: XMLHttpRequestResponseType) => any,
         data = '',
         url = '',
-        type = 'text/plain',
-        accept = 'text/plain'
+        type = MimeType.JSON,
+        accept = MimeType.JSON,
     ) {
         this.call(onload, 'POST', data, url, accept, type);
     }
@@ -47,7 +63,7 @@ export class Ajax {
     public static delete(
         onload: (response: any, type: XMLHttpRequestResponseType) => any,
         url = '',
-        accept = 'text/plain'
+        accept = MimeType.JSON,
     ) {
         this.call(onload, 'DELETE', '', url, accept);
     }

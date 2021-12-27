@@ -20,4 +20,13 @@ final class Arr
             }
         }
     }
+
+    public static function copyNonExistingKeys(&$target, $arr, ...$keys)
+    {
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $arr) && !array_key_exists($key, $target)) {
+                $target[$key] = $arr[$key];
+            }
+        }
+    }
 }

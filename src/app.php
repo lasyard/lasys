@@ -12,7 +12,6 @@ final class App
     private $_conf;
     private $_name;
     private $_files;
-    private $_action = null;
     private $_vars;
 
     public function __construct()
@@ -25,7 +24,7 @@ final class App
 
     public function run()
     {
-        list($this->_home, $args, $key) = Server::getHomeAndPath();
+        list($this->_home, $args, $type) = Server::getHomeAndPath();
         define('PUB_URL', $this->_home . Str::pathUrl(PUB_DIR) . '/');
         session_cache_limiter('nocache');
         session_start();
@@ -33,6 +32,7 @@ final class App
         $this->_path = DATA_PATH;
         $this->_conf = new Config(CONF_PATH);
         $title = null;
+        $action = null;
         $breadcrumbs = [];
         while (!empty($args)) {
             $name = array_shift($args);
@@ -47,39 +47,40 @@ final class App
                 $this->_path .= DS . $name;
                 $this->_base .= $name . '/';
                 $title = $this->_conf->title($name);
-                if ($this->hasPriv($name)) {
+                if ($this->hasPrivOf($name, Server::GET)) {
                     $this->_conf->shift($name);
                 } else {
-                    $this->_action = Actions::error('You do not have privilege to view "' . $name . '".');
+                    $action = Actions::error('You do not have privilege to view "' . $name . '".');
                     break;
                 }
             } else {
-                $this->_action = $this->_conf->action($name, $key);
+                $action = $this->action($this->_name, $type);
                 break;
             }
         }
-        if ($this->_action === null) {
-            $this->_name = $this->_conf->defaultItem;
-            $this->_action = $this->_conf->action($this->_name, $key);
+        if ($action === null) {
+            $this->_name = $this->_conf->get(Config::DEFAULT_ITEM);
+            $action = $this->action($this->_name, $type);
         }
-        if ($key == Server::HEAD) {
+        $httpHeaders = $action[Actions::ACTION]->httpHeaders;
+        if ($type == Server::HEAD) {
             // Seems never run to this.
-            $this->header();
+            $this->header($httpHeaders);
             exit;
         }
         // This is needed when calling action->do, e.g., for file uploading.
         $this->createFileList();
-        if ($this->hasPriv($this->_name, $key)) {
-            $this->_action->do($args, $this->_base, $this->_path, $this->_name);
+        if ($this->hasPriv($this->_name, $action[Actions::PRIV])) {
+            $action[Actions::ACTION]->do($args, $this->_base, $this->_path, $this->_name);
         } else {
-            $this->_action->doError('You do not have privilege to do this.');
+            $action[Actions::ACTION]->doError('You do not have privilege to do this.');
         }
-        if (Server::isAjax($key)) {
-            echo $this->_action->content;
+        if (Server::isAjax($type)) {
+            echo $action->content;
             exit;
         }
         $title = APP_TITLE;
-        $subTitle = $this->_action->title ?? $this->_conf->title($this->_name);
+        $subTitle = $action->title ?? $this->_conf->title($this->_name);
         if ($subTitle) {
             $title .= $subTitle;
         }
@@ -97,15 +98,22 @@ final class App
             'breadcrumbs' => $breadcrumbs,
             'buttons' => $list['buttons'],
             'files' => $list['files'],
-            'content' => $this->_action->content,
+            'content' => $action[Actions::ACTION]->content,
         ];
-        $this->header();
+        $this->header($httpHeaders);
         $this->view('main');
     }
 
-    private function header()
+    private function action($name, $type)
     {
-        $httpHeaders = $this->_action->httpHeaders;
+        $conf = $this->_conf;
+        return $conf->action($name, $type)
+            ?? FileActions::action($conf->get(Config::READ_ONLY), $type)
+            ?? Actions::default()->priv();
+    }
+
+    private function header($httpHeaders)
+    {
         if (isset($httpHeaders)) {
             foreach ($httpHeaders as $header) {
                 header($header);
@@ -141,22 +149,24 @@ final class App
         if ($this->_base != $this->_home) {
             $buttons[] = Html::link(Icon::UPPER_LEVEL, dirname($this->_base), 'Upper Level');
         }
-        foreach ($conf->list as $name => $info) {
-            if (!$conf->hidden($name) && $this->hasPriv($name)) {
-                if (isset($info[Config::BUTTON])) {
-                    $buttons[] = $this->makeButton($name, $info);
-                } else {
-                    $info['isDir'] = $this->isDir($name);
-                    $list0[] = $this->makeItem($name, $info);
-                }
+        foreach ($conf->list() as $name => $info) {
+            if ($conf->hidden($name) || !$this->hasPrivOf($name, Server::GET)) {
+                continue;
+            }
+            if (isset($info[Config::BUTTON])) {
+                $buttons[] = $this->makeButton($name, $info);
+            } else {
+                $info['isDir'] = $this->isDir($name);
+                $list0[] = $this->makeItem($name, $info);
             }
         }
         $list1 = [];
         foreach ($files as $name => $file) {
             $list1[] = $this->makeItem($name, $file);
         }
-        if ($conf->order) {
-            usort($list1, $conf->order);
+        $order = $conf->get(FileActions::ORDER);
+        if ($order) {
+            usort($list1, $order);
         }
         return ['buttons' => $buttons, 'files' => array_column(array_merge($list0, $list1), 'li')];
     }
@@ -165,7 +175,7 @@ final class App
     {
         $conf = $this->_conf;
         $this->_files = [];
-        if (!$conf->editable) {
+        if ($conf->get(Config::READ_ONLY)) {
             return;
         }
         $path = $this->_path;
@@ -233,14 +243,12 @@ final class App
         return $f ?? is_dir($this->_path . DS . $name);
     }
 
-    public function hasPriv($name, $key = Server::GET)
+    public function hasPriv($name, $priv)
     {
         $user = Sys::user();
         if ($user->hasPriv(User::ADMIN)) {
             return true;
         }
-        $conf = $this->_conf;
-        $priv = $conf->priv($name, $key);
         foreach ($priv as $p) {
             if ($p === User::OWNER) {
                 $meta = $this->_files[$name];
@@ -256,9 +264,18 @@ final class App
         return true;
     }
 
-    public function conf()
+    public function hasPrivOf($name, $type)
     {
-        return $this->_conf;
+        $actions = $this->action($name, $type);
+        if ($actions) {
+            return $this->hasPriv($name, $actions[Actions::PRIV]);
+        }
+        return false;
+    }
+
+    public function conf($name)
+    {
+        return $this->_conf->get($name);
     }
 
     public function info($name)

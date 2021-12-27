@@ -38,4 +38,14 @@ final class ArrTest extends TestCase
             $target
         );
     }
+
+    public function testCopyNonExistingKeys()
+    {
+        $arr = ['a' => 1, 'b' => 2, 'c' => 3];
+        $target = ['a' => 0, 'c' => 2];
+        Arr::copyNonExistingKeys($target, $arr, 'a', 'b', 'c');
+        $this->assertSame(0, $target['a']);
+        $this->assertSame(2, $target['b']);
+        $this->assertSame(2, $target['c']);
+    }
 }

@@ -3,6 +3,9 @@ class Actions
 {
     use Getter;
 
+    public const ACTION = 'action';
+    public const PRIV = 'priv';
+
     private static $_cache = [];
 
     private $_method;
@@ -12,6 +15,7 @@ class Actions
     private $_base;
     private $_path;
     private $_name;
+
     private $_content;
 
     protected $_httpHeaders = [];
@@ -24,13 +28,19 @@ class Actions
             if (!isset(self::$_cache[$class][$method])) {
                 self::$_cache[$class][$method] = new static($method);
             }
-            return self::$_cache[$class][$method];
-        }
-        $actions = new static($method, $args);
-        if (!$actions instanceof Actions) {
-            throw new Exception('Actions must inhrerit class "' . self::class . '".');
+            $actions = self::$_cache[$class][$method];
+        } else {
+            $actions = new static($method, $args);
         }
         return $actions;
+    }
+
+    public function priv(...$priv)
+    {
+        return [
+            self::ACTION => $this,
+            self::PRIV => $priv
+        ];
     }
 
     public function __construct($method, $args = [])
@@ -84,21 +94,16 @@ class Actions
         $this->doError($args[0]);
     }
 
-    protected function hasPriv($key = Server::GET)
+    protected function hasPrivOf($type)
     {
-        return Sys::app()->hasPriv($this->_name, $key);
+        return Sys::app()->hasPrivOf($this->_name, $type);
     }
 
-    protected function conf()
-    {
-        return Sys::app()->conf();
-    }
-
-    protected function attr($name)
+    protected function conf($name)
     {
         $conf = Sys::app()->conf();
-        if (isset($conf->list[$this->_name])) {
-            return $conf->list[$this->_name][$name];
+        if (isset($conf->list()[$this->_name])) {
+            return $conf->list()[$this->_name][$name];
         }
         return null;
     }

@@ -5,9 +5,10 @@ final class User
 
     const GUEST = 'Guest';
 
-    public const OWNER = 'owner';
     public const ADMIN = 'admin';
+    public const OWNER = 'owner';
     public const EDIT = 'edit';
+    public const READ0 = 'read0';
 
     private $_user;
 
