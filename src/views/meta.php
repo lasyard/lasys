@@ -1,18 +1,23 @@
 <div id="meta">
-    <span class="nobr">
-        <em><?php echo date('Y.m.d H:i:s', $time); ?></em>
+    <span id="msg">
         <?php
-        if (isset($uname)) {
-            echo ' by ', $uname;
-        } ?>
+        if (isset($msg)) {
+            echo $msg;
+        }
+        ?>
     </span>
-    <?php if (!empty($msg)) { ?>
-        <span class="msg"><?php echo ' ', Icon::INFO, ' ', $msg; ?></span>
-    <?php } ?>
+    <span id="ajax-msg"></span>
     <span class="buttons">
         <?php
-        foreach ($buttons as $button) {
-            echo $button;
+        if (isset($btnEdit)) {
+        ?>
+            <span id="-meta-btn-edit-"><?php echo $btnEdit; ?></span>
+        <?php
+        }
+        if (isset($btnDelete)) {
+        ?>
+            <span id="-meta-btn-delete-"><?php echo $btnDelete; ?></span>
+        <?php
         }
         ?>
     </span>

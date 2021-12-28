@@ -10,6 +10,7 @@ final class Icon
     public const EDIT = '<i class="bi bi-pencil-square"></i>';
     public const DELETE = '<i class="bi bi-x-square"></i>';
     public const INSERT = '<i class="bi bi-plus-square"></i>';
+    public const TIME = '<i class="bi bi-clock"></i>';
     public const INFO = '<i class="bi bi-info-circle"></i>';
 
     private function __construct()

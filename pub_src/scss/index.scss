@@ -91,10 +91,6 @@ body {
     white-space: nowrap;
 }
 
-.buttons {
-    letter-spacing: 0.3em;
-}
-
 a {
     background: transparent;
     text-decoration: none;
@@ -128,6 +124,10 @@ div#bar {
     color: $whiteColor;
     clear: both;
     z-index: 1000;
+
+    span#logo {
+        float: left;
+    }
 
     img {
         vertical-align: top;

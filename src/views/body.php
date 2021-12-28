@@ -18,7 +18,7 @@
         <div class="buttons">
             <?php
             foreach ($buttons as $btn) {
-                echo $btn;
+                echo $btn, ' ';
             }
             ?>
         </div>

@@ -70,13 +70,15 @@ final class App
         }
         // This is needed when calling action->do, e.g., for file uploading.
         $this->createFileList();
+        $actionDo = $action[Actions::ACTION];
         if ($this->hasPriv($this->_name, $action[Actions::PRIV])) {
-            $action[Actions::ACTION]->do($args, $this->_base, $this->_path, $this->_name);
+            $actionDo->do($args, $this->_base, $this->_path, $this->_name);
         } else {
-            $action[Actions::ACTION]->doError('You do not have privilege to do this.');
+            $actionDo->doError('You do not have privilege to do this.');
         }
+        $content = $actionDo->content;
         if (Server::isAjax($type)) {
-            echo $action->content;
+            echo $content;
             exit;
         }
         $title = APP_TITLE;
@@ -98,7 +100,7 @@ final class App
             'breadcrumbs' => $breadcrumbs,
             'buttons' => $list['buttons'],
             'files' => $list['files'],
-            'content' => $action[Actions::ACTION]->content,
+            'content' => $content,
         ];
         $this->header($httpHeaders);
         $this->view('main');

@@ -18,7 +18,7 @@ final class FileActions extends Actions
 
     public static function default($confName)
     {
-        return Sys::app()->conf($confName) ?? static::DEFAULT[$confName] ?? null;
+        return Sys::app()->conf($confName) ?? self::DEFAULT[$confName] ?? null;
     }
 
     private function getParser($name)
@@ -37,10 +37,14 @@ final class FileActions extends Actions
 
     private function buildMeta()
     {
-        $buttons = [];
+        $info = $this->info($this->name);
+        if (!$info) {
+            return null;
+        }
         $editForm = null;
+        $btnEdit = null;
         if ($this->hasPrivOf(Server::POST_UPDATE)) {
-            $buttons[] = '<span id="-meta-btn-edit-">' . Icon::EDIT . '</span>';
+            $btnEdit = Icon::EDIT;
             $editForm = View::renderHtml('upload', [
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'fieldName' => self::FILE_FIELD_NAME,
@@ -49,10 +53,14 @@ final class FileActions extends Actions
                 'sizeLimit' => self::default(self::SIZE_LIMIT),
             ]);
         }
-        if ($this->hasPrivOf(Server::AJAX_DELETE)) {
-            $buttons[] = '<span id="-meta-btn-delete-">' . Icon::DELETE . '</span>';
-        }
-        return ['buttons' => $buttons, 'editForm' => $editForm];
+        $btnDelete = $this->hasPrivOf(Server::AJAX_DELETE) ? Icon::DELETE : null;
+        $msg = Icon::TIME . '<em>' . date('Y.m.d H:i:s', $info['time']) . '</em> ' . Icon::USER . $info['uname'];
+        return [
+            'msg' => $msg,
+            'btnEdit' => $btnEdit,
+            'btnDelete' => $btnDelete,
+            'editForm' => $editForm,
+        ];
     }
 
     public function actionGet()
@@ -68,9 +76,9 @@ final class FileActions extends Actions
         ];
         $parser = $this->getParser($name);
         $this->_title = $parser->title;
-        $info = $this->info($name);
-        if ($info) {
-            View::render('meta', array_merge($info, $this->buildMeta()));
+        $meta = $this->buildMeta();
+        if ($meta) {
+            View::render('meta', $meta);
         }
         echo $parser->content;
     }

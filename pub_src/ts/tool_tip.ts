@@ -19,7 +19,6 @@ export class ToolTip {
     private constructor() {
         this.spanTitle = Tag.of('span');
         this.divBody = Tag.of('div');
-        const self = this;
         this.divTip = Tag.of('div').id('-tool-tip-')
             .add(Tag.of('div')
                 .add(this.spanTitle)

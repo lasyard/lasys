@@ -25,10 +25,33 @@ final class Db extends PDO
         return $st->fetchAll();
     }
 
+    public function getDataSet($sql, ...$paras)
+    {
+        $st = $this->prepare($sql);
+        $st->execute($paras);
+        $columns = [];
+        for ($i = 0; $i < $st->columnCount(); ++$i) {
+            $columns[$st->getColumnMeta($i)['name']] = $i;
+        }
+        $data = $st->fetchAll(PDO::FETCH_NUM);
+        return compact('columns', 'data');
+    }
+
     public function insert($tbl, $kv)
     {
         $sql = 'insert into ' . $tbl . '(' . join(', ', array_keys($kv)) . ')'
             . ' values(' . join(', ', array_fill(0, count($kv), '?')) . ')';
+        $st = $this->prepare($sql);
+        $st->execute(array_values($kv));
+        return $st->rowCount();
+    }
+
+    public function delete($tbl, $kv)
+    {
+        $sql = 'delete from ' . $tbl . ' where '
+            . join(' and ', array_map(function ($k) {
+                return $k . '= ?';
+            }, array_keys($kv)));
         $st = $this->prepare($sql);
         $st->execute(array_values($kv));
         return $st->rowCount();
@@ -52,6 +75,7 @@ final class Db extends PDO
             EOS,
             $tbl
         );
+        // This is always `null` for MySQL InnoDB.
         if (isset($r['mtime'])) {
             return $r['mtime'];
         }

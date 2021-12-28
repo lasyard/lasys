@@ -1,4 +1,4 @@
-import { onLoad, Tag, Ajax } from ".";
+import { onLoad, Tag, Ajax, MimeType } from ".";
 
 onLoad(function () {
     const btnEdit = Tag.byId('-meta-btn-edit-');
@@ -22,7 +22,7 @@ onLoad(function () {
             if (r) {
                 Ajax.delete(function (res) {
                     Tag.byId('main').html(res);
-                });
+                }, '', MimeType.HTML);
             }
         });
     }

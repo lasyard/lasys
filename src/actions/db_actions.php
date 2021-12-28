@@ -1,17 +1,21 @@
 <?php
 final class DbActions extends Actions
 {
-    public const SCRIPT = 'script';
+    // configs
+    public const SCRIPT = 'db:script';
 
-    private function buildField($columns)
+    private function buildField($columns, &$keyColumns)
     {
         $fields = [];
         foreach ($columns as $c) {
+            $name = $c['Field'];
+            if ($c['Key'] == 'PRI') {
+                $keyColumns[] = $name;
+            }
             if ($c['Extra'] == 'auto_increment') {
                 continue;
             }
             $required = ($c['Null'] !== 'YES' && !isset($c['Default']));
-            $name = $c['Field'];
             $label = $name;
             $type = 'text';
             $attrs = [];
@@ -22,52 +26,57 @@ final class DbActions extends Actions
 
     private function buildMeta()
     {
-        $buttons = [];
         $editForm = null;
-        if ($this->hasPriv(Server::PUT)) {
+        $btnEdit = null;
+        if ($this->hasPrivOf(Server::POST_UPDATE)) {
+            $btnEdit = Icon::INSERT;
             $columns = Sys::db()->getColumns($this->name);
-            $fields = $this->buildField($columns);
-            if (!empty($fields)) {
-                $buttons[] = '<span id="-meta-btn-edit-">' . Icon::INSERT . '</span>';
-                $editForm = View::renderHtml('db_edit', [
-                    'title' => Icon::INSERT . ' ' . $this->name,
-                    'action' => '?' . Server::KEY . '=' . Server::PUT,
-                    'fields' => $this->buildField($columns),
-                ]);
-            }
+            $keyColumns = [];
+            $fields = $this->buildField($columns, $keyColumns);
+            Sys::app()->addData('TABLE_KEY_COLUMNS', $keyColumns);
+            $editForm = View::renderHtml('db_edit', [
+                'title' => Icon::INSERT . ' ' . $this->name,
+                'action' => Server::QUERY_POST_UPDATE,
+                'fields' => $fields,
+            ]);
         }
-        return ['buttons' => $buttons, 'editForm' => $editForm];
+        $time = Sys::db()->getLastModTime($this->name);
+        $msg = Icon::TIME . '<em>' . date('Y.m.d H:i:s', $time) . '</em>';
+        return ['msg' => $msg, 'btnEdit' => $btnEdit, 'editForm' => $editForm];
     }
 
-    private function doView($msg = null)
+    public function actionGet()
     {
-        $script = $this->attr(self::SCRIPT);
+        $script = $this->conf(self::SCRIPT);
         if (isset($script)) {
             Sys::app()->addScript($script);
         }
         Sys::app()->addScript('js' . DS . 'db_table');
         $meta = $this->buildMeta();
-        $meta['time'] = Sys::db()->getLastModTime($this->name);
-        $meta['msg'] = $msg;
         View::render('meta', $meta);
-    }
-
-    public function actionGet()
-    {
-        $this->doView();
     }
 
     public function actionAjaxGet()
     {
         $sql = 'select * from ' . $this->name;
-        $data = Sys::db()->getAll($sql);
-        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        $result = Sys::db()->getDataSet($sql);
+        $result['canEdit'] = $this->hasPrivOf(Server::AJAX_PUT);
+        $result['canDelete'] = $this->hasPrivOf(Server::AJAX_DELETE);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
-    public function actionPut()
+    public function actionPostUpdate()
     {
-        $row = Sys::db()->insert($this->name, $_POST);
-        $this->doView('Succeeded to insert ' . $row . ' records.');
+        $name = $this->name;
+        Sys::db()->insert($name, $_POST);
+        // Do redirect to remove the 'update' query key.
+        Sys::app()->redirect($name);
+    }
+
+    public function actionAjaxDelete()
+    {
+        $row = Sys::db()->delete($this->name, $_GET);
+        echo Icon::INFO, 'Succeeded to delete ', $row, ' records.';
     }
 
     public function actionDump()
