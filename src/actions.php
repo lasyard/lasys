@@ -112,4 +112,9 @@ class Actions
     {
         return Sys::app()->info($this->_name);
     }
+
+    protected function setInfo($info)
+    {
+        Sys::app()->setInfo($this->_name, $info);
+    }
 }

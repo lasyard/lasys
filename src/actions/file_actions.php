@@ -13,7 +13,6 @@ final class FileActions extends Actions
         self::ACCEPT => 'text/plain',
     ];
 
-    public const FILE_FIELD_NAME = 'file';
     public const UPLOAD_ITEM = '-upload-';
 
     public static function default($confName)
@@ -47,7 +46,6 @@ final class FileActions extends Actions
             $btnEdit = Icon::EDIT;
             $editForm = View::renderHtml('upload', [
                 'title' => Icon::EDIT . ' ' . $this->name,
-                'fieldName' => self::FILE_FIELD_NAME,
                 'action' => Server::QUERY_POST_UPDATE,
                 'accept' => self::default(self::ACCEPT),
                 'sizeLimit' => self::default(self::SIZE_LIMIT),
@@ -93,18 +91,25 @@ final class FileActions extends Actions
     public function actionPost()
     {
         $this->doUpload();
+        throw new RuntimeException('No file sent.');
     }
 
     public function actionPostUpdate()
     {
         $this->doUpload($this->name, true);
+        if (!empty($_POST['title'])) {
+            $info = $this->info();
+            $info['title'] = $_POST['title'];
+            $this->setInfo($info);
+            Sys::app()->redirect($this->name);
+        }
+        throw new RuntimeException("Nothing changed.");
     }
 
     public function actionUploadForm()
     {
         View::render('upload', [
             'title' => self::default(self::UPLOAD_TITLE),
-            'fieldName' => self::FILE_FIELD_NAME,
             'action' => $this->base,
             'accept' => self::default(self::ACCEPT),
             'sizeLimit' => self::default(self::SIZE_LIMIT),
@@ -114,7 +119,7 @@ final class FileActions extends Actions
     private function doUpload($fileName = null, $overwrite = false)
     {
         $sizeLimit = self::default(self::SIZE_LIMIT);
-        $file = $_FILES[self::FILE_FIELD_NAME];
+        $file = $_FILES['file'];
         // Handle uploading.
         if (is_array($file['error'])) {
             throw new RuntimeException('Invalid parameters.');
@@ -123,7 +128,8 @@ final class FileActions extends Actions
             case UPLOAD_ERR_OK:
                 break;
             case UPLOAD_ERR_NO_FILE:
-                throw new RuntimeException('No file sent.');
+                // Returns only here.
+                return;
             case UPLOAD_ERR_INI_SIZE:
             case UPLOAD_ERR_FORM_SIZE:
                 throw new RuntimeException('Exceeded file size limit "' . $sizeLimit . '".');
@@ -156,7 +162,9 @@ final class FileActions extends Actions
                 'uname' => $user->name,
             ];
             $parser = $this->getParser($name);
-            if ($parser->title) {
+            if (!empty($_POST['title'])) {
+                $info['title'] = $_POST['title'];
+            } else if ($parser->title) {
                 $info['title'] = $parser->title;
             }
             Sys::app()->addFile($name, $info);

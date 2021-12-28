@@ -4,7 +4,11 @@
         <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo $sizeLimit; ?>" />
         <div class="field">
             <span class="label">File</span>
-            <input type="file" name="<?php echo $fieldName; ?>" accept="<?php echo $accept ?? '*'; ?>" />
+            <input type="file" name="file" accept="<?php echo $accept ?? '*'; ?>" />
+        </div>
+        <div class="field">
+            <span class="label">Title</span>
+            <input type="text" name="title" />
         </div>
         <div class="field">
             <span class="label"></span>

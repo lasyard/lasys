@@ -292,6 +292,12 @@ final class App
         return null;
     }
 
+    public function setInfo($name, $info)
+    {
+        $this->_files[$name] = $info;
+        $this->saveMeta();
+    }
+
     public function view($view, $extraVars = [])
     {
         View::render($view, array_merge($this->_vars, $extraVars));
