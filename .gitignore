@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.gitmodules
+!.gitattributes
 !.editorconfig
 
 # Apache2 files
