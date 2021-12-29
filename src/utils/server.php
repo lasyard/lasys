@@ -15,8 +15,8 @@ final class Server
     public const AJAX_DELETE = 'ajaxDelete';
     public const DELETE = 'delete';
 
-    public const QUERY_GET_RAW = '?' . self::TYPE_KEY . '=' . self::GET_RAW;
-    public const QUERY_POST_UPDATE = '?' . self::TYPE_KEY . '=' . self::POST_UPDATE;
+    public const QUERY_GET_RAW = self::TYPE_KEY . '=' . self::GET_RAW;
+    public const QUERY_POST_UPDATE = self::TYPE_KEY . '=' . self::POST_UPDATE;
 
     private function __construct()
     {

@@ -3,6 +3,7 @@ import {
     numCmp,
     dateCmp,
     capitalize,
+    html,
     textBuilder,
 } from '../ts/common';
 
@@ -28,6 +29,10 @@ test('dateCmp("December 17, 1995 03:24:00", "1995-12-17T03:24:00") == 0', () => 
 
 test('capitalize("abc") == "Abc"', () => {
     expect(capitalize('abc')).toBe('Abc');
+});
+
+test('html("<a>") == "&#60;a&#62;"', () => {
+    expect(html('<a>')).toBe('&#60;a&#62;');
 });
 
 test('textBuilder', () => {

@@ -5,10 +5,19 @@ export enum MimeType {
     JS = 'text/javascript',
 }
 
+export enum HttpMethod {
+    GET = 'GET',
+    PUT = 'PUT',
+    DELETE = 'DELETE',
+    POST = 'POST',
+}
+
+export type AjaxCallback = (response: any, type: XMLHttpRequestResponseType) => any;
+
 export class Ajax {
-    private static call(
-        onload: (response: any, type: XMLHttpRequestResponseType) => any,
-        method: string,
+    public static call(
+        onload: AjaxCallback,
+        method: HttpMethod,
         data: any,
         url: string,
         accept: MimeType,
@@ -34,37 +43,37 @@ export class Ajax {
     }
 
     public static get(
-        onload: (response: any, type: XMLHttpRequestResponseType) => any,
+        onload: AjaxCallback,
         url = '',
         accept = MimeType.JSON,
     ) {
-        this.call(onload, 'GET', '', url, accept);
+        Ajax.call(onload, HttpMethod.GET, '', url, accept);
     }
 
     public static put(
-        onload: (response: any, type: XMLHttpRequestResponseType) => any,
-        data = '',
+        onload: AjaxCallback,
+        data: any,
         url = '',
         accept = MimeType.JSON,
     ) {
-        this.call(onload, 'PUT', data, url, accept);
+        Ajax.call(onload, HttpMethod.PUT, data, url, accept);
     }
 
     public static post(
-        onload: (response: any, type: XMLHttpRequestResponseType) => any,
-        data = '',
+        onload: AjaxCallback,
+        data: any,
         url = '',
         type = MimeType.JSON,
         accept = MimeType.JSON,
     ) {
-        this.call(onload, 'POST', data, url, accept, type);
+        Ajax.call(onload, HttpMethod.POST, data, url, accept, type);
     }
 
     public static delete(
-        onload: (response: any, type: XMLHttpRequestResponseType) => any,
+        onload: AjaxCallback,
         url = '',
         accept = MimeType.JSON,
     ) {
-        this.call(onload, 'DELETE', '', url, accept);
+        Ajax.call(onload, HttpMethod.DELETE, '', url, accept);
     }
 }

@@ -46,7 +46,7 @@ final class FileActions extends Actions
             $btnEdit = Icon::EDIT;
             $editForm = View::renderHtml('upload', [
                 'title' => Icon::EDIT . ' ' . $this->name,
-                'action' => Server::QUERY_POST_UPDATE,
+                'action' => '?' . Server::QUERY_POST_UPDATE,
                 'accept' => self::default(self::ACCEPT),
                 'sizeLimit' => self::default(self::SIZE_LIMIT),
             ]);

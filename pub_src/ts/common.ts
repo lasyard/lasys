@@ -14,6 +14,12 @@ export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+export function html(str: string) {
+    return str
+        .replace(/[<>&]/gm, (s: String) => "&#" + s.charCodeAt(0) + ";")
+        .replace(/\r\n/gm, '<br />');
+}
+
 export function textBuilder() {
     let text = '';
     const p = (str: string) => {

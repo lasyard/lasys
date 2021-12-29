@@ -1,50 +1,55 @@
-div#main {
-    fieldset {
-        @extend .border;
-        margin: 0.5em 0;
-        padding: 0;
+div#main,
+div#-tool-tip- {
+    form {
+        fieldset {
+            @extend .border;
+            margin: 0.5em 0;
+            padding: 0;
 
-        legend {
-            font-family: Sans-Serif;
-            font-size: 0.8em;
+            legend {
+                font-family: Sans-Serif;
+                font-size: 0.8em;
+            }
         }
 
-        form {
-            div.field {
-                margin: 2px;
-                width: 100%;
+        input[type=submit] {
+            @extend .centered;
+        }
 
-                span.label {
+        div.field {
+            margin: 2px;
+            width: 100%;
+
+            span.label {
+                display: inline-block;
+                font-weight: bold;
+                text-align: right;
+                width: 15%;
+            }
+
+            input[type=text],
+            input[type=password] {
+                width: 80%;
+            }
+
+            textarea {
+                width: 80%;
+                margin-top: 0.3em;
+                vertical-align: top;
+            }
+
+            div.checkbox-group {
+                @extend .border;
+                padding: 1px;
+                display: inline-block;
+                width: 80%;
+                vertical-align: top;
+
+                span.checkbox {
                     display: inline-block;
-                    font-weight: bold;
-                    text-align: right;
-                    width: 15%;
-                }
-
-                input[type=text],
-                input[type=password] {
-                    width: 80%;
-                }
-
-                textarea {
-                    width: 80%;
-                    margin-top: 0.3em;
-                    vertical-align: top;
-                }
-
-                div.checkbox-group {
-                    @extend .border;
-                    padding: 1px;
-                    display: inline-block;
-                    width: 80%;
-                    vertical-align: top;
-
-                    span.checkbox {
-                        display: inline-block;
-                        min-width: 18%;
-                        white-space: nowrap;
-                        font-size: 0.8em;
-                    }
+                    min-width: 18%;
+                    white-space: nowrap;
+                    font-size: 0.8em;
                 }
             }
         }

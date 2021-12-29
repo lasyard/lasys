@@ -1,5 +1,7 @@
-import { MimeType, Ajax } from './ajax';
-import { Tag, TagList, onLoad } from './html';
+import { Tag, TagContent } from './tag';
+import { ToolTip } from './tool_tip';
+import { onLoad } from './html';
+import { MimeType, Ajax, HttpMethod } from './ajax';
 
 type ColumnIndices = { [index: string]: number };
 
@@ -12,7 +14,7 @@ interface DataSet {
 }
 
 type ValueCallback = (col: string) => any;
-type ContentFun = (d: ValueCallback) => string | Tag | TagList;
+type ContentFun = (d: ValueCallback) => TagContent;
 type SortFun = (a: ValueCallback, b: ValueCallback) => -1 | 0 | 1;
 
 interface ColumnDefinition {
@@ -27,11 +29,13 @@ interface DbTableConfig {
     sort?: SortFun;
 }
 
-declare const TABLE_KEY_COLUMNS: string[];
+declare const TABLE_KEY_FIELDS: string[];
+
 export class DbTable {
     private dataSet: DataSet;
     private conf: DbTableConfig;
-    private divData: Tag = null;
+    private divData: Tag<HTMLDivElement> = null;
+    private updateForm: Tag<HTMLFormElement> = null;
 
     constructor(conf: DbTableConfig) {
         this.conf = conf;
@@ -48,28 +52,87 @@ export class DbTable {
             return;
         }
         const dataAreaId = panelId + 'data-';
-        let divData = Tag.byId(dataAreaId);
+        let divData = Tag.byId(dataAreaId) as Tag<HTMLDivElement>;
         if (!divData) {
-            divData = Tag.of('div').id(dataAreaId).putInto(panel);
+            divData = Tag.of('div').id(dataAreaId).putInto(panel) as Tag<HTMLDivElement>;
         }
         this.divData = divData;
+        const insertForm = Tag.form('-form-db-insert-');
+        if (insertForm) {
+            insertForm.ajaxfy(
+                function (res) {
+                    Tag.byId('ajax-msg').html(res);
+                    self.loadData();
+                },
+                function (form) {
+                    const data: { [index: string]: any } = {};
+                    for (let i = 0; i < form.elements.length; ++i) {
+                        const f = form.elements[i];
+                        if (f instanceof HTMLInputElement) {
+                            if (f.type === 'submit') {
+                                continue;
+                            }
+                            data[f.name] = f.value;
+                        }
+                    }
+                    return data;
+                },
+                HttpMethod.POST,
+                MimeType.HTML,
+            );
+        }
+        const updateForm = Tag.form('-form-db-update-');
+        const self = this;
+        if (updateForm) {
+            updateForm.vanish().style({ display: 'block' }).ajaxfy(
+                function (res) {
+                    Tag.byId('ajax-msg').html(res);
+                    ToolTip.get().hide();
+                    self.loadData();
+                },
+                function (form) {
+                    const keys: { [index: string]: any } = {};
+                    const data: { [index: string]: any } = {};
+                    for (let i = 0; i < form.elements.length; ++i) {
+                        const f = form.elements[i];
+                        if (f instanceof HTMLInputElement) {
+                            if (f.type === 'submit') {
+                                continue;
+                            }
+                            (TABLE_KEY_FIELDS.includes(f.name) ? keys : data)[f.name] = f.value;
+                        }
+                    }
+                    return { keys: keys, data: data };
+                },
+                HttpMethod.PUT,
+                MimeType.HTML,
+            );
+            this.updateForm = updateForm;
+        }
         return this;
     }
 
-    private addContent(t: Tag, data: any[], fun: string | ContentFun, ci: ColumnIndices) {
+    private addContent(t: Tag<HTMLElement>, data: any[], fun: string | ContentFun, ci: ColumnIndices) {
         if (typeof fun === 'string') {
             t.add(data[ci[fun]]);
         } else if (typeof fun === 'function') {
-            const v = fun((col) => data[ci[col]]);
-            if (Array.isArray(v)) {
-                t.add(...v);
-            } else {
-                t.add(v);
+            t.add(fun((col) => data[ci[col]]));
+        }
+    }
+
+    private setEditFormData(data: any[]) {
+        const ci = this.dataSet.columns;
+        const form = this.updateForm;
+        for (const col in ci) {
+            const field = form.get().elements.namedItem(col);
+            if (field instanceof HTMLInputElement) {
+                (field as HTMLInputElement).value = data[ci[col]];
             }
         }
     }
 
     refresh() {
+        const self = this;
         const divData = this.divData;
         if (!divData) {
             return;
@@ -89,7 +152,7 @@ export class DbTable {
                 this.addContent(th, labels, col.th, ci);
                 th.putInto(headers);
             }
-            if (Array.isArray(TABLE_KEY_COLUMNS)) {
+            if (Array.isArray(TABLE_KEY_FIELDS)) {
                 if (dataSet.canEdit) {
                     Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
                     Tag.of('th').putInto(headers);
@@ -100,7 +163,7 @@ export class DbTable {
                 }
             }
         }
-        const table = Tag.of('table').cls('stylized').add(colgroup, headers);
+        const table = Tag.of('table').cls('stylized').addAll(colgroup, headers);
         let alt = false;
         let colCount = 0;
         let tr = null;
@@ -118,17 +181,23 @@ export class DbTable {
                 this.addContent(td, dt, col.td, ci);
                 tr.add(td);
             }
-            if (Array.isArray(TABLE_KEY_COLUMNS)) {
+            if (Array.isArray(TABLE_KEY_FIELDS)) {
                 if (dataSet.canEdit) {
-                    Tag.of('td').add(Tag.bi('pencil-square')).putInto(tr);
+                    Tag.of('td').add(Tag.bi('pencil-square')).putInto(tr).toolTip(function () {
+                        const data = dt;
+                        self.setEditFormData(data);
+                        return {
+                            body: self.updateForm,
+                            width: '70%',
+                        }
+                    });
                 }
                 if (dataSet.canDelete) {
-                    const self = this;
                     Tag.of('td').add(Tag.bi('x-square')).putInto(tr).event('click', () => {
                         const r = confirm('Are you sure to delete item [' + dt + ']?');
                         if (r) {
                             const url = new URL(window.location.href);
-                            for (const keyColumn of TABLE_KEY_COLUMNS) {
+                            for (const keyColumn of TABLE_KEY_FIELDS) {
                                 url.searchParams.append(keyColumn, dt[ci[keyColumn]]);
                             }
                             Ajax.delete(function (res) {

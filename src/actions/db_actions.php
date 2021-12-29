@@ -11,40 +11,35 @@ final class DbActions extends Actions
         return ($labels && array_key_exists($name, $labels)) ? $labels[$name] : ucfirst($name);
     }
 
-    private function buildField($columns, &$keyColumns)
+    private function buildFields($columns)
     {
         $fields = [];
         foreach ($columns as $c) {
             $name = $c['Field'];
-            if ($c['Key'] == 'PRI') {
-                $keyColumns[] = $name;
-            }
-            if ($c['Extra'] == 'auto_increment') {
-                continue;
-            }
+            $primary = ($c['Key'] == 'PRI');
+            $auto = ($c['Extra'] == 'auto_increment');
             $required = ($c['Null'] !== 'YES' && !isset($c['Default']));
             $label = $this->getLabel($name);
             $type = 'text';
             $attrs = [];
-            $fields[$name] = compact('label', 'type', 'required', 'attrs');
+            $fields[$name] = compact('label', 'type', 'primary', 'auto', 'required', 'attrs');
         }
         return $fields;
     }
 
-    private function buildMeta()
+    private function buildMeta($fields)
     {
         $editForm = null;
         $btnEdit = null;
         if ($this->hasPrivOf(Server::POST_UPDATE)) {
             $btnEdit = Icon::INSERT;
-            $columns = Sys::db()->getColumns($this->name);
-            $keyColumns = [];
-            $fields = $this->buildField($columns, $keyColumns);
-            Sys::app()->addData('TABLE_KEY_COLUMNS', $keyColumns);
             $editForm = View::renderHtml('db_edit', [
                 'title' => Icon::INSERT . ' ' . $this->name,
-                'action' => Server::QUERY_POST_UPDATE,
                 'fields' => $fields,
+                'attrs' => [
+                    'name' => '-form-db-insert-',
+                ],
+                'purpose' => 'insert',
             ]);
         }
         $time = Sys::db()->getLastModTime($this->name);
@@ -59,8 +54,25 @@ final class DbActions extends Actions
             Sys::app()->addScript($script);
         }
         Sys::app()->addScript('js' . DS . 'db_table');
-        $meta = $this->buildMeta();
+        $columns = Sys::db()->getColumns($this->name);
+        $fields = $this->buildFields($columns);
+        $keyFields = array_keys(array_filter($fields, function ($f) {
+            return $f['primary'];
+        }));
+        Sys::app()->addData('TABLE_KEY_FIELDS', $keyFields);
+        $meta = $this->buildMeta($fields);
         View::render('meta', $meta);
+        if ($this->hasPrivOf(Server::AJAX_PUT)) {
+            View::render('db_edit', [
+                'title' => Icon::EDIT . ' ' . $this->name,
+                'fields' => $fields,
+                'attrs' => [
+                    'name' => '-form-db-update-',
+                    'style' => 'display:none',
+                ],
+                'purpose' => 'update',
+            ]);
+        }
     }
 
     public function actionAjaxGet()
@@ -77,12 +89,27 @@ final class DbActions extends Actions
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
+    public function actionAjaxPut()
+    {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $row = Sys::db()->update($this->name, $data['keys'], $data['data']);
+        echo 'Succeeded to update ', $row, ' records.';
+    }
+
+    // This is not used because of ajaxfy.
     public function actionPostUpdate()
     {
         $name = $this->name;
         Sys::db()->insert($name, $_POST);
         // Do redirect to remove the 'update' query key.
         Sys::app()->redirect($name);
+    }
+
+    public function actionAjaxPost()
+    {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $row = Sys::db()->insert($this->name, $data);
+        echo 'Succeeded to insert ', $row, ' records.';
     }
 
     public function actionAjaxDelete()
@@ -102,7 +129,9 @@ final class DbActions extends Actions
         return function ($item) use ($script, $labels) {
             $item[Server::GET] = DbActions::get();
             $item[Server::AJAX_GET] = DbActions::ajaxGet();
+            $item[Server::AJAX_PUT] = DbActions::ajaxPut();
             $item[Server::POST_UPDATE] = DbActions::postUpdate();
+            $item[Server::AJAX_POST] = DbActions::ajaxPost();
             $item[Server::AJAX_DELETE] = DbActions::ajaxDelete();
             $item[DbActions::SCRIPT] = $script;
             $item[DbActions::LABELS] = $labels;

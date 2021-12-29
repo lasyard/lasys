@@ -3,13 +3,8 @@
  */
 
 import {
-    html,
     Tag
-} from '../ts/html';
-
-test('html("<a>") == "&#60;a&#62;"', () => {
-    expect(html('<a>')).toBe('&#60;a&#62;');
-});
+} from '../ts/tag';
 
 test('Tag', () => {
     const div = Tag.of('div').add('foo bar').id('id').cls('class').get();
