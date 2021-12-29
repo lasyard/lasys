@@ -3,6 +3,13 @@ final class DbActions extends Actions
 {
     // configs
     public const SCRIPT = 'db:script';
+    public const LABELS = 'db:labels';
+
+    private function getLabel($name)
+    {
+        $labels = $this->conf(self::LABELS);
+        return ($labels && array_key_exists($name, $labels)) ? $labels[$name] : ucfirst($name);
+    }
 
     private function buildField($columns, &$keyColumns)
     {
@@ -16,7 +23,7 @@ final class DbActions extends Actions
                 continue;
             }
             $required = ($c['Null'] !== 'YES' && !isset($c['Default']));
-            $label = $name;
+            $label = $this->getLabel($name);
             $type = 'text';
             $attrs = [];
             $fields[$name] = compact('label', 'type', 'required', 'attrs');
@@ -62,6 +69,11 @@ final class DbActions extends Actions
         $result = Sys::db()->getDataSet($sql);
         $result['canEdit'] = $this->hasPrivOf(Server::AJAX_PUT);
         $result['canDelete'] = $this->hasPrivOf(Server::AJAX_DELETE);
+        $labels = [];
+        foreach ($result['columns'] as $name => $index) {
+            $labels[$index] = $this->getLabel($name);
+        }
+        $result['labels'] = $labels;
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
@@ -85,14 +97,15 @@ final class DbActions extends Actions
         echo '<p class="sys center">Dumping succeed!</p>';
     }
 
-    public static function accessDb($script)
+    public static function accessDb($script, $labels = [])
     {
-        return function ($item) use ($script) {
+        return function ($item) use ($script, $labels) {
             $item[Server::GET] = DbActions::get();
             $item[Server::AJAX_GET] = DbActions::ajaxGet();
             $item[Server::POST_UPDATE] = DbActions::postUpdate();
             $item[Server::AJAX_DELETE] = DbActions::ajaxDelete();
             $item[DbActions::SCRIPT] = $script;
+            $item[DbActions::LABELS] = $labels;
             return $item;
         };
     }

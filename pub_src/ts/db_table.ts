@@ -7,16 +7,17 @@ interface DataSet {
     canEdit?: boolean;
     canDelete?: boolean;
     columns: ColumnIndices;
+    labels: string[];
     data: any[][];
 }
 
-type DataCallback = (col: string) => any;
-type TdContentFun = (d: DataCallback) => string | Tag | TagList;
-type SortFun = (a: DataCallback, b: DataCallback) => -1 | 0 | 1;
+type ValueCallback = (col: string) => any;
+type ContentFun = (d: ValueCallback) => string | Tag | TagList;
+type SortFun = (a: ValueCallback, b: ValueCallback) => -1 | 0 | 1;
 
 interface ColumnDefinition {
-    th: string;
-    td: string | TdContentFun;
+    th: string | ContentFun;
+    td: string | ContentFun;
     width?: string;
 }
 
@@ -55,6 +56,19 @@ export class DbTable {
         return this;
     }
 
+    private addContent(t: Tag, data: any[], fun: string | ContentFun, ci: ColumnIndices) {
+        if (typeof fun === 'string') {
+            t.add(data[ci[fun]]);
+        } else if (typeof fun === 'function') {
+            const v = fun((col) => data[ci[col]]);
+            if (Array.isArray(v)) {
+                t.add(...v);
+            } else {
+                t.add(v);
+            }
+        }
+    }
+
     refresh() {
         const divData = this.divData;
         if (!divData) {
@@ -64,12 +78,16 @@ export class DbTable {
         const columns = this.conf.columns ? this.conf.columns : 1;
         const cols = this.conf.cols;
         const dataSet = this.dataSet;
+        const ci = dataSet.columns;
+        const labels = dataSet.labels;
         const colgroup = Tag.of('colgroup');
         const headers = Tag.of('tr').cls('header');
         for (let i = 0; i < columns; ++i) {
             for (const col of cols) {
                 Tag.of('col').style({ width: col.width }).putInto(colgroup);
-                Tag.of('th').add(col.th).putInto(headers);
+                const th = Tag.of('th');
+                this.addContent(th, labels, col.th, ci);
+                th.putInto(headers);
             }
             if (Array.isArray(TABLE_KEY_COLUMNS)) {
                 if (dataSet.canEdit) {
@@ -83,7 +101,6 @@ export class DbTable {
             }
         }
         const table = Tag.of('table').cls('stylized').add(colgroup, headers);
-        const ci = dataSet.columns;
         let alt = false;
         let colCount = 0;
         let tr = null;
@@ -98,16 +115,7 @@ export class DbTable {
             }
             for (const col of cols) {
                 const td = Tag.of('td');
-                if (typeof col.td === 'string') {
-                    td.add(dt[ci[col.td]]);
-                } else if (typeof col.td === 'function') {
-                    const v = col.td((col) => dt[ci[col]]);
-                    if (Array.isArray(v)) {
-                        td.add(...v);
-                    } else {
-                        td.add(v);
-                    }
-                }
+                this.addContent(td, dt, col.td, ci);
                 tr.add(td);
             }
             if (Array.isArray(TABLE_KEY_COLUMNS)) {
