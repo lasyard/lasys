@@ -1,4 +1,5 @@
-import { onLoad, Tag, Ajax, MimeType } from ".";
+import { onLoad, Tag } from './html';
+import { Ajax, MimeType } from "./ajax";
 
 onLoad(function () {
     const btnEdit = Tag.byId('-meta-btn-edit-');

@@ -1,5 +1,5 @@
-import { MimeType } from './ajax';
-import { Tag, onLoad, Ajax, TagList } from './index';
+import { MimeType, Ajax } from './ajax';
+import { Tag, TagList, onLoad } from './html';
 
 type ColumnIndices = { [index: string]: number };
 
