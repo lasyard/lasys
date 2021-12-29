@@ -1,7 +1,7 @@
 <?php
 final class FileActions extends Actions
 {
-    // configs
+    // folder configs
     public const UPLOAD_TITLE = 'file:uploadTitle';
     public const SIZE_LIMIT = 'file:sizeLimit';
     public const ACCEPT = 'file:accept';

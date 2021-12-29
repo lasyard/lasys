@@ -67,6 +67,15 @@ final class Config
                 $item = [self::TITLE => $item];
             } else if ($item instanceof Actions) {
                 $item = [Server::GET => $item];
+            } else if (isset($item[Config::TRAITS])) {
+                $traits = $item[Config::TRAITS];
+                if (is_array($traits)) {
+                    foreach ($traits as $trait) {
+                        $item = $trait($item);
+                    }
+                } else {
+                    $item = $traits($item);
+                }
             }
         }
         foreach ($this->_conf[self::TRAITS] as $trait) {

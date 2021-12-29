@@ -84,4 +84,16 @@ final class DbActions extends Actions
         Sys::db()->dump($this->path);
         echo '<p class="sys center">Dumping succeed!</p>';
     }
+
+    public static function accessDb($script)
+    {
+        return function ($item) use ($script) {
+            $item[Server::GET] = DbActions::get();
+            $item[Server::AJAX_GET] = DbActions::ajaxGet();
+            $item[Server::POST_UPDATE] = DbActions::postUpdate();
+            $item[Server::AJAX_DELETE] = DbActions::ajaxDelete();
+            $item[DbActions::SCRIPT] = $script;
+            return $item;
+        };
+    }
 }
