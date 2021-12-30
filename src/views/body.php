@@ -1,5 +1,5 @@
 <div id="bar">
-    <span id="logo"><a href="<?php echo $home; ?>"><?php echo $homeLink ?? 'Lasys Home'; ?></a></span>
+    <span id="logo"><a href="<?php echo $home; ?>">Lasys Home</a></span>
     <span id="breadcrumbs">
         <?php
         foreach ($breadcrumbs as $breadcrumb) {

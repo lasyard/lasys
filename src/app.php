@@ -82,9 +82,9 @@ final class App
             exit;
         }
         $title = APP_TITLE;
-        $subTitle = $action->title ?? $this->_conf->title($this->_name);
+        $subTitle = $actionDo->title ?? $this->_conf->title($this->_name);
         if ($subTitle) {
-            $title .= $subTitle;
+            $title .= ' - ' . $subTitle;
         }
         $this->addScript('js' . DS . 'main');
         $this->addStyle('css' . DS . 'main');
@@ -254,7 +254,7 @@ final class App
         foreach ($priv as $p) {
             if ($p === User::OWNER) {
                 $meta = $this->_files[$name];
-                if (isset($meta) && $user->id === $meta['uid']) {
+                if (isset($meta['uid']) && $user->hasPriv($meta['uid'])) {
                     continue;
                 }
                 return false;

@@ -7,8 +7,9 @@ final class User
 
     public const ADMIN = 'admin';
     public const OWNER = 'owner';
-    public const EDIT = 'edit';
     public const READ0 = 'read0';
+    public const EDIT = 'edit';
+    public const EDIT0 = 'edit0';
 
     private $_user;
 
@@ -44,7 +45,7 @@ final class User
     private function check($id, $password)
     {
         $db = Sys::db();
-        $user = $db->getOne('select * from tbl_user where id = ?', $id);
+        $user = $db->getOne('select * from `users` where `id` = ?', $id);
         if ($user) {
             $hash = $user['password_hash'];
             if (hash_equals($hash, crypt($password, $hash))) {
@@ -86,10 +87,10 @@ final class User
         if ($this->_user == null) {
             return false;
         }
-        $privs = $this->_user['priv'];
-        if (in_array('admin', $privs)) {
+        if ($this->user['id'] === $priv) {
             return true;
         }
+        $privs = $this->_user['priv'];
         return in_array($priv, $privs);
     }
 }

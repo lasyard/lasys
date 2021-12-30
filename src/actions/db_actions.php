@@ -124,15 +124,15 @@ final class DbActions extends Actions
         echo '<p class="sys center">Dumping succeed!</p>';
     }
 
-    public static function accessDb($script, $labels = [])
+    public static function accessDb($script, $labels = [], $rPriv = [], $wPriv = [User::EDIT0])
     {
-        return function ($item) use ($script, $labels) {
-            $item[Server::GET] = DbActions::get();
-            $item[Server::AJAX_GET] = DbActions::ajaxGet();
-            $item[Server::AJAX_PUT] = DbActions::ajaxPut();
-            $item[Server::POST_UPDATE] = DbActions::postUpdate();
-            $item[Server::AJAX_POST] = DbActions::ajaxPost();
-            $item[Server::AJAX_DELETE] = DbActions::ajaxDelete();
+        return function ($item) use ($script, $labels, $rPriv, $wPriv) {
+            $item[Server::GET] = DbActions::get()->priv(...$rPriv);
+            $item[Server::AJAX_GET] = DbActions::ajaxGet()->priv(...$rPriv);
+            $item[Server::AJAX_PUT] = DbActions::ajaxPut()->priv(...$wPriv);
+            $item[Server::POST_UPDATE] = DbActions::postUpdate()->priv(...$wPriv);
+            $item[Server::AJAX_POST] = DbActions::ajaxPost()->priv(...$wPriv);
+            $item[Server::AJAX_DELETE] = DbActions::ajaxDelete()->priv(...$wPriv);
             $item[DbActions::SCRIPT] = $script;
             $item[DbActions::LABELS] = $labels;
             return $item;
