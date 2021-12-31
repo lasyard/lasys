@@ -1,7 +1,7 @@
 import { Ajax, AjaxCallback, HttpMethod, MimeType } from './ajax';
 import { ToolTip, ToolTipContent } from './tool_tip';
 
-type TagList = (Tag<HTMLElement> | string)[];
+type TagList = (Tag<HTMLElement> | any)[];
 
 export type TagContent = string | Tag<HTMLElement> | TagList;
 
@@ -20,11 +20,19 @@ export class Tag<T extends HTMLElement> {
         return Tag.of('p').add(tags);
     }
 
+    public static b(...tags: TagList) {
+        return Tag.of('b').add(tags);
+    }
+
     public static br() {
         return Tag.of('br');
     }
 
-    public static bi(icon: string) {
+    public static li(...tags: TagList) {
+        return Tag.of('li').add(tags);
+    }
+
+    public static icon(icon: string) {
         return Tag.of('i').cls('bi bi-' + icon);
     }
 
@@ -77,7 +85,7 @@ export class Tag<T extends HTMLElement> {
 
     public addAll(...tags: TagList) {
         for (const tag of tags) {
-            this.element.appendChild(typeof tag === 'string' ? new Text(tag) : tag.element);
+            this.element.appendChild(tag instanceof Tag ? tag.element : new Text(tag.toString()));
         }
         return this;
     }

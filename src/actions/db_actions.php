@@ -20,8 +20,20 @@ final class DbActions extends Actions
             $auto = ($c['Extra'] == 'auto_increment');
             $required = ($c['Null'] !== 'YES' && !isset($c['Default']));
             $label = $this->getLabel($name);
-            $type = 'text';
             $attrs = [];
+            switch ($c['Type']) {
+                case 'text':
+                    $type = 'textarea';
+                    $attrs['rows'] = 4;
+                    break;
+                case 'year':
+                    $type = 'select';
+                    $attrs['options'] = range(date('Y'), 1970, -1);
+                    break;
+                default:
+                    $type = 'text';
+                    break;
+            }
             $fields[$name] = compact('label', 'type', 'primary', 'auto', 'required', 'attrs');
         }
         return $fields;
@@ -124,7 +136,7 @@ final class DbActions extends Actions
         echo '<p class="sys center">Dumping succeed!</p>';
     }
 
-    public static function accessDb($script, $labels = [], $rPriv = [], $wPriv = [User::EDIT0])
+    public static function accessDb($script = null, $labels = [], $rPriv = [], $wPriv = [User::EDIT0])
     {
         return function ($item) use ($script, $labels, $rPriv, $wPriv) {
             $item[Server::GET] = DbActions::get()->priv(...$rPriv);

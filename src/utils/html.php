@@ -24,24 +24,44 @@ final class Html
         return $html;
     }
 
-    public static function input($name, $type, $required = false, $attrs = [])
+    private static function inlineAttrs($required, $attrs)
     {
-        switch ($type) {
-            case 'textarea':
-                $html = '<textarea name="' . $name . '"';
-                $end = '></textarea>';
-                break;
-            default:
-                $html = '<input name="' . $name . '" type="' . $type . '"';
-                $end = '></input>';
-        }
+        $html = '';
         if ($required) {
             $html .= ' required';
         }
         foreach ($attrs as $key => $value) {
             $html .= ' ' . $key . '="' . $value . '"';
         }
-        $html .= $end;
+        return $html;
+    }
+
+    public static function input($name, $type, $required = false, $attrs = [])
+    {
+        switch ($type) {
+            case 'select':
+                if (isset($attrs['options'])) {
+                    $options = $attrs['options'];
+                    unset($attrs['options']);
+                }
+                $html = '<select name="' . $name . '"' . self::inlineAttrs($required, $attrs) . '>' . PHP_EOL;
+                $html .= '<option value="">-- Choose an option --</option>' . PHP_EOL;
+                if (isset($options)) {
+                    foreach ($options as $option => $value) {
+                        if (is_int($option)) { // A flat array.
+                            $option = $value;
+                        }
+                        $html .= '<option value="' . $value . '">' . $option . '</option>' . PHP_EOL;
+                    }
+                }
+                $html .= '</select>';
+                break;
+            case 'textarea':
+                $html = '<textarea name="' . $name . '"' . self::inlineAttrs($required, $attrs) . '></textarea>';
+                break;
+            default:
+                $html = '<input name="' . $name . '" type="' . $type . '"' . self::inlineAttrs($required, $attrs) . '></input>';
+        }
         return $html;
     }
 }

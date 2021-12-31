@@ -142,6 +142,52 @@ div#bar {
     }
 }
 
+@media screen and (min-width: 54rem) {
+    div#list {
+        position: sticky;
+        left: 0;
+        top: $barHeight;
+        float: left;
+        width: $listWidth;
+        margin-bottom: $barHeight;
+
+        div.buttons {
+            @include ribbon;
+        }
+    }
+
+    div#main {
+        margin-top: $barHeight;
+        margin-left: $listWidth;
+        border: 1px solid transparent;
+        margin-bottom: $barHeight;
+
+        div#meta {
+            @include ribbon;
+        }
+    }
+
+    span#breadcrumbs {
+        font-family: $headerFont;
+    }
+}
+
+@media screen and (max-width: 54rem) {
+    div#list {
+        margin-top: $barHeight;
+        width: 100%;
+    }
+
+    div#main {
+        width: 100%;
+        margin-bottom: $barHeight;
+    }
+
+    div#breadcrumb {
+        display: none;
+    }
+}
+
 @mixin list-box {
     @extend .border;
     margin: 0.5rem;
@@ -185,52 +231,6 @@ div#list {
         li.highlighted a {
             background-color: $highColor;
         }
-    }
-}
-
-@media screen and (min-width: 54rem) {
-    div#list {
-        position: sticky;
-        left: 0;
-        top: $barHeight;
-        width: $listWidth;
-        float: left;
-        margin-bottom: $barHeight;
-
-        div.buttons {
-            @include ribbon;
-        }
-    }
-
-    div#main {
-        margin-top: $barHeight;
-        margin-left: $listWidth;
-        border: 1px solid transparent;
-        margin-bottom: $barHeight;
-
-        div#meta {
-            @include ribbon;
-        }
-    }
-
-    span#breadcrumbs {
-        font-family: $headerFont;
-    }
-}
-
-@media screen and (max-width: 54rem) {
-    div#list {
-        margin-top: $barHeight;
-        width: 100%;
-    }
-
-    div#main {
-        width: 100%;
-        margin-bottom: $barHeight;
-    }
-
-    div#breadcrumb {
-        display: none;
     }
 }
 
@@ -278,7 +278,7 @@ h4 {
 }
 
 div.error {
-    color: $hotColor;
+    @extend .hot;
     text-align: center;
     border: 1px solid $hotColor;
 }
@@ -293,6 +293,21 @@ table {
 
         p {
             margin: 0;
+        }
+    }
+}
+
+ul.icon {
+    list-style: none;
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+    margin-left: -0.7em;
+    text-indent: -0.8em;
+
+    li {
+        >i.bi:first-child {
+            margin-right: 0.8em;
+            color: $bgColor5;
         }
     }
 }

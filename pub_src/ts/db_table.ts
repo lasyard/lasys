@@ -18,13 +18,13 @@ type ContentFun = (d: ValueCallback) => TagContent;
 type SortFun = (a: ValueCallback, b: ValueCallback) => -1 | 0 | 1;
 
 interface ColumnDefinition {
-    th: string | ContentFun;
+    th?: string | ContentFun;
     td: string | ContentFun;
     width?: string;
 }
 
 interface DbTableConfig {
-    cols: ColumnDefinition[];
+    cols?: ColumnDefinition[];
     columns?: number;
     sort?: SortFun;
 }
@@ -112,7 +112,7 @@ export class DbTable {
         return this;
     }
 
-    private addContent(t: Tag<HTMLElement>, data: any[], fun: string | ContentFun, ci: ColumnIndices) {
+    private static addContent(t: Tag<HTMLElement>, data: any[], fun: string | ContentFun, ci: ColumnIndices) {
         if (typeof fun === 'string') {
             t.add(data[ci[fun]]);
         } else if (typeof fun === 'function') {
@@ -120,28 +120,35 @@ export class DbTable {
         }
     }
 
-    private setEditFormData(data: any[]) {
+    private setFormData(data: any[]) {
         const ci = this.dataSet.columns;
         const form = this.updateForm;
         for (const col in ci) {
             const field = form.get().elements.namedItem(col);
             if (field instanceof HTMLInputElement) {
                 (field as HTMLInputElement).value = data[ci[col]];
+            } else if (field instanceof HTMLTextAreaElement) {
+                (field as HTMLTextAreaElement).value = data[ci[col]];
+            } else if (field instanceof HTMLSelectElement) {
+                (field as HTMLSelectElement).value = data[ci[col]];
             }
         }
     }
 
     refresh() {
-        const self = this;
         const divData = this.divData;
         if (!divData) {
             return;
         }
         divData.clear();
-        const columns = this.conf.columns ? this.conf.columns : 1;
-        const cols = this.conf.cols;
+        const self = this;
+        const conf = this.conf;
+        const columns = conf.columns ? conf.columns : 1;
         const dataSet = this.dataSet;
         const ci = dataSet.columns;
+        const cols = conf.cols ? conf.cols : Object.keys(dataSet.columns).map(
+            c => ({ th: c, td: c } as ColumnDefinition)
+        );
         const labels = dataSet.labels;
         const colgroup = Tag.of('colgroup');
         const headers = Tag.of('tr').cls('header');
@@ -149,7 +156,7 @@ export class DbTable {
             for (const col of cols) {
                 Tag.of('col').style({ width: col.width }).putInto(colgroup);
                 const th = Tag.of('th');
-                this.addContent(th, labels, col.th, ci);
+                DbTable.addContent(th, labels, col.th, ci);
                 th.putInto(headers);
             }
             if (Array.isArray(TABLE_KEY_FIELDS)) {
@@ -168,8 +175,8 @@ export class DbTable {
         let colCount = 0;
         let tr = null;
         let data = dataSet.data;
-        if (this.conf.sort) {
-            data.sort((a, b) => this.conf.sort((col) => a[ci[col]], (col) => b[ci[col]]));
+        if (conf.sort) {
+            data.sort((a, b) => conf.sort((col) => a[ci[col]], (col) => b[ci[col]]));
         }
         for (const dt of data) {
             if (colCount == 0) {
@@ -178,14 +185,14 @@ export class DbTable {
             }
             for (const col of cols) {
                 const td = Tag.of('td');
-                this.addContent(td, dt, col.td, ci);
+                DbTable.addContent(td, dt, col.td, ci);
                 tr.add(td);
             }
             if (Array.isArray(TABLE_KEY_FIELDS)) {
                 if (dataSet.canEdit) {
-                    Tag.of('td').add(Tag.bi('pencil-square')).putInto(tr).toolTip(function () {
+                    Tag.of('td').add(Tag.icon('pencil-square')).putInto(tr).toolTip(function () {
                         const data = dt;
-                        self.setEditFormData(data);
+                        self.setFormData(data);
                         return {
                             body: self.updateForm,
                             width: '70%',
@@ -193,7 +200,7 @@ export class DbTable {
                     });
                 }
                 if (dataSet.canDelete) {
-                    Tag.of('td').add(Tag.bi('x-square')).putInto(tr).event('click', () => {
+                    Tag.of('td').add(Tag.icon('x-square')).putInto(tr).event('click', () => {
                         const r = confirm('Are you sure to delete item [' + dt + ']?');
                         if (r) {
                             const url = new URL(window.location.href);
@@ -231,5 +238,5 @@ export class DbTable {
 declare const dbTableConfig: () => DbTableConfig;
 
 onLoad(function () {
-    new DbTable(dbTableConfig()).render('main').loadData();
+    new DbTable((typeof dbTableConfig === 'function') ? dbTableConfig() : {}).render('main').loadData();
 });
