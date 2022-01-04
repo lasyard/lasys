@@ -20,14 +20,16 @@ export class ToolTip {
 
     private constructor() {
         this.spanTitle = Tag.of('span');
-        this.divBody = Tag.of('div') as Tag<HTMLDivElement>;
-        this.divTip = Tag.of('div').id('-tool-tip-')
-            .add(Tag.of('div')
-                .add(this.spanTitle)
-                .add(Tag.icon('x-circle sys').event('click', this.hide.bind(this))))
-            .add(this.divBody)
+        this.divBody = Tag.div();
+        this.divTip = Tag.div(
+            Tag.div(
+                this.spanTitle,
+                Tag.icon('x-circle sys').event('click', this.hide.bind(this)),
+            ),
+            this.divBody,
+        ).id('-tool-tip-')
             .event('click', (e) => e.stopPropagation())
-            .emerge() as Tag<HTMLDivElement>;
+            .emerge();
         document.body.addEventListener('click', this.hide.bind(this));
     }
 

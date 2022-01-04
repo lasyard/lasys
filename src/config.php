@@ -119,7 +119,8 @@ final class Config
 
     public function title($name)
     {
-        return $this->_conf[self::LIST][$name][self::TITLE] ?? Str::captalize($name);
+        return $this->_conf[self::LIST][$name][self::TITLE]
+            ?? ($name === $this->_conf[self::DEFAULT_ITEM] ? '' : Str::captalize($name));
     }
 
     public function action($name, $type)

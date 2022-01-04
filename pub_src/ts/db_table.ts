@@ -16,6 +16,8 @@ interface DataSet {
 type ValueCallback = (col: string) => any;
 type ContentFun = (d: ValueCallback) => TagContent;
 type SortFun = (a: ValueCallback, b: ValueCallback) => -1 | 0 | 1;
+type StatFun = (data: ValueCallback, context: any) => void;
+type ResultFun = (context: any) => TagContent;
 
 interface ColumnDefinition {
     th?: string | ContentFun;
@@ -23,10 +25,22 @@ interface ColumnDefinition {
     width?: string;
 }
 
+interface StatObject {
+    init: () => any;
+    fun: StatFun,
+    result: ResultFun,
+}
+
 interface DbTableConfig {
     cols?: ColumnDefinition[];
     columns?: number;
+    group?: {
+        key: string,
+        title?: (k: string) => TagContent,
+        sort?: (a: any, b: any) => -1 | 0 | 1,
+    };
     sort?: SortFun;
+    stat?: ((count: number) => TagContent) | StatObject;
 }
 
 declare const TABLE_KEY_FIELDS: string[];
@@ -41,9 +55,17 @@ export class DbTable {
         this.conf = conf;
     }
 
-    data(dataSet: DataSet) {
+    private data(dataSet: DataSet) {
         this.dataSet = dataSet;
         return this;
+    }
+
+    private static renderDiv(id: string, panel: Tag<HTMLElement>) {
+        let div = Tag.byId<HTMLDivElement>(id);
+        if (!div) {
+            div = Tag.div().id(id).putInto(panel);
+        }
+        return div;
     }
 
     render(panelId: string) {
@@ -51,12 +73,7 @@ export class DbTable {
         if (!panel) {
             return;
         }
-        const dataAreaId = panelId + 'data-';
-        let divData = Tag.byId(dataAreaId) as Tag<HTMLDivElement>;
-        if (!divData) {
-            divData = Tag.of('div').id(dataAreaId).putInto(panel) as Tag<HTMLDivElement>;
-        }
-        this.divData = divData;
+        this.divData = DbTable.renderDiv(panelId + 'data-', panel);
         const insertForm = Tag.form('-form-db-insert-');
         if (insertForm) {
             insertForm.ajaxfy(
@@ -135,7 +152,22 @@ export class DbTable {
         }
     }
 
-    refresh() {
+    private getStat(data: any[][], ci: ColumnIndices) {
+        const stat = this.conf.stat;
+        let result: TagContent = '';
+        if (typeof stat === 'function') {
+            result = stat(data.length);
+        } else if (stat) {
+            const ctx = stat.init();
+            for (const d of data) {
+                stat.fun((col) => d[ci[col]], ctx);
+            }
+            result = stat.result(ctx);
+        }
+        return result;
+    }
+
+    private refresh() {
         const divData = this.divData;
         if (!divData) {
             return;
@@ -170,14 +202,53 @@ export class DbTable {
                 }
             }
         }
-        const table = Tag.of('table').cls('stylized').addAll(colgroup, headers);
-        let alt = false;
-        let colCount = 0;
-        let tr = null;
+        const table = Tag.of<HTMLTableElement>('table').cls('stylized').addAll(colgroup, headers);
+        const totalColumns = colgroup.get().childNodes.length;
         let data = dataSet.data;
+        if (conf.group) {
+            const keyCol = conf.group.key;
+            const grouped: { [index: string]: any[][] } = {};
+            for (const d of data) {
+                const key = d[ci[keyCol]];
+                if (!grouped[key]) {
+                    grouped[key] = [];
+                }
+                grouped[key].push(d);
+            }
+            const keys = Object.keys(grouped);
+            if (conf.group.sort) {
+                keys.sort(conf.group.sort);
+            }
+            for (const key of keys) {
+                const result = this.getStat(grouped[key], ci);
+                Tag.of('tr').cls('top').add(
+                    Tag.of('td').cls('group').attr({ colspan: totalColumns })
+                        .add(Tag.of('span').add(key))
+                        .add(Tag.of('span').cls('stat').add(result))
+                ).putInto(table);
+                this.addToTable(table, grouped[key], columns);
+            }
+        } else {
+            this.addToTable(table, data, columns);
+        }
+        const result = this.getStat(data, ci);
+        Tag.div(Tag.of('span').cls('stat').add(result)).putInto(divData);
+        table.putInto(divData);
+    }
+
+    private addToTable(table: Tag<HTMLTableElement>, data: any[][], columns: number) {
+        const conf = this.conf;
+        const dataSet = this.dataSet;
+        const ci = dataSet.columns;
         if (conf.sort) {
             data.sort((a, b) => conf.sort((col) => a[ci[col]], (col) => b[ci[col]]));
         }
+        let colCount = 0;
+        let alt = false;
+        let tr = null;
+        const cols = this.conf.cols;
+        const self = this;
+        const divData = this.divData;
         for (const dt of data) {
             if (colCount == 0) {
                 tr = Tag.of('tr').cls(alt ? 'alt' : 'def');
@@ -225,7 +296,6 @@ export class DbTable {
         if (tr) {
             tr.putInto(table);
         }
-        table.putInto(divData);
     }
 
     loadData() {

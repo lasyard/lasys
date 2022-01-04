@@ -40,10 +40,17 @@ table.stylized {
         }
     }
 
-    td.left-label,
-    td.top-label {
+    td.group {
         font-family: Sans-Serif;
         background: $highColor;
-        text-align: center;
+
+        >:first-child {
+            margin-right: 2em;
+        }
     }
+}
+
+span.stat {
+    font-size: 0.8em;
+    color: $visitedColor;
 }

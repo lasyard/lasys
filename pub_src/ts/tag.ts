@@ -12,12 +12,16 @@ export class Tag<T extends HTMLElement> {
         this.element = element;
     }
 
-    public static of(name: string) {
-        return new Tag(document.createElement(name));
+    public static of<H extends HTMLElement>(name: string) {
+        return new Tag(document.createElement(name) as H);
+    }
+
+    public static div(...tags: TagList) {
+        return Tag.of<HTMLDivElement>('div').add(tags);
     }
 
     public static p(...tags: TagList) {
-        return Tag.of('p').add(tags);
+        return Tag.of<HTMLParagraphElement>('p').add(tags);
     }
 
     public static b(...tags: TagList) {
@@ -25,19 +29,19 @@ export class Tag<T extends HTMLElement> {
     }
 
     public static br() {
-        return Tag.of('br');
+        return Tag.of<HTMLBRElement>('br');
     }
 
     public static li(...tags: TagList) {
-        return Tag.of('li').add(tags);
+        return Tag.of<HTMLLIElement>('li').add(tags);
     }
 
     public static icon(icon: string) {
         return Tag.of('i').cls('bi bi-' + icon);
     }
 
-    public static byId(id: string) {
-        const element = document.getElementById(id);
+    public static byId<H extends HTMLElement>(id: string) {
+        const element = document.getElementById(id) as H;
         return element ? new Tag(element) : null;
     }
 

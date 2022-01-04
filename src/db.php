@@ -176,6 +176,8 @@ final class Db extends PDO
         fwrite($fh, "DROP TABLE IF EXISTS `" . $table . "`;" . PHP_EOL);
         $result = $this->query('show create table ' . $table);
         $sql = $result->fetchColumn(1);
+        // Remove the collate setting to be compatible with old mysql versions.
+        $sql = preg_replace('/\s+COLLATE=\w+/i', '', $sql);
         fwrite($fh, $sql . ";" . PHP_EOL . PHP_EOL);
         $result = $this->query('select * from ' . $table);
         $fields = [];
