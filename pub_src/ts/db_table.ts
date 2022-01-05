@@ -40,6 +40,7 @@ interface DbTableConfig {
         key: string,
         title?: (k: string) => TagContent,
         sort?: SortFun<string>,
+        nav?: string,
     };
     sort?: SortFun<ValueCallback>;
     stat?: ((count: number) => TagContent) | StatObject;
@@ -213,8 +214,9 @@ export class DbTable {
                 data = filter.filter(data);
             }
         }
-        if (conf.group) {
-            const keyCol = conf.group.key;
+        const group = conf.group;
+        if (group) {
+            const keyCol = group.key;
             const grouped: { [index: string]: any[][] } = {};
             for (const d of data) {
                 const key = d[ci[keyCol]];
@@ -224,14 +226,19 @@ export class DbTable {
                 grouped[key].push(d);
             }
             const keys = Object.keys(grouped);
-            if (conf.group.sort) {
+            if (group.sort) {
                 keys.sort(conf.group.sort);
+            }
+            if (group.nav) {
+                Tag.of('form').add(Tag.fieldset(group.nav).cls('links').add(
+                    keys.map((k) => Tag.span(Tag.of('a').attr({ href: '#' + k }).add(k)))
+                )).putInto(divData);
             }
             for (const key of keys) {
                 const result = this.getStat(grouped[key], ci);
                 Tag.of('tr').cls('top').add(
                     Tag.of('td').cls('group').attr({ colspan: totalColumns })
-                        .add(Tag.of('span').add(key))
+                        .add(Tag.of('span').add(Tag.of('a').name(key).add(key)))
                         .add(Tag.of('span').cls('stat').add(result))
                 ).putInto(table);
                 this.addToTable(table, grouped[key], columns);

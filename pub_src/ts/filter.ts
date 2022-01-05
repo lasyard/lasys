@@ -43,7 +43,7 @@ export abstract class Filter {
         this.itemName = this.formName + '-item';
         this.handler = handler;
         this.index = ci[this.key];
-        const fieldSet = Tag.of('fieldset').add(Tag.of('legend').add(this.title)).cls('checkboxes');
+        const fieldSet = Tag.fieldset(this.title).cls('checkbox');
         const values = this.getValuesCount(data);
         const keys = Object.keys(values).sort(this.sortFun);
         const checks = this.createChecks(values, keys);
@@ -60,12 +60,18 @@ export abstract class Filter {
         count: number,
         checked = false
     ) {
+        const input = Tag.of('input')
+            .name(name)
+            .attr({ value: value, type: type })
+            .event('change', this.handler.bind(this));
+        if (checked) {
+            input.attr({ checked: 'checked' });
+        }
         return Tag.span(
-            Tag.of('input').name(name).attr({ value: value, type: type, checked: checked })
-                .event('change', this.handler.bind(this)),
+            input,
             Tag.of('label').add(this.toLabel(value)),
             Tag.span('(' + count + ')').cls('hot'),
-        ).cls('checkbox')
+        );
     }
 
     protected abstract createChecks(values: { [index: string]: number }, keys: string[]): Tag<HTMLElement>[];

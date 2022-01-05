@@ -37,18 +37,22 @@ form {
         }
     }
 
-    fieldset.checkboxes {
-        @extend .border;
-        padding: 1px;
-        display: inline-block;
-        width: 100%;
-        vertical-align: top;
-
-        span.checkbox {
+    fieldset.checkbox {
+        span {
             display: inline-block;
             min-width: 18%;
             white-space: nowrap;
             font-size: 0.8em;
+        }
+    }
+
+    fieldset.links {
+        span {
+            display: inline-block;
+            white-space: nowrap;
+            font-size: 0.8em;
+            margin-left: 1em;
+            margin-right: 1em;
         }
     }
 }

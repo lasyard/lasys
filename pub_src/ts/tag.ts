@@ -40,6 +40,10 @@ export class Tag<T extends HTMLElement> {
         return Tag.of<HTMLLIElement>('li').add(tags);
     }
 
+    public static fieldset(title: string) {
+        return Tag.of<HTMLFieldSetElement>('fieldset').add(Tag.of('legend').add(title));
+    }
+
     public static icon(icon: string) {
         return Tag.of('i').cls('bi bi-' + icon);
     }
