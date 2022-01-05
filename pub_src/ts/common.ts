@@ -1,3 +1,5 @@
+export type SortFun<T> = (a: T, b: T) => -1 | 0 | 1;
+
 export function objCmp(a: any, b: any) {
     return (a > b) ? 1 : (a == b) ? 0 : -1;
 }

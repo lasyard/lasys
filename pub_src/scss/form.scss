@@ -35,20 +35,20 @@ form {
             margin-top: 0.3em;
             vertical-align: top;
         }
+    }
 
-        div.checkbox-group {
-            @extend .border;
-            padding: 1px;
+    fieldset.checkboxes {
+        @extend .border;
+        padding: 1px;
+        display: inline-block;
+        width: 100%;
+        vertical-align: top;
+
+        span.checkbox {
             display: inline-block;
-            width: 80%;
-            vertical-align: top;
-
-            span.checkbox {
-                display: inline-block;
-                min-width: 18%;
-                white-space: nowrap;
-                font-size: 0.8em;
-            }
+            min-width: 18%;
+            white-space: nowrap;
+            font-size: 0.8em;
         }
     }
 }

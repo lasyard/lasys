@@ -49,7 +49,7 @@ final class DbActions extends Actions
                 'title' => Icon::INSERT . ' ' . $this->name,
                 'fields' => $fields,
                 'attrs' => [
-                    'name' => '-form-db-insert-',
+                    'name' => '-form-db-insert',
                 ],
                 'purpose' => 'insert',
             ]);
@@ -79,7 +79,7 @@ final class DbActions extends Actions
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'fields' => $fields,
                 'attrs' => [
-                    'name' => '-form-db-update-',
+                    'name' => '-form-db-update',
                     'style' => 'display:none',
                 ],
                 'purpose' => 'update',

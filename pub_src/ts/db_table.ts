@@ -1,9 +1,11 @@
+import { SortFun } from './common';
 import { Tag, TagContent } from './tag';
 import { ToolTip } from './tool_tip';
 import { onLoad } from './html';
 import { MimeType, Ajax, HttpMethod } from './ajax';
+import { Filter } from './filter';
 
-type ColumnIndices = { [index: string]: number };
+export type ColumnIndices = { [index: string]: number };
 
 interface DataSet {
     canEdit?: boolean;
@@ -15,7 +17,6 @@ interface DataSet {
 
 type ValueCallback = (col: string) => any;
 type ContentFun = (d: ValueCallback) => TagContent;
-type SortFun = (a: ValueCallback, b: ValueCallback) => -1 | 0 | 1;
 type StatFun = (data: ValueCallback, context: any) => void;
 type ResultFun = (context: any) => TagContent;
 
@@ -34,12 +35,13 @@ interface StatObject {
 interface DbTableConfig {
     cols?: ColumnDefinition[];
     columns?: number;
+    filters?: Filter[];
     group?: {
         key: string,
         title?: (k: string) => TagContent,
-        sort?: (a: any, b: any) => -1 | 0 | 1,
+        sort?: SortFun<string>,
     };
-    sort?: SortFun;
+    sort?: SortFun<ValueCallback>;
     stat?: ((count: number) => TagContent) | StatObject;
 }
 
@@ -48,6 +50,7 @@ declare const TABLE_KEY_FIELDS: string[];
 export class DbTable {
     private dataSet: DataSet;
     private conf: DbTableConfig;
+    private panel: Tag<HTMLElement> = null;
     private divData: Tag<HTMLDivElement> = null;
     private updateForm: Tag<HTMLFormElement> = null;
 
@@ -57,15 +60,15 @@ export class DbTable {
 
     private data(dataSet: DataSet) {
         this.dataSet = dataSet;
-        return this;
-    }
-
-    private static renderDiv(id: string, panel: Tag<HTMLElement>) {
-        let div = Tag.byId<HTMLDivElement>(id);
-        if (!div) {
-            div = Tag.div().id(id).putInto(panel);
+        if (this.conf.filters) {
+            for (const filter of this.conf.filters) {
+                this.panel.insert(
+                    filter.render(dataSet.data, dataSet.columns, this.refresh.bind(this)),
+                    this.divData
+                );
+            }
         }
-        return div;
+        return this;
     }
 
     render(panelId: string) {
@@ -73,8 +76,9 @@ export class DbTable {
         if (!panel) {
             return;
         }
-        this.divData = DbTable.renderDiv(panelId + 'data-', panel);
-        const insertForm = Tag.form('-form-db-insert-');
+        this.divData = Tag.div().putInto(panel);
+        this.panel = panel;
+        const insertForm = Tag.form('-form-db-insert');
         if (insertForm) {
             insertForm.ajaxfy(
                 function (res) {
@@ -98,7 +102,7 @@ export class DbTable {
                 MimeType.HTML,
             );
         }
-        const updateForm = Tag.form('-form-db-update-');
+        const updateForm = Tag.form('-form-db-update');
         const self = this;
         if (updateForm) {
             updateForm.vanish().style({ display: 'block' }).ajaxfy(
@@ -173,7 +177,6 @@ export class DbTable {
             return;
         }
         divData.clear();
-        const self = this;
         const conf = this.conf;
         const columns = conf.columns ? conf.columns : 1;
         const dataSet = this.dataSet;
@@ -205,6 +208,11 @@ export class DbTable {
         const table = Tag.of<HTMLTableElement>('table').cls('stylized').addAll(colgroup, headers);
         const totalColumns = colgroup.get().childNodes.length;
         let data = dataSet.data;
+        if (conf.filters) {
+            for (const filter of conf.filters) {
+                data = filter.filter(data);
+            }
+        }
         if (conf.group) {
             const keyCol = conf.group.key;
             const grouped: { [index: string]: any[][] } = {};

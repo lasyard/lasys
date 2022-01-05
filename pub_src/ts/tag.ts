@@ -20,6 +20,10 @@ export class Tag<T extends HTMLElement> {
         return Tag.of<HTMLDivElement>('div').add(tags);
     }
 
+    public static span(...tags: TagList) {
+        return Tag.of<HTMLSpanElement>('span').add(tags);
+    }
+
     public static p(...tags: TagList) {
         return Tag.of<HTMLParagraphElement>('p').add(tags);
     }
@@ -63,6 +67,11 @@ export class Tag<T extends HTMLElement> {
         return this;
     }
 
+    public name(name: string) {
+        this.element.setAttribute('name', name);
+        return this;
+    }
+
     public cls(cls: string) {
         this.element.className = cls;
         return this;
@@ -94,11 +103,16 @@ export class Tag<T extends HTMLElement> {
         return this;
     }
 
-    public add(obj: string | Tag<HTMLElement> | TagList) {
+    public add(obj: TagContent) {
         if (Array.isArray(obj)) {
             return this.addAll(...obj);
         }
         return this.addAll(obj);
+    }
+
+    public insert(tag: Tag<HTMLElement>, ref: Tag<HTMLElement>) {
+        this.element.insertBefore(tag.element, ref.element);
+        return this;
     }
 
     public event(eventName: string, handler: (e: Event) => any) {
