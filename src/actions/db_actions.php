@@ -136,8 +136,14 @@ final class DbActions extends Actions
         echo '<p class="sys center">Dumping succeed!</p>';
     }
 
-    public static function accessDb($script = null, $labels = [], $rPriv = [], $wPriv = [User::EDIT0])
+    public static function accessDb($script = null, $labels = [], $rPriv = null, $wPriv = null)
     {
+        if ($rPriv === null) {
+            $rPriv = Sys::app()->conf(Config::READ_PRIV);
+        }
+        if ($wPriv === null) {
+            $wPriv = Sys::app()->conf(Config::EDIT_PRIV);
+        }
         return function ($item) use ($script, $labels, $rPriv, $wPriv) {
             $item[Server::GET] = DbActions::get()->priv(...$rPriv);
             $item[Server::AJAX_GET] = DbActions::ajaxGet()->priv(...$rPriv);

@@ -5,6 +5,8 @@ final class Config
     public const TRAITS = 'traits';
     public const READ_ONLY = 'readOnly';
     public const DEFAULT_ITEM = 'defaultItem';
+    public const READ_PRIV = 'readPriv';
+    public const EDIT_PRIV = 'editPriv';
     public const EXCLUDES = 'excludes';
     public const LIST = 'list';
 
@@ -17,6 +19,8 @@ final class Config
         self::TRAITS => [],
         self::READ_ONLY => true,
         self::DEFAULT_ITEM => 'index',
+        self::READ_PRIV => [],
+        self::EDIT_PRIV => [User::OWNER, User::EDIT],
         self::EXCLUDES => ['.*', 'index.*', '_*'],
         self::LIST => [],
     ];
@@ -24,6 +28,8 @@ final class Config
     private const RECURSIVE_CONF = [
         self::READ_ONLY,
         self::DEFAULT_ITEM,
+        self::READ_PRIV,
+        self::EDIT_PRIV,
     ];
 
     private $_path;
@@ -129,7 +135,9 @@ final class Config
         if (isset($list[$name][$type])) {
             $action = $list[$name][$type];
             if ($action instanceof Actions) {
-                return [Actions::ACTION => $action, Actions::PRIV => []];
+                return $action->priv(
+                    ...(Server::isEdit($type) ? $this->_conf[self::EDIT_PRIV] : $this->_conf[self::READ_PRIV])
+                );
             }
             return $action;
         }

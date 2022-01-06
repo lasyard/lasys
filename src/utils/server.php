@@ -57,6 +57,11 @@ final class Server
         return in_array($type, [self::AJAX_GET, self::AJAX_POST, self::AJAX_PUT, self::AJAX_DELETE]);
     }
 
+    public static function isEdit($type)
+    {
+        return !in_array($type, [self::GET, self::AJAX_GET]);
+    }
+
     private static function isAjaxRequest()
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
@@ -105,5 +110,14 @@ final class Server
         header('Content-Disposition: attachment; filename="' . basename($path) . '"');
         header('Content-Transfer-Encoding: binary');
         readfile($path);
+    }
+
+    public static function rawUrl($url)
+    {
+        // ! absolute, protocol, inline, javascript
+        if (strpos($url, ':') === false and !preg_match('/^\//', $url)) {
+            return $url . '?' . self::QUERY_GET_RAW;
+        }
+        return $url;
     }
 }

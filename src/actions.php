@@ -72,6 +72,11 @@ class Actions
         $this->_content = View::renderHtml('error', ['message' => $msg]);
     }
 
+    // As a stub to set priv of directory.
+    public function actionNoop()
+    {
+    }
+
     public function actionDefault(...$args)
     {
         $this->_title = 'default';

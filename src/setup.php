@@ -27,6 +27,7 @@ define('VIEWS_PATH', ROOT_PATH . DS . VIEWS_DIR);
 define('ACTIONS_PATH', ROOT_PATH . DS . ACTIONS_DIR);
 set_include_path(
     get_include_path()
+        . PATH_SEPARATOR . dirname(__DIR__) . DS . 'vendor'
         . PATH_SEPARATOR . __DIR__
         . PATH_SEPARATOR . __DIR__ . DS . 'utils'
         . PATH_SEPARATOR . __DIR__ . DS . 'parsers'

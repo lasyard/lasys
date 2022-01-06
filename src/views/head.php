@@ -15,4 +15,8 @@ foreach ($scripts as $script) {
 foreach ($styles as $style) {
     echo Html::cssLink($style);
 }
-?>
+if (!empty($css)) {
+    echo '<style>', PHP_EOL;
+    echo $css, PHP_EOL;
+    echo '</style>', PHP_EOL;
+}

@@ -25,10 +25,14 @@ final class FileActions extends Actions
         $ext = pathinfo($name, PATHINFO_EXTENSION);
         switch ($ext) {
             case 'txt':
-                return new TextParser($this->path . DS . $name);
+                return TextParser::file($this->path . DS . $name);
+            case 'md':
+                return MdParser::file($this->path . DS . $name);
+            case 'html':
+                return HtmlParser::file($this->path . DS . $name);
             case 'png':
             case 'jpg':
-                return new ImageParser($this->base . $name);
+                return ImageParser::url($this->base . $name);
             default:
                 throw new RuntimeException('Unsupported file type "' . $ext . '".');
         }
@@ -182,13 +186,13 @@ final class FileActions extends Actions
         } else {
             switch ($type) {
                 case Server::GET:
-                    return  FileActions::get()->priv();
+                    return  FileActions::get()->priv(...Sys::app()->conf(Config::READ_PRIV));
                     break;
                 case Server::POST_UPDATE:
-                    return  FileActions::postUpdate()->priv(User::OWNER, User::EDIT);
+                    return  FileActions::postUpdate()->priv(...Sys::app()->conf(Config::EDIT_PRIV));
                     break;
                 case Server::AJAX_DELETE:
-                    return  FileActions::ajaxDelete()->priv(User::OWNER, User::EDIT);
+                    return  FileActions::ajaxDelete()->priv(...Sys::app()->conf(Config::EDIT_PRIV));
                     break;
                 default:
                     break;

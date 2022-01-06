@@ -7,6 +7,7 @@ final class App
     private $_datum = [];
     private $_scripts = [];
     private $_styles = [];
+    private $_css = '';
     private $_base;
     private $_path;
     private $_conf;
@@ -50,7 +51,7 @@ final class App
                 if ($this->hasPrivOf($name, Server::GET)) {
                     $this->_conf->shift($name);
                 } else {
-                    $action = Actions::error('You do not have privilege to view "' . $name . '".');
+                    $action = Actions::error('You do not have privilege to access "' . $name . '".');
                     break;
                 }
             } else {
@@ -96,6 +97,7 @@ final class App
             'datum' => $this->_datum,
             'scripts' => $this->_scripts,
             'styles' => $this->_styles,
+            'css' => $this->_css,
             'base' => $this->_base,
             'breadcrumbs' => $breadcrumbs,
             'buttons' => $list['buttons'],
@@ -253,7 +255,11 @@ final class App
         }
         foreach ($priv as $p) {
             if ($p === User::OWNER) {
-                $meta = $this->_files[$name];
+                $files = $this->_files;
+                if (!array_key_exists($name, $files)) {
+                    return false;
+                }
+                $meta = $files[$name];
                 if (isset($meta['uid']) && $user->hasPriv($meta['uid'])) {
                     continue;
                 }
@@ -344,6 +350,11 @@ final class App
     public function addData($name, $data, $flags = JSON_UNESCAPED_UNICODE)
     {
         $this->_datum[] = 'const ' . $name . ' = ' . json_encode($data, $flags) . ';';
+    }
+
+    public function addCss($css)
+    {
+        $this->_css .= $css;
     }
 
     public function redirect($name)
