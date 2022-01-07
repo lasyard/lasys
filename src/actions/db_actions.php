@@ -32,7 +32,12 @@ final class DbActions extends Actions
                     $attrs['options'] = range(date('Y'), 1970, -1);
                     break;
                 default:
-                    $type = 'text';
+                    if (preg_match('/enum\((.*)\)/', $c['Type'], $matches)) {
+                        $type = 'select';
+                        $attrs['options'] = str_getcsv($matches[1], ',', "'");
+                    } else {
+                        $type = 'text';
+                    }
                     break;
             }
             $fields[$name] = compact('label', 'type', 'primary', 'auto', 'required', 'attrs');

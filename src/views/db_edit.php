@@ -23,5 +23,14 @@
             </div>
         <?php } ?>
     </fieldset>
-    <input type="submit" />
+    <div class="buttons">
+        <input type="submit" />
+        <?php
+        if ($purpose === 'update') {
+            echo '<span id="-insert-new">';
+            echo Html::link(Icon::INSERT, 'javascript:void(0)', 'Insert new');
+            echo '</span>';
+        }
+        ?>
+    </div>
 </form>

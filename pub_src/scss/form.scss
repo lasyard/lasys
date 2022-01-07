@@ -10,8 +10,12 @@ form {
         }
     }
 
-    input[type=submit] {
-        @extend .centered;
+    div.buttons {
+        text-align: center;
+
+        span#-insert-new {
+            float: right;
+        }
     }
 
     div.field {
