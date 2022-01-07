@@ -27,18 +27,16 @@ final class HtmlParserTest extends TestCase
         );
     }
 
-    public function testFullHtml()
+    public function testRawHtml1()
     {
         $html =
             <<<'EOS'
-            <html>
-            <head><title>MyTitle1</title></head>
             <body>
             <h1>MyTitle2</h1>
             </body>
             EOS;
         $htmlParser = HtmlParser::str($html);
-        $this->assertSame('MyTitle1', $htmlParser->title);
+        $this->assertSame('MyTitle2', $htmlParser->title);
         $this->assertSame(
             <<<'EOS'
             <div id="html-body">

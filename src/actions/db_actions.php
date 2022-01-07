@@ -135,25 +135,4 @@ final class DbActions extends Actions
         Sys::db()->dump($this->path);
         echo '<p class="sys center">Dumping succeed!</p>';
     }
-
-    public static function accessDb($script = null, $labels = [], $rPriv = null, $wPriv = null)
-    {
-        if ($rPriv === null) {
-            $rPriv = Sys::app()->conf(Config::READ_PRIV);
-        }
-        if ($wPriv === null) {
-            $wPriv = Sys::app()->conf(Config::EDIT_PRIV);
-        }
-        return function ($item) use ($script, $labels, $rPriv, $wPriv) {
-            $item[Server::GET] = DbActions::get()->priv(...$rPriv);
-            $item[Server::AJAX_GET] = DbActions::ajaxGet()->priv(...$rPriv);
-            $item[Server::AJAX_PUT] = DbActions::ajaxPut()->priv(...$wPriv);
-            $item[Server::POST_UPDATE] = DbActions::postUpdate()->priv(...$wPriv);
-            $item[Server::AJAX_POST] = DbActions::ajaxPost()->priv(...$wPriv);
-            $item[Server::AJAX_DELETE] = DbActions::ajaxDelete()->priv(...$wPriv);
-            $item[DbActions::SCRIPT] = $script;
-            $item[DbActions::LABELS] = $labels;
-            return $item;
-        };
-    }
 }

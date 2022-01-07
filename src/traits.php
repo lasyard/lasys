@@ -1,6 +1,9 @@
 <?php
 abstract class Traits
 {
+    private static $_doUpload = null;
+    private static $_passDownDefaultPage = null;
+
     protected function __construct()
     {
     }
@@ -15,15 +18,32 @@ abstract class Traits
         return $conf;
     }
 
-    public static function passDownDefaultPage()
+    public function forItem($item, $conf)
     {
-        require_once 'traits' . DS . 'pass_down_default_page.php';
-        return PassDownDefaultPage::get();
+        return $item;
+    }
+
+    public static function accessDb($script = null, $labels = [], $rPriv = null, $wPriv = null)
+    {
+        require_once 'traits' . DS . 'access_db.php';
+        return new AccessDb($script, $labels, $rPriv, $wPriv);
     }
 
     public static function doUpload($recursive = true)
     {
-        require_once 'traits' . DS . 'do_upload.php';
-        return DoUpload::get();
+        if (self::$_doUpload === null) {
+            require_once 'traits' . DS . 'do_upload.php';
+            self::$_doUpload = new DoUpload();
+        }
+        return self::$_doUpload;
+    }
+
+    public static function passDownDefaultPage()
+    {
+        if (self::$_passDownDefaultPage === null) {
+            require_once 'traits' . DS . 'pass_down_default_page.php';
+            self::$_passDownDefaultPage = new PassDownDefaultPage();
+        }
+        return self::$_passDownDefaultPage;
     }
 }

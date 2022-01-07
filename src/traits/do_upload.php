@@ -1,14 +1,6 @@
 <?php
 final class DoUpload extends Traits
 {
-    private static $instance = null;
-
-    public static function get()
-    {
-        self::$instance = self::$instance ?? new DoUpload();
-        return self::$instance;
-    }
-
     public function forSelf($conf, $oldConf)
     {
         Arr::copyNonExistingKeys(
@@ -33,7 +25,7 @@ final class DoUpload extends Traits
 
     public function forChild($conf, $oldConf)
     {
-        $conf[Config::TRAITS][] = self::$instance;
+        $conf[Config::TRAITS][] = $this;
         return $conf;
     }
 }

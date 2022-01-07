@@ -77,10 +77,10 @@ final class Config
                 $traits = $item[Config::TRAITS];
                 if (is_array($traits)) {
                     foreach ($traits as $trait) {
-                        $item = $trait($item);
+                        $item = $trait->forItem($item, $conf);
                     }
                 } else {
-                    $item = $traits($item);
+                    $item = $traits->forItem($item, $conf);
                 }
             }
         }
