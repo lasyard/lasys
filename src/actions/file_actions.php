@@ -10,7 +10,7 @@ final class FileActions extends Actions
     public const DEFAULT = [
         self::UPLOAD_TITLE => 'Upload',
         self::SIZE_LIMIT => 65536,
-        self::ACCEPT => 'text/plain',
+        self::ACCEPT => '.txt,text/plain',
     ];
 
     public const UPLOAD_ITEM = '-upload-';
@@ -56,7 +56,13 @@ final class FileActions extends Actions
             ]);
         }
         $btnDelete = $this->hasPrivOf(Server::AJAX_DELETE) ? Icon::DELETE : null;
-        $msg = Icon::TIME . '<em>' . date('Y.m.d H:i:s', $info['time']) . '</em> ' . Icon::USER . $info['uname'];
+        $msg = '';
+        if (isset($info['time'])) {
+            $msg .= Icon::TIME . '<em>' . date('Y.m.d H:i:s', $info['time']) . '</em> ';
+        }
+        if (isset($info['uname'])) {
+            $msg .= Icon::USER . $info['uname'];
+        }
         return [
             'msg' => $msg,
             'btnEdit' => $btnEdit,
@@ -78,6 +84,19 @@ final class FileActions extends Actions
         ];
         $parser = $this->getParser($name);
         $this->_title = $parser->title;
+        if (!empty($parser->scripts)) {
+            foreach ($parser->scripts as $script) {
+                Sys::app()->addScript($script);
+            }
+        }
+        if (!empty($parser->styles)) {
+            foreach ($parser->styles as $style) {
+                Sys::app()->addStyle($style);
+            }
+        }
+        if (!empty($parser->css)) {
+            Sys::app()->addCss($parser->css);
+        }
         $meta = $this->buildMeta();
         if ($meta) {
             View::render('meta', $meta);

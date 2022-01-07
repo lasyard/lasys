@@ -16,7 +16,7 @@ class HtmlParser
     {
         $dom = new DOMDocument();
         $dom->loadHTMLFile($file);
-        return new HtmlParser($file);
+        return new HtmlParser($dom);
     }
 
     public static function str($str)

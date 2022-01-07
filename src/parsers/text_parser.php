@@ -31,7 +31,7 @@ final class TextParser
         $html = '<div class="text">' . PHP_EOL;
         $html .= '<h1>' . $this->_title . '</h1>' . PHP_EOL;
         $pOpen = false;
-        foreach ($lines as &$line) {
+        foreach ($lines as $line) {
             if (empty(trim($line))) {
                 if ($pOpen) {
                     $html .= "</p>" . PHP_EOL;
