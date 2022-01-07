@@ -71,6 +71,9 @@ final class App
         }
         // This is needed when calling action->do, e.g., for file uploading.
         $this->createFileList();
+        $this->addScript('js' . DS . 'main');
+        $this->addStyle('css' . DS . 'main');
+        $this->addStyle('lib' . DS . 'bootstrap-icons');
         $actionDo = $action[Actions::ACTION];
         if ($this->hasPriv($this->_name, $action[Actions::PRIV])) {
             $actionDo->do($args, $this->_base, $this->_path, $this->_name);
@@ -87,9 +90,6 @@ final class App
         if ($subTitle) {
             $title .= ' - ' . $subTitle;
         }
-        $this->addScript('js' . DS . 'main');
-        $this->addStyle('css' . DS . 'main');
-        $this->addStyle('lib' . DS . 'bootstrap-icons');
         $list = $this->createItemList();
         $this->_vars = [
             'home' => $this->_home,

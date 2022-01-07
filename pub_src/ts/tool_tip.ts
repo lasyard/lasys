@@ -27,10 +27,7 @@ export class ToolTip {
                 Tag.icon('x-circle sys').event('click', this.hide.bind(this)),
             ),
             this.divBody,
-        ).id('-tool-tip-')
-            .event('click', (e) => e.stopPropagation())
-            .emerge();
-        document.body.addEventListener('click', this.hide.bind(this));
+        ).id('-tool-tip-').emerge().outClickHide();
     }
 
     public static get() {
@@ -52,7 +49,7 @@ export class ToolTip {
     }
 
     public hide() {
-        this.divTip.style({ display: 'none' });
+        this.divTip.hide();
     }
 
     private show(e: MouseEvent, info: ToolTipContent) {
@@ -67,7 +64,7 @@ export class ToolTip {
         const x = e.pageX;
         const y = e.pageY;
         const divTip = this.divTip;
-        divTip.style({ left: x + 'px', top: y + 'px', display: 'block' });
+        divTip.style({ left: x + 'px', top: y + 'px' }).show();
         const width = divTip.get().offsetWidth;
         const right = e.clientX + width / 2 - document.documentElement.clientWidth;
         let left = x - width / 2;
@@ -82,7 +79,7 @@ export class ToolTip {
         if (bottom > 0) {
             top = y - height;
         }
-        divTip.style({ left: left + 'px', top: top + 'px', display: 'block' });
+        divTip.style({ left: left + 'px', top: top + 'px' });
         e.stopPropagation();
     }
 }

@@ -13,19 +13,19 @@ final class Sys
 
     public static function app()
     {
-        self::$_app = self::$_app ?? new App;
+        self::$_app ??= new App;
         return self::$_app;
     }
 
     public static function db()
     {
-        self::$_db = self::$_db ?? new Db;
+        self::$_db ??= new Db;
         return self::$_db;
     }
 
     public static function user()
     {
-        self::$_user = self::$_user ?? new User();
+        self::$_user ??= new User();
         return self::$_user;
     }
 }

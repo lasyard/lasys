@@ -1,10 +1,10 @@
 <form <?php
         if (isset($attrs)) {
             foreach ($attrs as $key => $value) {
-                echo $key . '="' . $value . '" ';
+                echo $key, '="', $value, '" ';
             }
         }
-        ?>action="<?php echo $action ?? ''; ?>" method="<?php echo $method ?? 'POST'; ?>">
+        ?>name="<?php echo $name; ?>" action="<?php echo $action ?? ''; ?>" method="<?php echo $method ?? 'POST'; ?>">
     <fieldset>
         <legend><?php echo $title; ?></legend>
         <?php foreach ($fields as $name => $f) {

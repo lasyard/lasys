@@ -23,10 +23,10 @@ abstract class Traits
         return $item;
     }
 
-    public static function accessDb($script = null, $labels = [], $rPriv = null, $wPriv = null)
+    public static function accessDb($rPriv = null, $wPriv = null)
     {
         require_once 'traits' . DS . 'access_db.php';
-        return new AccessDb($script, $labels, $rPriv, $wPriv);
+        return new AccessDb($rPriv, $wPriv);
     }
 
     public static function doUpload($recursive = true)

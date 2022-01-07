@@ -161,6 +161,27 @@ export class Tag<T extends HTMLElement> {
         return this;
     }
 
+    public show() {
+        this.element.style.display = 'block';
+        return this;
+    }
+
+    public hide() {
+        this.element.style.display = 'none';
+        return this;
+    }
+
+    public outClickHide() {
+        const element = this.element;
+        document.body.addEventListener('click', (e) => {
+            element.style.display = 'none';
+        });
+        this.event('click', (e) => {
+            e.stopPropagation();
+        });
+        return this;
+    }
+
     public emerge() {
         document.body.appendChild(this.element);
         return this;

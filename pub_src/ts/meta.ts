@@ -3,20 +3,16 @@ import { Ajax, MimeType } from "./ajax";
 import { Tag } from './tag';
 
 onLoad(function () {
-    const btnEdit = Tag.byId('-meta-btn-edit-');
-    const btnDelete = Tag.byId('-meta-btn-delete-');
-    const divForm = Tag.byId('-meta-div-edit-form-');
+    const btnEdit = Tag.byId('-meta-btn-edit');
+    const btnDelete = Tag.byId('-meta-btn-delete');
+    const divForm = Tag.byId('-meta-div-edit-form');
+    const ajaxMsg = Tag.byId('-ajax-msg');
     if (btnEdit && divForm) {
         btnEdit.event('click', (e) => {
-            divForm.style({ display: 'block' });
+            divForm.show();
             e.stopPropagation();
         });
-        document.body.addEventListener('click', (e) => {
-            divForm.style({ display: 'none' });
-        });
-        divForm.event('click', (e) => {
-            e.stopPropagation();
-        });
+        divForm.outClickHide();
     }
     if (btnDelete) {
         btnDelete.event('click', () => {
@@ -27,5 +23,8 @@ onLoad(function () {
                 }, '', MimeType.HTML);
             }
         });
+    }
+    if (ajaxMsg) {
+        ajaxMsg.outClickHide();
     }
 });

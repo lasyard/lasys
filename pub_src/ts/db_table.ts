@@ -52,6 +52,7 @@ export class DbTable {
     private dataSet: DataSet;
     private conf: DbTableConfig;
     private panel: Tag<HTMLElement> = null;
+    private divFilters: Tag<HTMLDivElement> = null;
     private divData: Tag<HTMLDivElement> = null;
     private updateForm: Tag<HTMLFormElement> = null;
 
@@ -61,15 +62,51 @@ export class DbTable {
 
     private data(dataSet: DataSet) {
         this.dataSet = dataSet;
-        if (this.conf.filters) {
+        if (this.divFilters) {
+            const div = this.divFilters;
+            div.clear();
             for (const filter of this.conf.filters) {
-                this.panel.insert(
-                    filter.render(dataSet.data, dataSet.columns, this.refresh.bind(this)),
-                    this.divData
-                );
+                div.add(filter.render(dataSet.data, dataSet.columns, this.refresh.bind(this)));
             }
         }
         return this;
+    }
+
+    private setFormData(data: any[]) {
+        const ci = this.dataSet.columns;
+        const form = this.updateForm;
+        for (const col in ci) {
+            const field = form.get().elements.namedItem(col);
+            if (field instanceof HTMLInputElement) {
+                (field as HTMLInputElement).value = data[ci[col]];
+            } else if (field instanceof HTMLTextAreaElement) {
+                (field as HTMLTextAreaElement).value = data[ci[col]];
+            } else if (field instanceof HTMLSelectElement) {
+                (field as HTMLSelectElement).value = data[ci[col]];
+            }
+        }
+    }
+
+    private static retrieveFormData(form: HTMLFormElement) {
+        const data: { [index: string]: any } = {};
+        for (let i = 0; i < form.elements.length; ++i) {
+            const f = form.elements[i];
+            if (
+                f instanceof HTMLInputElement
+                || f instanceof HTMLTextAreaElement
+                || f instanceof HTMLSelectElement
+            ) {
+                if (f.type === 'submit') {
+                    continue;
+                }
+                data[f.name] = f.value;
+            }
+        }
+        return data;
+    }
+
+    private static showMsg(msg: string) {
+        Tag.byId('-ajax-msg').html(msg).show();
     }
 
     render(panelId: string) {
@@ -77,27 +114,21 @@ export class DbTable {
         if (!panel) {
             return;
         }
+        if (this.conf.filters) {
+            this.divFilters = Tag.div().putInto(panel);
+        }
         this.divData = Tag.div().putInto(panel);
         this.panel = panel;
         const insertForm = Tag.form('-form-db-insert');
         if (insertForm) {
             insertForm.ajaxfy(
                 function (res) {
-                    Tag.byId('ajax-msg').html(res);
+                    Tag.byId('-meta-div-edit-form').hide();
+                    DbTable.showMsg(res);
                     self.loadData();
                 },
                 function (form) {
-                    const data: { [index: string]: any } = {};
-                    for (let i = 0; i < form.elements.length; ++i) {
-                        const f = form.elements[i];
-                        if (f instanceof HTMLInputElement) {
-                            if (f.type === 'submit') {
-                                continue;
-                            }
-                            data[f.name] = f.value;
-                        }
-                    }
-                    return data;
+                    return DbTable.retrieveFormData(form);
                 },
                 HttpMethod.POST,
                 MimeType.HTML,
@@ -106,22 +137,19 @@ export class DbTable {
         const updateForm = Tag.form('-form-db-update');
         const self = this;
         if (updateForm) {
-            updateForm.vanish().style({ display: 'block' }).ajaxfy(
+            updateForm.vanish().show().ajaxfy(
                 function (res) {
-                    Tag.byId('ajax-msg').html(res);
                     ToolTip.get().hide();
+                    DbTable.showMsg(res);
                     self.loadData();
                 },
                 function (form) {
+                    const data = DbTable.retrieveFormData(form);
                     const keys: { [index: string]: any } = {};
-                    const data: { [index: string]: any } = {};
-                    for (let i = 0; i < form.elements.length; ++i) {
-                        const f = form.elements[i];
-                        if (f instanceof HTMLInputElement) {
-                            if (f.type === 'submit') {
-                                continue;
-                            }
-                            (TABLE_KEY_FIELDS.includes(f.name) ? keys : data)[f.name] = f.value;
+                    for (const key of TABLE_KEY_FIELDS) {
+                        if (key in data) {
+                            keys[key] = data[key];
+                            delete data[key];
                         }
                     }
                     return { keys: keys, data: data };
@@ -139,21 +167,6 @@ export class DbTable {
             t.add(data[ci[fun]]);
         } else if (typeof fun === 'function') {
             t.add(fun((col) => data[ci[col]]));
-        }
-    }
-
-    private setFormData(data: any[]) {
-        const ci = this.dataSet.columns;
-        const form = this.updateForm;
-        for (const col in ci) {
-            const field = form.get().elements.namedItem(col);
-            if (field instanceof HTMLInputElement) {
-                (field as HTMLInputElement).value = data[ci[col]];
-            } else if (field instanceof HTMLTextAreaElement) {
-                (field as HTMLTextAreaElement).value = data[ci[col]];
-            } else if (field instanceof HTMLSelectElement) {
-                (field as HTMLSelectElement).value = data[ci[col]];
-            }
         }
     }
 
@@ -263,7 +276,6 @@ export class DbTable {
         let tr = null;
         const cols = this.conf.cols;
         const self = this;
-        const divData = this.divData;
         for (const dt of data) {
             if (colCount == 0) {
                 tr = Tag.of('tr').cls(alt ? 'alt' : 'def');
@@ -294,7 +306,7 @@ export class DbTable {
                                 url.searchParams.append(keyColumn, dt[ci[keyColumn]]);
                             }
                             Ajax.delete(function (res) {
-                                Tag.byId('ajax-msg').html(res);
+                                DbTable.showMsg(res);
                                 self.loadData();
                             }, url.href, MimeType.HTML);
                         }

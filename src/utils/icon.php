@@ -13,6 +13,7 @@ final class Icon
     public const INSERT = '<i class="bi bi-plus-square"></i>';
     public const TIME = '<i class="bi bi-clock"></i>';
     public const INFO = '<i class="bi bi-info-circle"></i>';
+    public const WARN = '<i class="bi bi-exclamation-triangle-fill"></i>';
 
     private function __construct()
     {

@@ -4,6 +4,7 @@ final class DbActions extends Actions
     // configs
     public const SCRIPT = 'db:script';
     public const LABELS = 'db:labels';
+    public const INSERT_FORM = 'db:insertForm';
 
     private function getLabel($name)
     {
@@ -45,12 +46,11 @@ final class DbActions extends Actions
         $btnEdit = null;
         if ($this->hasPrivOf(Server::POST_UPDATE)) {
             $btnEdit = Icon::INSERT;
-            $editForm = View::renderHtml('db_edit', [
+            $formView = $this->conf(self::INSERT_FORM) ?? 'db_edit';
+            $editForm = View::renderHtml($formView, [
                 'title' => Icon::INSERT . ' ' . $this->name,
                 'fields' => $fields,
-                'attrs' => [
-                    'name' => '-form-db-insert',
-                ],
+                'name' => '-form-db-insert',
                 'purpose' => 'insert',
             ]);
         }
@@ -78,8 +78,8 @@ final class DbActions extends Actions
             View::render('db_edit', [
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'fields' => $fields,
+                'name' => '-form-db-update',
                 'attrs' => [
-                    'name' => '-form-db-update',
                     'style' => 'display:none',
                 ],
                 'purpose' => 'update',
@@ -105,7 +105,7 @@ final class DbActions extends Actions
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $row = Sys::db()->update($this->name, $data['keys'], $data['data']);
-        echo 'Succeeded to update ', $row, ' records.';
+        self::echoInfo('Succeeded to update ' . $row . ' records.');
     }
 
     // This is not used because of ajaxfy.
@@ -121,18 +121,28 @@ final class DbActions extends Actions
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $row = Sys::db()->insert($this->name, $data);
-        echo 'Succeeded to insert ', $row, ' records.';
+        self::echoInfo('Succeeded to insert ' . $row . ' records.');
     }
 
     public function actionAjaxDelete()
     {
         $row = Sys::db()->delete($this->name, $_GET);
-        echo Icon::INFO, 'Succeeded to delete ', $row, ' records.';
+        self::echoINfo('Succeeded to delete ' . $row . ' records.');
     }
 
     public function actionDump()
     {
         Sys::db()->dump($this->path);
         echo '<p class="sys center">Dumping succeed!</p>';
+    }
+
+    public static function echoInfo($msg)
+    {
+        echo '<p class="center">', Icon::INFO, ' ', $msg, '</p>', PHP_EOL;
+    }
+
+    public static function echoHotInfo($msg)
+    {
+        echo '<p class="hot center">', Icon::WARN, ' ', $msg, '</p>', PHP_EOL;
     }
 }
