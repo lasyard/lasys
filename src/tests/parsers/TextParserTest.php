@@ -40,8 +40,10 @@ final class TextParserTest extends TestCase
         <h2>1. abc</h2>
         <p>def</p>
         <h3>1.1 abcd</h3>
-        <p>abcd<br />
-        efgh</p>
+        <ul>
+        <li>abcd</li>
+        <li>efgh</li>
+        </ul>
         <h2>2. ghi</h2>
         <p>jkl</p>
         <p>see <a href="http://lasys" target="_blank">http://lasys</a></p>

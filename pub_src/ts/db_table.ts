@@ -8,8 +8,6 @@ import { Filter } from './filter';
 export type ColumnIndices = { [index: string]: number };
 
 interface DataSet {
-    canEdit?: boolean;
-    canDelete?: boolean;
     columns: ColumnIndices;
     labels: string[];
     data: any[][];
@@ -46,7 +44,8 @@ interface DbTableConfig {
     stat?: ((count: number) => TagContent) | StatObject;
 }
 
-declare const TABLE_KEY_FIELDS: string[];
+declare const _TABLE_FIELDS: { [index: string]: { primary: boolean, auto: boolean } };
+declare const _TABLE_CAN_DELETE: boolean;
 
 export class DbTable {
     private dataSet: DataSet;
@@ -137,19 +136,35 @@ export class DbTable {
         const updateForm = Tag.form('-form-db-update');
         const self = this;
         if (updateForm) {
+            const callback = function (res: string) {
+                ToolTip.get().hide();
+                DbTable.showMsg(res);
+                self.loadData();
+            };
+            // Do this before updateForm vanished.
+            const btn = Tag.byId('-span-insert-new').find('a');
+            if (btn) {
+                btn.event('click', function (e) {
+                    const form = updateForm.get();
+                    const data = DbTable.retrieveFormData(form);
+                    for (const f in _TABLE_FIELDS) {
+                        if (_TABLE_FIELDS[f].auto) {
+                            delete data[f];
+                        }
+                    }
+                    Ajax.call(callback, HttpMethod.POST, JSON.stringify(data), form.action, MimeType.HTML);
+                    e.preventDefault();
+                });
+            }
             updateForm.vanish().show().ajaxfy(
-                function (res) {
-                    ToolTip.get().hide();
-                    DbTable.showMsg(res);
-                    self.loadData();
-                },
+                callback,
                 function (form) {
                     const data = DbTable.retrieveFormData(form);
                     const keys: { [index: string]: any } = {};
-                    for (const key of TABLE_KEY_FIELDS) {
-                        if (key in data) {
-                            keys[key] = data[key];
-                            delete data[key];
+                    for (const f in data) {
+                        if (_TABLE_FIELDS[f].primary) {
+                            keys[f] = data[f];
+                            delete data[f];
                         }
                     }
                     return { keys: keys, data: data };
@@ -208,15 +223,13 @@ export class DbTable {
                 DbTable.addContent(th, labels, col.th, ci);
                 th.putInto(headers);
             }
-            if (Array.isArray(TABLE_KEY_FIELDS)) {
-                if (dataSet.canEdit) {
-                    Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
-                    Tag.of('th').putInto(headers);
-                }
-                if (dataSet.canDelete) {
-                    Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
-                    Tag.of('th').putInto(headers);
-                }
+            if (this.updateForm) {
+                Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
+                Tag.of('th').putInto(headers);
+            }
+            if (_TABLE_CAN_DELETE) {
+                Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
+                Tag.of('th').putInto(headers);
             }
         }
         const table = Tag.of<HTMLTableElement>('table').cls('stylized').addAll(colgroup, headers);
@@ -286,32 +299,32 @@ export class DbTable {
                 DbTable.addContent(td, dt, col.td, ci);
                 tr.add(td);
             }
-            if (Array.isArray(TABLE_KEY_FIELDS)) {
-                if (dataSet.canEdit) {
-                    Tag.of('td').add(Tag.icon('pencil-square')).putInto(tr).toolTip(function () {
-                        const data = dt;
-                        self.setFormData(data);
-                        return {
-                            body: self.updateForm,
-                            width: '70%',
-                        }
-                    });
-                }
-                if (dataSet.canDelete) {
-                    Tag.of('td').add(Tag.icon('x-square')).putInto(tr).event('click', () => {
-                        const r = confirm('Are you sure to delete item [' + dt + ']?');
-                        if (r) {
-                            const url = new URL(window.location.href);
-                            for (const keyColumn of TABLE_KEY_FIELDS) {
-                                url.searchParams.append(keyColumn, dt[ci[keyColumn]]);
+            if (this.updateForm) {
+                Tag.of('td').add(Tag.icon('pencil-square')).putInto(tr).toolTip(function () {
+                    const data = dt;
+                    self.setFormData(data);
+                    return {
+                        body: self.updateForm,
+                        width: '70%',
+                    }
+                });
+            }
+            if (_TABLE_CAN_DELETE) {
+                Tag.of('td').add(Tag.icon('x-square')).putInto(tr).event('click', () => {
+                    const r = confirm('Are you sure to delete item [' + dt + ']?');
+                    if (r) {
+                        const url = new URL(window.location.href);
+                        for (const f in _TABLE_FIELDS) {
+                            if (_TABLE_FIELDS[f].primary) {
+                                url.searchParams.append(f, dt[ci[f]]);
                             }
-                            Ajax.delete(function (res) {
-                                DbTable.showMsg(res);
-                                self.loadData();
-                            }, url.href, MimeType.HTML);
                         }
-                    });
-                }
+                        Ajax.delete(function (res) {
+                            DbTable.showMsg(res);
+                            self.loadData();
+                        }, url.href, MimeType.HTML);
+                    }
+                });
             }
             colCount++;
             if (colCount == columns) {

@@ -244,6 +244,10 @@ div#main {
             @extend .nobr;
             float: right;
         }
+
+        div#-ajax-msg {
+            background-color: $whiteColor;
+        }
     }
 
     img {

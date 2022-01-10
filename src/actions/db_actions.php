@@ -73,10 +73,13 @@ final class DbActions extends Actions
         Sys::app()->addScript('js' . DS . 'db_table');
         $columns = Sys::db()->getColumns($this->name);
         $fields = $this->buildFields($columns);
-        $keyFields = array_keys(array_filter($fields, function ($f) {
-            return $f['primary'];
-        }));
-        Sys::app()->addData('TABLE_KEY_FIELDS', $keyFields);
+        Sys::app()->addData('_TABLE_FIELDS', array_map(function ($v) {
+            return [
+                'primary' => $v['primary'],
+                'auto' => $v['auto']
+            ];
+        }, $fields));
+        Sys::app()->addData('_TABLE_CAN_DELETE', $this->hasPrivOf(Server::AJAX_DELETE));
         $meta = $this->buildMeta($fields);
         View::render('meta', $meta);
         if ($this->hasPrivOf(Server::AJAX_PUT)) {
@@ -96,8 +99,6 @@ final class DbActions extends Actions
     {
         $sql = 'select * from ' . $this->name;
         $result = Sys::db()->getDataSet($sql);
-        $result['canEdit'] = $this->hasPrivOf(Server::AJAX_PUT);
-        $result['canDelete'] = $this->hasPrivOf(Server::AJAX_DELETE);
         $labels = [];
         foreach ($result['columns'] as $name => $index) {
             $labels[$index] = $this->getLabel($name);
@@ -132,7 +133,7 @@ final class DbActions extends Actions
     public function actionAjaxDelete()
     {
         $row = Sys::db()->delete($this->name, $_GET);
-        self::echoINfo('Succeeded to delete ' . $row . ' records.');
+        self::echoInfo('Succeeded to delete ' . $row . ' records.');
     }
 
     public function actionDump()

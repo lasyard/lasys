@@ -66,6 +66,10 @@ export class Tag<T extends HTMLElement> {
         return this.element.tagName;
     }
 
+    public find(tagName: string, index: number = 0) {
+        return new Tag(this.element.getElementsByTagName(tagName)[index] as HTMLElement);
+    }
+
     public id(id: string) {
         this.element.id = id;
         return this;
