@@ -7,5 +7,9 @@ div#main {
         p {
             text-indent: 2em+$letterSpacing*2;
         }
+
+        ul {
+            list-style: none;
+        }
     }
 }

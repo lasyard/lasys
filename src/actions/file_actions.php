@@ -83,7 +83,7 @@ final class FileActions extends Actions
             'ETag: "' . md5(Sys::user()->name . filemtime($file)) . '"',
         ];
         $parser = $this->getParser($name);
-        $this->_title = $parser->title;
+        $this->_title = $parser->title ?? null;
         if (!empty($parser->scripts)) {
             foreach ($parser->scripts as $script) {
                 Sys::app()->addScript($script);

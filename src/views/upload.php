@@ -11,5 +11,7 @@
             <input type="text" name="title" />
         </div>
     </fieldset>
-    <input type="submit" />
+    <div class="buttons">
+        <input type="submit" />
+    </div>
 </form>

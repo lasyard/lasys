@@ -25,32 +25,37 @@ final class TextParser
         return new TextParser($lines);
     }
 
+    private static function packLines($lines)
+    {
+        $html = '';
+        $c = count($lines);
+        if ($c == 1) {
+            $html .= '<p>' . $lines[0] . '</p>' . PHP_EOL;
+        } else if ($c > 1) {
+            $html .= '<ul>' . PHP_EOL;
+            foreach ($lines as $line) {
+                $html .= '<li>' . $line . '</li>' . PHP_EOL;
+            }
+            $html .= '</ul>' . PHP_EOL;
+        }
+        return $html;
+    }
+
     private function content()
     {
         $lines = $this->_lines;
         $html = '<div class="text">' . PHP_EOL;
         $html .= '<h1>' . $this->_title . '</h1>' . PHP_EOL;
-        $pOpen = false;
+        $cLines = [];
         foreach ($lines as $line) {
             if (empty(trim($line))) {
-                if ($pOpen) {
-                    $html .= "</p>" . PHP_EOL;
-                    $pOpen = false;
-                }
+                $html .= self::packLines($cLines);
+                $cLines = [];
             } else {
-                if (!$pOpen) {
-                    $html .= "<p>";
-                    $pOpen = true;
-                } else {
-                    $html .= "<br />" . PHP_EOL;
-                }
-                $html .= Str::filterLinks(htmlspecialchars($line));
+                $cLines[] = Str::filterLinks(htmlspecialchars($line));
             }
         }
-        if ($pOpen) {
-            $html .= "</p>" . PHP_EOL;
-            $pOpen = false;
-        }
+        $html .= self::packLines(($cLines));
         $html .= '</div>';
         $html = Text::markTitle($html);
         return $html;
