@@ -8,11 +8,17 @@ final class TextParser
     private const POEM_LINE_THRESHOLD = 40;
 
     private $_title;
+    private $_info;
 
     private $_lines;
 
     private function __construct($lines)
     {
+        $numChars = 0;
+        foreach ($lines as $line) {
+            $numChars += mb_strlen($line, 'UTF-8');
+        }
+        $this->_info = ' ' . Icon::INFO . $numChars . ' characters';
         $this->_title = array_shift($lines);
         $this->_lines = $lines;
     }
@@ -57,7 +63,7 @@ final class TextParser
                     $type = 'norm';
                     break;
                 }
-            } else if (mb_strlen($line) <= self::POEM_LINE_THRESHOLD) {
+            } else if (mb_strlen($line, 'UTF-8') <= self::POEM_LINE_THRESHOLD) {
                 $type ??= 'poem';
                 if ($type !== 'poem') {
                     $type = 'norm';

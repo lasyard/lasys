@@ -32,7 +32,7 @@ final class FileActions extends Actions
                 return HtmlParser::file($this->path . DS . $name);
             case 'png':
             case 'jpg':
-                return ImageParser::url($this->base . $name);
+                return ImageParser::fileUrl($this->path . DS . $name, $this->base . $name);
             default:
                 throw new RuntimeException('Unsupported file type "' . $ext . '".');
         }
@@ -99,6 +99,9 @@ final class FileActions extends Actions
         }
         $meta = $this->buildMeta();
         if ($meta) {
+            if (!empty($parser->info)) {
+                $meta['msg'] .= $parser->info;
+            }
             View::render('meta', $meta);
         }
         echo $parser->content;

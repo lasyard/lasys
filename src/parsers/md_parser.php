@@ -7,8 +7,11 @@ final class MdParser
 
     private $_htmlParser;
 
+    private $_info;
+
     private function __construct($text)
     {
+        $this->_info = ' ' . Icon::INFO . mb_strlen($text, 'UTF-8') . ' characters';
         $parsedown = new Parsedown();
         $parsedown->setSafeMode(true);
         $html = $parsedown->text($text);
