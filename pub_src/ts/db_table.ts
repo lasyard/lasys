@@ -2,7 +2,7 @@ import { SortFun } from './common';
 import { Tag, TagContent } from './tag';
 import { ToolTip } from './tool_tip';
 import { onLoad } from './html';
-import { MimeType, Ajax, HttpMethod } from './ajax';
+import { MimeType, Ajax } from './ajax';
 import { Filter } from './filter';
 
 export type ColumnIndices = { [index: string]: number };
@@ -50,7 +50,6 @@ declare const _TABLE_CAN_DELETE: boolean;
 export class DbTable {
     private dataSet: DataSet;
     private conf: DbTableConfig;
-    private panel: Tag<HTMLElement> = null;
     private divFilters: Tag<HTMLDivElement> = null;
     private divData: Tag<HTMLDivElement> = null;
     private updateForm: Tag<HTMLFormElement> = null;
@@ -68,6 +67,11 @@ export class DbTable {
                 div.add(filter.render(dataSet.data, dataSet.columns, this.refresh.bind(this)));
             }
         }
+        if (!this.conf.cols) {
+            this.conf.cols = Object.keys(dataSet.columns).map(
+                c => ({ th: c, td: c } as ColumnDefinition)
+            );
+        }
         return this;
     }
 
@@ -77,7 +81,13 @@ export class DbTable {
         for (const col in ci) {
             const field = form.get().elements.namedItem(col);
             if (field instanceof HTMLInputElement) {
-                (field as HTMLInputElement).value = data[ci[col]];
+                const f = field as HTMLInputElement;
+                const v = data[ci[col]];
+                if (f.type === 'checkbox') {
+                    f.checked = (v == '1' ? true : false);
+                } else {
+                    f.value = v;
+                }
             } else if (field instanceof HTMLTextAreaElement) {
                 (field as HTMLTextAreaElement).value = data[ci[col]];
             } else if (field instanceof HTMLSelectElement) {
@@ -98,7 +108,11 @@ export class DbTable {
                 if (f.type === 'submit') {
                     continue;
                 }
-                data[f.name] = f.value;
+                if (f.type === 'checkbox') {
+                    data[f.name] = (f as HTMLInputElement).checked ? 1 : 0;
+                } else {
+                    data[f.name] = f.value;
+                }
             }
         }
         return data;
@@ -117,71 +131,89 @@ export class DbTable {
             this.divFilters = Tag.div().putInto(panel);
         }
         this.divData = Tag.div().putInto(panel);
-        this.panel = panel;
+        const self = this;
         const insertForm = Tag.form('-form-db-insert');
         if (insertForm) {
-            insertForm.ajaxfy(
-                function (res) {
-                    Tag.byId('-meta-div-edit-form').hide();
-                    DbTable.showMsg(res);
-                    self.loadData();
-                },
-                function (form) {
-                    return DbTable.retrieveFormData(form);
-                },
-                HttpMethod.POST,
-                MimeType.HTML,
-            );
+            const form = insertForm.get();
+            const action = form.getAttribute('action');
+            insertForm.event('submit', function (e) {
+                const data = DbTable.retrieveFormData(form);
+                Ajax.post(
+                    function (res) {
+                        Tag.byId('-meta-div-edit-form').hide();
+                        DbTable.showMsg(res);
+                        self.loadData();
+                    },
+                    JSON.stringify(data),
+                    action,
+                    MimeType.JSON,
+                    MimeType.HTML
+                );
+                e.preventDefault();
+            });
         }
         const updateForm = Tag.form('-form-db-update');
-        const self = this;
         if (updateForm) {
             const callback = function (res: string) {
                 ToolTip.get().hide();
                 DbTable.showMsg(res);
                 self.loadData();
             };
+            const form = updateForm.get();
+            // Do not use `form.action`, which may overrided by an input named `action`.
+            const action = form.getAttribute('action');
             // Do this before updateForm vanished.
             const btn = Tag.byId('-span-insert-new').find('a');
             if (btn) {
                 btn.event('click', function (e) {
-                    const form = updateForm.get();
                     const data = DbTable.retrieveFormData(form);
                     for (const f in _TABLE_FIELDS) {
                         if (_TABLE_FIELDS[f].auto) {
                             delete data[f];
                         }
                     }
-                    Ajax.call(callback, HttpMethod.POST, JSON.stringify(data), form.action, MimeType.HTML);
+                    Ajax.post(
+                        callback,
+                        JSON.stringify(data),
+                        action,
+                        MimeType.JSON,
+                        MimeType.HTML
+                    );
                     e.preventDefault();
                 });
             }
-            updateForm.vanish().show().ajaxfy(
-                callback,
-                function (form) {
-                    const data = DbTable.retrieveFormData(form);
-                    const keys: { [index: string]: any } = {};
-                    for (const f in data) {
-                        if (_TABLE_FIELDS[f].primary) {
-                            keys[f] = data[f];
-                            delete data[f];
-                        }
+            updateForm.vanish().show().event('submit', function (e) {
+                const data = DbTable.retrieveFormData(form);
+                const keys: { [index: string]: any } = {};
+                for (const f in data) {
+                    if (_TABLE_FIELDS[f].primary) {
+                        keys[f] = data[f];
+                        delete data[f];
                     }
-                    return { keys: keys, data: data };
-                },
-                HttpMethod.PUT,
-                MimeType.HTML,
-            );
+                }
+                Ajax.put(
+                    callback,
+                    JSON.stringify({ keys: keys, data: data }),
+                    action,
+                    MimeType.JSON,
+                    MimeType.HTML
+                );
+                e.preventDefault();
+            });
             this.updateForm = updateForm;
         }
         return this;
     }
 
     private static addContent(t: Tag<HTMLElement>, data: any[], fun: string | ContentFun, ci: ColumnIndices) {
+        let c: any;
         if (typeof fun === 'string') {
-            t.add(data[ci[fun]]);
+            c = data[ci[fun]];
         } else if (typeof fun === 'function') {
-            t.add(fun((col) => data[ci[col]]));
+            c = fun((col) => data[ci[col]])
+        }
+        if (c) {
+            t.add(c);
         }
     }
 

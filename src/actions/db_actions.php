@@ -4,12 +4,19 @@ final class DbActions extends Actions
     // configs
     public const SCRIPT = 'db:script';
     public const LABELS = 'db:labels';
+    public const READ_ONLY = 'db:readOnly';
     public const INSERT_FORM = 'db:insertForm';
 
     private function getLabel($name)
     {
         $labels = $this->conf(self::LABELS);
         return ($labels && array_key_exists($name, $labels)) ? $labels[$name] : ucfirst($name);
+    }
+
+    private function getReadOnly($name)
+    {
+        $ro = $this->conf(self::READ_ONLY);
+        return $ro && in_array($name, $ro);
     }
 
     private function buildFields($columns)
@@ -21,6 +28,7 @@ final class DbActions extends Actions
             $auto = ($c['Extra'] == 'auto_increment');
             $required = ($c['Null'] !== 'YES' && !isset($c['Default']));
             $label = $this->getLabel($name);
+            $readOnly = $this->getReadOnly($name);
             $attrs = [];
             switch ($c['Type']) {
                 case 'text':
@@ -31,6 +39,20 @@ final class DbActions extends Actions
                     $type = 'select';
                     $attrs['options'] = range(date('Y'), 1970, -1);
                     break;
+                case 'datetime':
+                    $type = 'datetime-local';
+                    break;
+                case 'int':
+                case 'bigint':
+                    $type = 'number';
+                    break;
+                case 'tinyint(1)':
+                    if (in_array('bool', explode(',', $c['Comment']))) {
+                        $type = 'checkbox';
+                    } else {
+                        $type = 'number';
+                    }
+                    break;
                 default:
                     if (preg_match('/enum\((.*)\)/', $c['Type'], $matches)) {
                         $type = 'select';
@@ -40,7 +62,7 @@ final class DbActions extends Actions
                     }
                     break;
             }
-            $fields[$name] = compact('label', 'type', 'primary', 'auto', 'required', 'attrs');
+            $fields[$name] = compact('label', 'type', 'primary', 'auto', 'required', 'readOnly', 'attrs');
         }
         return $fields;
     }

@@ -1,4 +1,3 @@
-import { Ajax, AjaxCallback, HttpMethod, MimeType } from './ajax';
 import { ToolTip, ToolTipContent } from './tool_tip';
 
 type TagList = (Tag<HTMLElement> | any)[];
@@ -106,7 +105,8 @@ export class Tag<T extends HTMLElement> {
 
     public addAll(...tags: TagList) {
         for (const tag of tags) {
-            this.element.appendChild(tag instanceof Tag ? tag.element : new Text(tag.toString()));
+            const e = tag instanceof Tag ? tag.element : new Text(tag.toString());
+            this.element.appendChild(e);
         }
         return this;
     }
@@ -130,24 +130,6 @@ export class Tag<T extends HTMLElement> {
 
     public toolTip(info: ToolTipContent): Tag<T> {
         return ToolTip.get().on(this, info);
-    }
-
-    public ajaxfy(
-        cb: AjaxCallback,
-        dataCallback: (form: HTMLFormElement) => any,
-        method: HttpMethod,
-        accept = MimeType.JSON,
-        type = MimeType.JSON,
-    ) {
-        if (this.element instanceof HTMLFormElement) {
-            const form = (this.element as HTMLFormElement);
-            this.event('submit', function (e: Event) {
-                e.preventDefault();
-                const data = dataCallback(form);
-                Ajax.call(cb, method, JSON.stringify(data), form.action, accept, type);
-            });
-        }
-        return this;
     }
 
     public putInto(tag: Tag<HTMLElement>) {

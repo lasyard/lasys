@@ -6,7 +6,6 @@ final class Db extends PDO
         parent::__construct(PDO_DSN, DB_USER, DB_PASSWORD, [
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION SQL_BIG_SELECTS=1',
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_STRINGIFY_FETCHES => false,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ]);
     }
@@ -72,7 +71,8 @@ final class Db extends PDO
 
     public function getColumns($tbl)
     {
-        return $this->getAll('show columns from ' . $tbl);
+        // Add `full` to get `Comment`.
+        return $this->getAll('show full columns from ' . $tbl);
     }
 
     public function getLastModTime($tbl)

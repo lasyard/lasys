@@ -4,14 +4,14 @@
                 echo $key, '="', $value, '" ';
             }
         }
-        ?>name="<?php echo $name; ?>" action="<?php echo $action ?? ''; ?>" method="<?php echo $method ?? 'POST'; ?>">
+        ?>name="<?php echo $name; ?>" action="<?php echo $action ?? '#'; ?>" method="<?php echo $method ?? 'POST'; ?>">
     <fieldset>
         <legend><?php echo $title; ?></legend>
         <?php foreach ($fields as $name => $f) {
             if ($purpose === 'insert' && $f['auto']) {
                 continue;
             }
-            if ($purpose === 'update' && $f['primary']) {
+            if ($purpose === 'update' && ($f['primary'] || $f['readOnly'])) {
                 $f['attrs']['disabled'] = 1;
             }
         ?>

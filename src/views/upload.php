@@ -1,4 +1,4 @@
-<form enctype="multipart/form-data" action="<?php echo $action ?? ''; ?>" method="<?php echo $method ?? 'POST'; ?>">
+<form enctype="multipart/form-data" action="<?php echo $action ?? '#'; ?>" method="<?php echo $method ?? 'POST'; ?>">
     <fieldset>
         <legend><?php echo $title; ?></legend>
         <input type="hidden" name="MAX_FILE_SIZE" value="<?php echo $sizeLimit; ?>" />
