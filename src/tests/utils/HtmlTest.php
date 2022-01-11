@@ -48,25 +48,25 @@ final class HtmlTest extends TestCase
     public function testInputSelect()
     {
         $this->assertSame(
-            <<<'EOS'
-            <select name="sel" required>
-            <option value="">-- Choose an option --</option>
-            <option value="a">a</option>
-            <option value="b">b</option>
-            <option value="c">c</option>
-            </select>
-            EOS,
+            join(PHP_EOL, [
+                '<select name="sel" required>',
+                '<option value="">-- Choose an option --</option>',
+                '<option value="a">a</option>',
+                '<option value="b">b</option>',
+                '<option value="c">c</option>',
+                '</select>',
+            ]),
             Html::input('sel', 'select', true, ['options' => ['a', 'b', 'c']])
         );
         $this->assertSame(
-            <<<'EOS'
-            <select name="sel" required>
-            <option value="">-- Choose an option --</option>
-            <option value="1">a</option>
-            <option value="2">b</option>
-            <option value="3">c</option>
-            </select>
-            EOS,
+            join(PHP_EOL, [
+                '<select name="sel" required>',
+                '<option value="">-- Choose an option --</option>',
+                '<option value="1">a</option>',
+                '<option value="2">b</option>',
+                '<option value="3">c</option>',
+                '</select>',
+            ]),
             Html::input('sel', 'select', true, ['options' => ['a' => 1, 'b' => 2, 'c' => 3]])
         );
     }

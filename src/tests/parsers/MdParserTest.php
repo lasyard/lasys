@@ -11,26 +11,25 @@ final class MdParserTest extends TestCase
 
     public function test()
     {
-        $text =
-            <<<'EOS'
-            # TiTle
-            ## T2
-            - haha
-            - hehe
-            ### T3
-            EOS;
+        $text = join(PHP_EOL, [
+            '# TiTle',
+            '## T2',
+            '- haha',
+            '- hehe',
+            '### T3',
+        ]);
         $mdParser = MdParser::str($text);
         $this->assertSame('TiTle', $mdParser->title);
         $this->assertSame(
-            <<<'EOS'
-            <div id="html-body"><h1>TiTle</h1>
-            <h2>T2</h2>
-            <ul>
-            <li>haha</li>
-            <li>hehe
-            <h3>T3</h3></li>
-            </ul></div>
-            EOS,
+            join(PHP_EOL, [
+                '<div id="html-body"><h1>TiTle</h1>',
+                '<h2>T2</h2>',
+                '<ul>',
+                '<li>haha</li>',
+                '<li>hehe',
+                '<h3>T3</h3></li>',
+                '</ul></div>',
+            ]),
             $mdParser->content
         );
     }

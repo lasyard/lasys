@@ -28,6 +28,15 @@ final class Str
         );
     }
 
+    public static function filterEmoji($txt)
+    {
+        return preg_replace(
+            ['/:\(/', '/:\)/'],
+            ["\u{1F641}", "\u{1F642}"],
+            $txt
+        );
+    }
+
     public static function classToFile($class)
     {
         $words = preg_split('/(?=[A-Z])/', $class, -1, PREG_SPLIT_NO_EMPTY);

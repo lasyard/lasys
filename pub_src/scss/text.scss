@@ -1,15 +1,40 @@
 div#main {
     div.text {
+        $charWidth: 1em + $letterSpacing;
+        $indent: $charWidth * 2;
+
         @extend .centered;
         margin-top: 1em;
-        max-width: (1em+$letterSpacing)*40;
+        max-width: $charWidth * 40;
 
-        p {
-            text-indent: 2em+$letterSpacing*2;
+        p:not(.center) {
+            text-indent: $indent;
         }
 
         ul {
             list-style: none;
+        }
+
+        ol {
+            margin-left: $indent - 0.5em;
+        }
+
+        table {
+            border: 0;
+            margin-left: $indent;
+
+            td {
+                border: 0;
+            }
+
+            td:first-child {
+                @extend .nobr;
+                vertical-align: top;
+            }
+
+            td:last-child {
+                padding-left: 0.5em;
+            }
         }
     }
 }
