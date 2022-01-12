@@ -31,9 +31,9 @@ $highColor: #FFA;
 $hotColor: #F55;
 $lineColor: #AAA;
 
-$normalFont: Serif;
-$headerFont: Sans-Serif;
-$titleFont: Fantasy;
+$normalFont: serif;
+$headerFont: sans sans-serif;
+$titleFont: fantasy;
 $letterSpacing: 0.1em;
 
 $barHeight: 31px;
@@ -318,6 +318,20 @@ ul.icon {
 
 img {
     border: 0;
+}
+
+strong {
+    background-color: $bgColor2;
+}
+
+code {
+    font-family: monospace;
+}
+
+blockquote {
+    border-left: 3px solid $lineColor;
+    padding-left: 3px;
+    background-color: $bgColor1;
 }
 
 @import 'form';

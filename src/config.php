@@ -68,7 +68,7 @@ final class Config
         $this->mergeArray($conf, self::EXCLUDES);
         $this->setDefault($conf, self::TRAITS);
         $this->setDefault($conf, self::LIST);
-        foreach ($conf[self::LIST] as $name => &$item) {
+        foreach ($conf[self::LIST] as &$item) {
             if (is_string($item)) {
                 $item = [self::TITLE => $item];
             } else if ($item instanceof Actions || is_array($item) && isset($item[Actions::ACTION])) {

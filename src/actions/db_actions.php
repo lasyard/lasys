@@ -39,6 +39,9 @@ final class DbActions extends Actions
                     $type = 'select';
                     $attrs['options'] = range(date('Y'), 1970, -1);
                     break;
+                case 'date':
+                    $type = 'date';
+                    break;
                 case 'datetime':
                     $type = 'datetime-local';
                     break;
@@ -160,7 +163,7 @@ final class DbActions extends Actions
 
     public function actionDump()
     {
-        Sys::db()->dump($this->path);
+        Sys::db()->dump($this->path . DS . '_dump');
         echo '<p class="sys center">Dumping succeed!</p>';
     }
 

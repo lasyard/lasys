@@ -59,6 +59,9 @@ final class App
                 break;
             }
         }
+        if ($this->_base != $this->_home) {
+            $breadcrumbs[] = $title;
+        }
         if ($action === null) {
             $this->_name = $this->_conf->get(Config::DEFAULT_ITEM);
             $action = $this->action($this->_name, $type);

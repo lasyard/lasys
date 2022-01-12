@@ -31,7 +31,7 @@ interface StatObject {
 }
 
 interface DbTableConfig {
-    cols?: ColumnDefinition[];
+    cols?: (ColumnDefinition | string)[];
     columns?: number;
     filters?: Filter[];
     group?: {
@@ -250,9 +250,14 @@ export class DbTable {
         const headers = Tag.of('tr').cls('header');
         for (let i = 0; i < columns; ++i) {
             for (const col of cols) {
-                Tag.of('col').style({ width: col.width }).putInto(colgroup);
+                const colTag = Tag.of('col').putInto(colgroup);
                 const th = Tag.of('th');
-                DbTable.addContent(th, labels, col.th, ci);
+                if (typeof col === 'string') {
+                    DbTable.addContent(th, labels, col, ci);
+                } else {
+                    DbTable.addContent(th, labels, col.th, ci);
+                    colTag.style({ width: col.width });
+                }
                 th.putInto(headers);
             }
             if (this.updateForm) {
@@ -328,7 +333,7 @@ export class DbTable {
             }
             for (const col of cols) {
                 const td = Tag.of('td');
-                DbTable.addContent(td, dt, col.td, ci);
+                DbTable.addContent(td, dt, typeof col === 'string' ? col : col.td, ci);
                 tr.add(td);
             }
             if (this.updateForm) {
