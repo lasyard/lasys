@@ -32,7 +32,7 @@ final class DbActions extends Actions
             $attrs = [];
             $i = strpos($c['Type'], '(');
             $type = ($i === false) ?  $c['Type'] : substr($c['Type'], 0, $i);
-            switch ($c['Type']) {
+            switch ($type) {
                 case 'text':
                     $type = 'textarea';
                     $attrs['rows'] = 4;
@@ -51,7 +51,7 @@ final class DbActions extends Actions
                 case 'bigint':
                     $type = 'number';
                     break;
-                case 'tinyint(1)':
+                case 'tinyint':
                     if (in_array('bool', explode(',', $c['Comment']))) {
                         $type = 'checkbox';
                     } else {
