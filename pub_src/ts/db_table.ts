@@ -191,7 +191,7 @@ export class DbTable {
                         delete data[f];
                     }
                 }
-                Ajax.put(
+                Ajax.update(
                     callback,
                     JSON.stringify({ keys: keys, data: data }),
                     action,
@@ -351,15 +351,21 @@ export class DbTable {
                     const r = confirm('Are you sure to delete item [' + dt + ']?');
                     if (r) {
                         const url = new URL(window.location.href);
+                        const data: { [index: string]: any } = {};
                         for (const f in _TABLE_FIELDS) {
                             if (_TABLE_FIELDS[f].primary) {
-                                url.searchParams.append(f, dt[ci[f]]);
+                                data[f] = dt[ci[f]];
                             }
                         }
-                        Ajax.delete(function (res) {
-                            DbTable.showMsg(res);
-                            self.loadData();
-                        }, url.href, MimeType.HTML);
+                        Ajax.delete(
+                            function (res) {
+                                DbTable.showMsg(res);
+                                self.loadData();
+                            },
+                            JSON.stringify(data),
+                            url.href,
+                            MimeType.HTML
+                        );
                     }
                 });
             }

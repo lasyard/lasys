@@ -30,6 +30,8 @@ final class DbActions extends Actions
             $label = $this->getLabel($name);
             $readOnly = $this->getReadOnly($name);
             $attrs = [];
+            $i = strpos($c['Type'], '(');
+            $type = ($i === false) ?  $c['Type'] : substr($c['Type'], 0, $i);
             switch ($c['Type']) {
                 case 'text':
                     $type = 'textarea';
@@ -74,7 +76,7 @@ final class DbActions extends Actions
     {
         $editForm = null;
         $btnEdit = null;
-        if ($this->hasPrivOf(Server::POST_UPDATE)) {
+        if ($this->hasPrivOf(Server::AJAX_POST)) {
             $btnEdit = Icon::INSERT;
             $formView = $this->conf(self::INSERT_FORM) ?? 'db_edit';
             $editForm = View::renderHtml($formView, [
@@ -107,7 +109,7 @@ final class DbActions extends Actions
         Sys::app()->addData('_TABLE_CAN_DELETE', $this->hasPrivOf(Server::AJAX_DELETE));
         $meta = $this->buildMeta($fields);
         View::render('meta', $meta);
-        if ($this->hasPrivOf(Server::AJAX_PUT)) {
+        if ($this->hasPrivOf(Server::AJAX_UPDATE)) {
             View::render('db_edit', [
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'fields' => $fields,
@@ -132,7 +134,7 @@ final class DbActions extends Actions
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
-    public function actionAjaxPut()
+    public function actionAjaxUpdate()
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $row = Sys::db()->update($this->name, $data['keys'], $data['data']);
@@ -140,7 +142,7 @@ final class DbActions extends Actions
     }
 
     // This is not used because of ajaxfy.
-    public function actionPostUpdate()
+    public function actionUpdate()
     {
         $name = $this->name;
         Sys::db()->insert($name, $_POST);
@@ -157,7 +159,8 @@ final class DbActions extends Actions
 
     public function actionAjaxDelete()
     {
-        $row = Sys::db()->delete($this->name, $_GET);
+        $data = json_decode(file_get_contents('php://input'), true);
+        $row = Sys::db()->delete($this->name, $data);
         self::echoInfo('Succeeded to delete ' . $row . ' records.');
     }
 

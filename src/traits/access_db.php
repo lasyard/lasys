@@ -16,8 +16,7 @@ final class AccessDb extends Traits
         $wPriv = $this->_wPriv ? $this->_wPriv : $conf[Config::EDIT_PRIV];
         $item[Server::GET] ??= DbActions::get()->priv(...$rPriv);
         $item[Server::AJAX_GET] ??= DbActions::ajaxGet()->priv(...$rPriv);
-        $item[Server::AJAX_PUT] ??= DbActions::ajaxPut()->priv(...$wPriv);
-        $item[Server::POST_UPDATE] ??= DbActions::postUpdate()->priv(...$wPriv);
+        $item[Server::AJAX_UPDATE] ??= DbActions::ajaxUpdate()->priv(...$wPriv);
         $item[Server::AJAX_POST] ??= DbActions::ajaxPost()->priv(...$wPriv);
         $item[Server::AJAX_DELETE] ??= DbActions::ajaxDelete()->priv(...$wPriv);
         return $item;

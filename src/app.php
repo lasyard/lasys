@@ -85,6 +85,7 @@ final class App
         }
         $content = $actionDo->content;
         if (Server::isAjax($type)) {
+            // This is needed for CORS post, put and delete.
             echo $content;
             exit;
         }

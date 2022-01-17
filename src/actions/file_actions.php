@@ -46,11 +46,11 @@ final class FileActions extends Actions
         }
         $editForm = null;
         $btnEdit = null;
-        if ($this->hasPrivOf(Server::POST_UPDATE)) {
+        if ($this->hasPrivOf(Server::UPDATE)) {
             $btnEdit = Icon::EDIT;
             $editForm = View::renderHtml('upload', [
                 'title' => Icon::EDIT . ' ' . $this->name,
-                'action' => '?' . Server::QUERY_POST_UPDATE,
+                'action' => '?' . Server::QUERY_UPDATE,
                 'accept' => self::default(self::ACCEPT),
                 'sizeLimit' => self::default(self::SIZE_LIMIT),
             ]);
@@ -120,7 +120,7 @@ final class FileActions extends Actions
         throw new RuntimeException('No file sent.');
     }
 
-    public function actionPostUpdate()
+    public function actionUpdate()
     {
         $this->doUpload($this->name, true);
         if (!empty($_POST['title'])) {
@@ -210,8 +210,8 @@ final class FileActions extends Actions
                 case Server::GET:
                     return  FileActions::get()->priv(...Sys::app()->conf(Config::READ_PRIV));
                     break;
-                case Server::POST_UPDATE:
-                    return  FileActions::postUpdate()->priv(...Sys::app()->conf(Config::EDIT_PRIV));
+                case Server::UPDATE:
+                    return  FileActions::update()->priv(...Sys::app()->conf(Config::EDIT_PRIV));
                     break;
                 case Server::AJAX_DELETE:
                     return  FileActions::ajaxDelete()->priv(...Sys::app()->conf(Config::EDIT_PRIV));

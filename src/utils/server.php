@@ -4,19 +4,19 @@ final class Server
     public const TYPE_KEY = '_type_';
     public const INVALID = 'invalid';
     public const HEAD = 'head';
-    public const AJAX_GET = 'ajaxGet';
     public const GET = 'get';
     public const GET_RAW = 'raw';
-    public const AJAX_POST = 'ajaxPost';
+    public const AJAX_GET = 'ajaxGet';
     public const POST = 'post';
-    public const POST_UPDATE = 'update';
-    public const AJAX_PUT = 'ajaxPut';
-    public const PUT = 'put';
-    public const AJAX_DELETE = 'ajaxDelete';
+    public const AJAX_POST = 'ajaxPost';
+    public const UPDATE = 'update';
+    public const AJAX_UPDATE = 'ajaxUpdate';
     public const DELETE = 'delete';
+    public const AJAX_DELETE = 'ajaxDelete';
 
     public const QUERY_GET_RAW = self::TYPE_KEY . '=' . self::GET_RAW;
-    public const QUERY_POST_UPDATE = self::TYPE_KEY . '=' . self::POST_UPDATE;
+    public const QUERY_UPDATE = self::TYPE_KEY . '=' . self::UPDATE;
+    public const QUERY_DELETE = self::TYPE_KEY . '=' . self::DELETE;
 
     private function __construct()
     {
@@ -46,15 +46,18 @@ final class Server
             $home .= $prefix;
         }
         $type = self::requestType();
-        if ($type == self::GET_RAW && strpos($_SERVER['HTTP_REFERER'], $home) === 0) {
-            self::rawFile(DATA_PATH . DS . $path);
+        if ($type == self::GET_RAW) {
+            if (strpos($_SERVER['HTTP_REFERER'], $home) === 0) {
+                self::rawFile(DATA_PATH . DS . $path);
+            }
+            exit;
         }
         return [$home, explode('/', $path), $type];
     }
 
     public static function isAjax($type)
     {
-        return in_array($type, [self::AJAX_GET, self::AJAX_POST, self::AJAX_PUT, self::AJAX_DELETE]);
+        return in_array($type, [self::AJAX_GET, self::AJAX_POST, self::AJAX_UPDATE, self::AJAX_DELETE]);
     }
 
     public static function isEdit($type)
@@ -71,6 +74,7 @@ final class Server
     private static function requestType()
     {
         // Form method can only be `GET` or `POST`.
+        // Some hosting services don't allow methods other than `GET` and `POST`.
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
                 if (isset($_GET[self::TYPE_KEY]) && $_GET[self::TYPE_KEY] == self::GET_RAW) {
@@ -78,12 +82,19 @@ final class Server
                 }
                 return self::isAjaxRequest() ? self::AJAX_GET : self::GET;
             case 'POST':
-                if (isset($_GET[self::TYPE_KEY]) && $_GET[self::TYPE_KEY] == self::POST_UPDATE) {
-                    return self::POST_UPDATE;
+                if (isset($_GET[self::TYPE_KEY])) {
+                    switch ($_GET[self::TYPE_KEY]) {
+                        case self::UPDATE:
+                            return self::isAjaxRequest() ? self::AJAX_UPDATE : self::UPDATE;
+                        case self::DELETE:
+                            return self::isAjaxRequest() ? self::AJAX_DELETE : self::DELETE;
+                        default:
+                            return  self::INVALID;
+                    }
                 }
                 return self::isAjaxRequest() ? self::AJAX_POST : self::POST;
             case 'PUT':
-                return self::isAjaxRequest() ? self::AJAX_PUT : self::PUT;
+                return self::isAjaxRequest() ? self::AJAX_UPDATE : self::UPDATE;
             case 'DELETE':
                 return self::isAjaxRequest() ? self::AJAX_DELETE : self::DELETE;
             case 'HEAD':
@@ -110,6 +121,7 @@ final class Server
         header('Content-Disposition: attachment; filename="' . basename($path) . '"');
         header('Content-Transfer-Encoding: binary');
         readfile($path);
+        exit;
     }
 
     public static function rawUrl($url)

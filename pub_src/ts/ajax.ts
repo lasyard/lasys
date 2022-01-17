@@ -7,10 +7,14 @@ export enum MimeType {
 
 enum HttpMethod {
     GET = 'GET',
+    POST = 'POST',
     PUT = 'PUT',
     DELETE = 'DELETE',
-    POST = 'POST',
 }
+
+const TYPE_KEY = '_type_';
+const UPDATE = 'update';
+const DELETE = 'delete';
 
 export type AjaxCallback = (response: any, type: XMLHttpRequestResponseType) => any;
 
@@ -19,7 +23,7 @@ export class Ajax {
         onload: AjaxCallback,
         method: HttpMethod,
         data: any,
-        url: string,
+        url: URL,
         type: MimeType,
         accept: MimeType,
     ) {
@@ -44,37 +48,44 @@ export class Ajax {
 
     public static get(
         onload: AjaxCallback,
-        url = '',
+        urlStr = '',
         accept = MimeType.JSON,
     ) {
+        const url = new URL(urlStr, window.location.href);
         Ajax.call(onload, HttpMethod.GET, null, url, MimeType.JSON, accept);
-    }
-
-    public static put(
-        onload: AjaxCallback,
-        data: any,
-        url = '',
-        type = MimeType.JSON,
-        accept = MimeType.JSON,
-    ) {
-        Ajax.call(onload, HttpMethod.PUT, data, url, type, accept);
     }
 
     public static post(
         onload: AjaxCallback,
         data: any,
-        url = '',
+        urlStr = '',
         type = MimeType.JSON,
         accept = MimeType.JSON,
     ) {
+        const url = new URL(urlStr, window.location.href);
+        Ajax.call(onload, HttpMethod.POST, data, url, type, accept);
+    }
+
+    public static update(
+        onload: AjaxCallback,
+        data: any,
+        urlStr = '',
+        type = MimeType.JSON,
+        accept = MimeType.JSON,
+    ) {
+        const url = new URL(urlStr, window.location.href);
+        url.searchParams.set(TYPE_KEY, UPDATE);
         Ajax.call(onload, HttpMethod.POST, data, url, type, accept);
     }
 
     public static delete(
         onload: AjaxCallback,
-        url = '',
+        data: any = null,
+        urlStr = '',
         accept = MimeType.JSON,
     ) {
-        Ajax.call(onload, HttpMethod.DELETE, null, url, MimeType.JSON, accept);
+        const url = new URL(urlStr, window.location.href);
+        url.searchParams.set(TYPE_KEY, DELETE);
+        Ajax.call(onload, HttpMethod.POST, data, url, MimeType.JSON, accept);
     }
 }
