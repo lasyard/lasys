@@ -11,7 +11,7 @@
             if ($purpose === 'insert' && $f['auto']) {
                 continue;
             }
-            if ($purpose === 'update' && ($f['primary'] || $f['readOnly'])) {
+            if ($purpose === 'update' && ($f['primary'] || $f['readOnly'] || $f['auto'])) {
                 $f['attrs']['disabled'] = 1;
             }
         ?>

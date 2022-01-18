@@ -4,7 +4,6 @@ final class DbActions extends Actions
     // configs
     public const SCRIPT = 'db:script';
     public const LABELS = 'db:labels';
-    public const READ_ONLY = 'db:readOnly';
     public const INSERT_FORM = 'db:insertForm';
 
     private function getLabel($name)
@@ -13,22 +12,17 @@ final class DbActions extends Actions
         return ($labels && array_key_exists($name, $labels)) ? $labels[$name] : ucfirst($name);
     }
 
-    private function getReadOnly($name)
-    {
-        $ro = $this->conf(self::READ_ONLY);
-        return $ro && in_array($name, $ro);
-    }
-
     private function buildFields($columns)
     {
         $fields = [];
         foreach ($columns as $c) {
             $name = $c['Field'];
+            $comments = explode(',', $c['Comment']);
             $primary = ($c['Key'] == 'PRI');
-            $auto = ($c['Extra'] == 'auto_increment');
+            $auto = ($c['Extra'] == 'auto_increment') || in_array('auto', $comments);
             $required = ($c['Null'] !== 'YES' && !isset($c['Default']));
+            $readOnly = in_array('readOnly', $comments);
             $label = $this->getLabel($name);
-            $readOnly = $this->getReadOnly($name);
             $attrs = [];
             $i = strpos($c['Type'], '(');
             $type = ($i === false) ?  $c['Type'] : substr($c['Type'], 0, $i);
@@ -52,7 +46,7 @@ final class DbActions extends Actions
                     $type = 'number';
                     break;
                 case 'tinyint':
-                    if (in_array('bool', explode(',', $c['Comment']))) {
+                    if (in_array('bool', $comments)) {
                         $type = 'checkbox';
                     } else {
                         $type = 'number';
