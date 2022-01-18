@@ -22,17 +22,19 @@ final class FileActions extends Actions
 
     private function getParser($name)
     {
+        $path = $this->path;
+        $base = $this->base;
         $ext = pathinfo($name, PATHINFO_EXTENSION);
         switch ($ext) {
             case 'txt':
-                return TextParser::file($this->path . DS . $name);
+                return TextParser::file($path . DS . $name);
             case 'md':
-                return MdParser::file($this->path . DS . $name);
+                return MdParser::file($path . DS . $name);
             case 'html':
-                return HtmlParser::file($this->path . DS . $name);
+                return HtmlParser::file($path . DS . $name);
             case 'png':
             case 'jpg':
-                return ImageParser::fileUrl($this->path . DS . $name, $this->base . $name);
+                return ImageParser::fileUrl($path . DS . $name, $base . $name);
             default:
                 throw new RuntimeException('Unsupported file type "' . $ext . '".');
         }

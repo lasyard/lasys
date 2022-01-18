@@ -61,6 +61,17 @@ export class Tag<T extends HTMLElement> {
         return this.element;
     }
 
+    public getPos() {
+        let left = 0;
+        let top = 0;
+        let e: HTMLElement = this.element;
+        do {
+            left += e.offsetLeft;
+            top += e.offsetTop;
+        } while (e = e.offsetParent as HTMLElement);
+        return { left: left, top: top };
+    }
+
     public tagName() {
         return this.element.tagName;
     }

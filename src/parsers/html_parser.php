@@ -1,5 +1,5 @@
 <?php
-class HtmlParser
+final class HtmlParser
 {
     use Getter;
 
