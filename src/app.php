@@ -33,38 +33,39 @@ final class App
         $this->_path = DATA_PATH;
         $this->_conf = new Config(CONF_PATH);
         $title = null;
-        $action = null;
+        $action = Actions::noop();
         $breadcrumbs = [];
         while (!empty($args)) {
             $name = array_shift($args);
             if ($name == '') {
                 continue;
             }
-            $this->_name = $name;
-            if ($this->isDir($name)) {
-                if ($this->_base != $this->_home) {
-                    $breadcrumbs[] = Html::link($title, $this->_base);
-                }
-                $this->_path .= DS . $name;
-                $this->_base .= $name . '/';
-                $title = $this->_conf->title($name);
-                if ($this->hasPrivOf($name, Server::GET)) {
-                    $this->_conf->shift($name);
-                } else {
-                    $action = Actions::error('You do not have privilege to access "' . $name . '".');
-                    break;
-                }
+            $action = $this->action($name, $type);
+            if ($action[Actions::ACTION]) {
+                break;
+            }
+            // It is a dir.
+            if ($this->_base != $this->_home) {
+                $breadcrumbs[] = Html::link($title, $this->_base);
+            }
+            $this->_path .= DS . $name;
+            $this->_base .= $name . '/';
+            $title = $this->_conf->title($name);
+            if ($this->hasPriv($name, $action[Actions::PRIV])) {
+                $this->_conf->shift($name);
             } else {
-                $action = $this->action($this->_name, $type);
+                $action = Actions::error('You do not have privilege to access "' . $name . '".');
                 break;
             }
         }
         if ($this->_base != $this->_home) {
             $breadcrumbs[] = $title;
         }
-        if ($action === null) {
+        if ($action[Actions::ACTION] === null) {
             $this->_name = $this->_conf->get(Config::DEFAULT_ITEM);
             $action = $this->action($this->_name, $type);
+        } else {
+            $this->_name = $name;
         }
         $httpHeaders = $action[Actions::ACTION]->httpHeaders;
         if ($type == Server::HEAD) {
@@ -115,9 +116,17 @@ final class App
     private function action($name, $type)
     {
         $conf = $this->_conf;
-        return $conf->action($name, $type)
-            ?? FileActions::action($conf->get(Config::READ_ONLY), $type)
-            ?? Actions::default()->priv();
+        $action = $conf->action($name, $type);
+        if ($action) {
+            return $action;
+        }
+        $file = $this->_path . DS . $name;
+        if (is_dir($file)) {
+            return Actions::noop();
+        } else if (is_file($file)) {
+            return FileActions::action($conf->get(Config::READ_ONLY), $type);
+        }
+        return Actions::default()->priv();
     }
 
     private function header($httpHeaders)
@@ -247,8 +256,7 @@ final class App
 
     private function isDir($name)
     {
-        $f = $this->_conf->dirOrFile($name);
-        return $f ?? is_dir($this->_path . DS . $name);
+        return $this->action($name, Server::GET) === null;
     }
 
     public function hasPriv($name, $priv)

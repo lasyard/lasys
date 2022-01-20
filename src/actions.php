@@ -35,6 +35,12 @@ class Actions
         return $actions;
     }
 
+    // As a stub to set priv of directory.
+    public static function noop(...$priv)
+    {
+        return [self::ACTION => null, self::PRIV => $priv];
+    }
+
     public function priv(...$priv)
     {
         return [
@@ -70,11 +76,6 @@ class Actions
     {
         $this->_title = 'Error';
         $this->_content = View::renderHtml('error', ['message' => $msg]);
-    }
-
-    // As a stub to set priv of directory.
-    public function actionNoop()
-    {
     }
 
     public function actionDefault(...$args)

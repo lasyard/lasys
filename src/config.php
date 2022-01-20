@@ -143,10 +143,4 @@ final class Config
         }
         return null;
     }
-
-    public function dirOrFile($name)
-    {
-        $file = $this->_path . DS . $name;
-        return is_dir($file) ? true : (is_file($file . '.php') ? false : null);
-    }
 }
