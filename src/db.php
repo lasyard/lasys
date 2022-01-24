@@ -122,15 +122,7 @@ final class Db extends PDO
             }
         }
         if ($whole) {
-            $file = $path . '.sql';
-            $fh = fopen($file, 'w');
-            if (!$fh) {
-                mkdir(dirname($file), 0775, true);
-                $fh = fopen($file, 'w');
-            }
-            if (!$fh) {
-                throw new RuntimeException('Open file "' . $file . '" failed!');
-            }
+            $fh = File::openForWriting($path . '.sql');
             $this->dumpSettings($fh);
             fwrite($fh, PHP_EOL);
             foreach ($tables as $table) {
@@ -147,15 +139,9 @@ final class Db extends PDO
                     unlink($path . '/' . $file);
                 }
                 closedir($dir);
-            } else {
-                mkdir($path, 0775, true);
             }
             foreach ($tables as $table) {
-                $file = $path . '/' . $table . '.sql';
-                $fh = fopen($file, 'w');
-                if (!$fh) {
-                    throw new RuntimeException('Open file "' . $file . '" failed!');
-                }
+                $fh = File::openForWriting($path . '/' . $table . '.sql');
                 $this->dumpSettings($fh);
                 fwrite($fh, PHP_EOL);
                 $this->dumpTable($fh, $table, $colExcludes[$table]);

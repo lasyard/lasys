@@ -46,12 +46,6 @@ module.exports = {
                 'css-loader',
                 'sass-loader',
             ],
-        }, {
-            test: /\.woff2?$/,
-            type: 'asset/resource',
-            generator: {
-                filename: 'fonts/[name][ext]',
-            },
         }],
     },
     plugins: [

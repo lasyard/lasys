@@ -104,7 +104,7 @@ final class Server
         return self::INVALID;
     }
 
-    public static function rawFile($path)
+    private static function rawFile($path)
     {
         if (!is_file($path)) {
             header('HTTP/1.0 404 Not Found');

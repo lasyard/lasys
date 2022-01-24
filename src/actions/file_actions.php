@@ -116,22 +116,59 @@ final class FileActions extends Actions
         View::render('deleted', ['name' => $name, 'url' => $this->base]);
     }
 
+    private function getTitle($name)
+    {
+        if (!empty($_POST['title'])) {
+            return $_POST['title'];
+        } else {
+            $parser = $this->getParser($name);
+            if ($parser->title) {
+                return $parser->title;
+            }
+        }
+        return null;
+    }
+
     public function actionPost()
     {
-        $this->doUpload();
-        throw new RuntimeException('No file sent.');
+        $name = File::upload($this->path, null, false, self::default(self::SIZE_LIMIT));
+        $user = Sys::user();
+        $info = [
+            'time' => $_SERVER['REQUEST_TIME'],
+            'uid' => $user->id,
+            'uname' => $user->name,
+        ];
+        $title = $this->getTitle($name);
+        if ($title) {
+            $info['title'] = $title;
+        }
+        Sys::app()->setInfo($name, $info);
+        Sys::app()->redirect($name);
     }
 
     public function actionUpdate()
     {
-        $this->doUpload($this->name, true);
-        if (!empty($_POST['title'])) {
-            $info = $this->info();
-            $info['title'] = $_POST['title'];
-            $this->setInfo($info);
-            Sys::app()->redirect($this->name);
+        $name = $this->name;
+        try {
+            File::upload($this->path, $name, true, self::default(self::SIZE_LIMIT));
+            $title = $this->getTitle($name);
+        } catch (RuntimeException $e) {
+            if ($e->getCode() === File::NO_FILE_SENT) {
+                if (!empty($_POST['title'])) {
+                    $title = $_POST['title'];
+                } else {
+                    throw new RuntimeException("Nothing changed.");
+                }
+            } else {
+                throw $e;
+            }
         }
-        throw new RuntimeException("Nothing changed.");
+        $info = $this->info();
+        if ($title) {
+            $info['title'] = $title;
+        }
+        $this->setInfo($info);
+        Sys::app()->redirect($name);
     }
 
     public function actionUploadForm()
@@ -142,63 +179,6 @@ final class FileActions extends Actions
             'accept' => self::default(self::ACCEPT),
             'sizeLimit' => self::default(self::SIZE_LIMIT),
         ]);
-    }
-
-    private function doUpload($fileName = null, $overwrite = false)
-    {
-        $sizeLimit = self::default(self::SIZE_LIMIT);
-        $file = $_FILES['file'];
-        // Handle uploading.
-        if (is_array($file['error'])) {
-            throw new RuntimeException('Invalid parameters.');
-        }
-        switch ($file['error']) {
-            case UPLOAD_ERR_OK:
-                break;
-            case UPLOAD_ERR_NO_FILE:
-                // Returns only here.
-                return;
-            case UPLOAD_ERR_INI_SIZE:
-            case UPLOAD_ERR_FORM_SIZE:
-                throw new RuntimeException('Exceeded file size limit "' . $sizeLimit . '".');
-            default:
-                throw new RuntimeException('Unknown errors.');
-        }
-        if ($file['size'] > $sizeLimit) {
-            throw new RuntimeException('Exceeded file size limit "' . $sizeLimit . '".');
-        }
-        if (!is_uploaded_file($file['tmp_name'])) {
-            throw new RuntimeException('Uploaded file error!');
-        }
-        $path = $this->path;
-        $name = $fileName ?? $file['name'];
-        $newFile = $path . DS . $name;
-        if (!$overwrite && (is_file($newFile) || is_dir($newFile))) {
-            throw new RuntimeException('File "' . $name . '" exists.');
-        }
-        if (!is_dir($path)) {
-            mkdir($path, 0775, true);
-        }
-        if (
-            Str::isValidFileName($name)
-            && move_uploaded_file($file['tmp_name'], $newFile)
-        ) {
-            $user = Sys::user();
-            $info = [
-                'time' => $_SERVER['REQUEST_TIME'],
-                'uid' => $user->id,
-                'uname' => $user->name,
-            ];
-            $parser = $this->getParser($name);
-            if (!empty($_POST['title'])) {
-                $info['title'] = $_POST['title'];
-            } else if ($parser->title) {
-                $info['title'] = $parser->title;
-            }
-            Sys::app()->setInfo($name, $info);
-            Sys::app()->redirect($name);
-        }
-        throw new RuntimeException('Cannot save uploaded file "' . $name . '".');
     }
 
     public static function action($readOnly, $type)
