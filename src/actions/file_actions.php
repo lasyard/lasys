@@ -195,7 +195,7 @@ final class FileActions extends Actions
             } else if ($parser->title) {
                 $info['title'] = $parser->title;
             }
-            Sys::app()->addFile($name, $info);
+            Sys::app()->setInfo($name, $info);
             Sys::app()->redirect($name);
         }
         throw new RuntimeException('Cannot save uploaded file "' . $name . '".');

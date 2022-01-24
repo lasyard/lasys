@@ -74,7 +74,7 @@ final class App
             exit;
         }
         // This is needed when calling action->do, e.g., for file uploading.
-        $this->createFileList();
+        $this->_files = $this->loadFileList($this->_path);
         $this->addScript('js' . DS . 'main');
         $this->addStyle('css' . DS . 'main');
         $this->addStyle('lib' . DS . 'bootstrap-icons');
@@ -188,20 +188,17 @@ final class App
         return ['buttons' => $buttons, 'files' => array_column(array_merge($list0, $list1), 'li')];
     }
 
-    private function createFileList()
+    public function loadFileList($path)
     {
         $conf = $this->_conf;
-        $this->_files = [];
+        $files = [];
         if ($conf->get(Config::READ_ONLY)) {
-            return;
+            return $files;
         }
-        $path = $this->_path;
         $dh = @opendir($path);
         if (!$dh) {
-            $this->_files = [];
-            return;
+            return $files;
         }
-        $files = [];
         while (($file = readdir($dh)) !== false) {
             if ($file == self::META_FILE) {
                 $files = array_merge_recursive(
@@ -213,38 +210,29 @@ final class App
             if ($conf->excluded($file)) {
                 continue;
             }
-            if (is_dir($path . DS . $file)) {
-                $files[$file]['isDir'] = true;
-            } else {
-                $files[$file]['isDir'] = false;
-            }
+            $files[$file]['isDir'] = is_dir($path . DS . $file);
         }
         closedir($dh);
-        $this->_files = array_filter($files, function ($v) {
+        // Filter out non-existing files.
+        $files1 = array_filter($files, function ($v) {
             return array_key_exists('isDir', $v);
         });
-        if (count($this->_files) < count($files)) {
-            $this->saveMeta();
+        // Remove info of missing files from meta file.
+        if (count($files1) < count($files)) {
+            self::saveFileList($path, $files1);
         }
+        return $files1;
     }
 
-    public function addFile($name, $fileInfo)
-    {
-        $this->_files[$name] = $fileInfo;
-        $this->_files[$name]['isDir'] = false;
-        $this->saveMeta();
-    }
-
-    private function saveMeta()
+    private static function saveFileList($path, $files)
     {
         $json = [];
-        foreach ($this->_files as $name => $file) {
+        foreach ($files as $name => $file) {
             $res = Arr::transKeys($file, 'title', 'time', 'uid', 'uname');
             if (!empty($res)) {
                 $json[$name] = $res;
             }
         }
-        $path = $this->_path;
         if (!is_dir($path)) {
             mkdir($path, 0775, true);
         }
@@ -256,7 +244,7 @@ final class App
 
     private function isDir($name)
     {
-        return $this->action($name, Server::GET) === null;
+        return $this->action($name, Server::GET)[Actions::ACTION] === null;
     }
 
     public function hasPriv($name, $priv)
@@ -313,7 +301,7 @@ final class App
     public function setInfo($name, $info)
     {
         $this->_files[$name] = $info;
-        $this->saveMeta();
+        self::saveFileList($this->_path, $this->_files);
     }
 
     public function view($view, $extraVars = [])
