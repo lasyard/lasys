@@ -17,7 +17,7 @@ final class ImageParserTest extends TestCase
         $this->assertSame(
             join(PHP_EOL, [
                 '<div class="center"><div class="pic">',
-                '<img src="http://lasys/a.jpg?_type_=raw" />',
+                '<img src="http://lasys/a.jpg?' . Server::QUERY_GET_RAW . '" />',
                 '</div></div>',
             ]),
             $imageParser->content

@@ -14,11 +14,11 @@ final class DoUpload extends Traits
         if (isset($conf[Config::READ_ONLY]) && $conf[Config::READ_ONLY]) {
             return $conf;
         }
-        $conf[Config::LIST][$conf[Config::DEFAULT_ITEM]][Server::POST] = FileActions::post()->priv(User::EDIT);
         $conf[Config::LIST][FileActions::UPLOAD_ITEM] = [
             Config::TITLE => $conf[FileActions::UPLOAD_TITLE] ?? FileActions::DEFAULT[FileActions::UPLOAD_TITLE],
             Config::BUTTON => Icon::UPLOAD,
             Server::GET => FileActions::uploadForm()->priv(User::EDIT),
+            Server::POST => FileActions::post()->priv(User::EDIT),
         ];
         return $conf;
     }

@@ -20,7 +20,7 @@ final class HtmlParserTest extends TestCase
         $this->assertSame(
             join(PHP_EOL, [
                 '<div id="html-body"><h1>标题</h1>',
-                '<img src="ha.jpg?_type_=raw"></div>',
+                '<img src="ha.jpg?' . Server::QUERY_GET_RAW . '"></div>',
             ]),
             $htmlParser->content
         );

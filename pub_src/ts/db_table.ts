@@ -350,7 +350,6 @@ export class DbTable {
                 Tag.of('td').add(Tag.icon('x-square')).putInto(tr).event('click', () => {
                     const r = confirm('Are you sure to delete item [' + dt + ']?');
                     if (r) {
-                        const url = new URL(window.location.href);
                         const data: { [index: string]: any } = {};
                         for (const f in _TABLE_FIELDS) {
                             if (_TABLE_FIELDS[f].primary) {
@@ -363,7 +362,7 @@ export class DbTable {
                                 self.loadData();
                             },
                             JSON.stringify(data),
-                            url.href,
+                            '',
                             MimeType.HTML
                         );
                     }

@@ -13,7 +13,7 @@ final class FileActions extends Actions
         self::ACCEPT => '.txt,text/plain',
     ];
 
-    public const UPLOAD_ITEM = '-upload-';
+    public const UPLOAD_ITEM = 'upload';
 
     public static function default($confName)
     {
@@ -138,7 +138,7 @@ final class FileActions extends Actions
     {
         View::render('upload', [
             'title' => self::default(self::UPLOAD_TITLE),
-            'action' => $this->base,
+            'action' => $this->base . self::UPLOAD_ITEM,
             'accept' => self::default(self::ACCEPT),
             'sizeLimit' => self::default(self::SIZE_LIMIT),
         ]);

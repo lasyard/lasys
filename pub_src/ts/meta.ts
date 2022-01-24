@@ -18,9 +18,14 @@ onLoad(function () {
         btnDelete.event('click', () => {
             const r = confirm('Are you sure to delete this item?');
             if (r) {
-                Ajax.delete(function (res) {
-                    Tag.byId('main').html(res);
-                }, '', MimeType.HTML);
+                Ajax.delete(
+                    function (res) {
+                        Tag.byId('main').html(res);
+                    },
+                    null,
+                    '',
+                    MimeType.HTML
+                );
             }
         });
     }

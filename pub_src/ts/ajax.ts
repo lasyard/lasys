@@ -12,7 +12,7 @@ enum HttpMethod {
     DELETE = 'DELETE',
 }
 
-const TYPE_KEY = '_type_';
+const TYPE_KEY = 'requestType';
 const UPDATE = 'update';
 const DELETE = 'delete';
 

@@ -1,7 +1,7 @@
 <?php
 final class Server
 {
-    public const TYPE_KEY = '_type_';
+    public const TYPE_KEY = 'requestType';
     public const INVALID = 'invalid';
     public const HEAD = 'head';
     public const GET = 'get';
