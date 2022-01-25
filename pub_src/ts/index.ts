@@ -6,4 +6,3 @@ export * from './tool_tip';
 export * from './unit_trans';
 export * from './filter';
 export * from './blink';
-import './meta';

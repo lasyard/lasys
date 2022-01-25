@@ -66,23 +66,23 @@ final class DbActions extends Actions
         return $fields;
     }
 
-    private function buildMeta($fields)
+    private function buildRibbon($fields)
     {
-        $editForm = null;
-        $btnEdit = null;
+        $formInsert = null;
+        $btnInsert = null;
         if ($this->hasPrivOf(Server::AJAX_POST)) {
-            $btnEdit = Icon::INSERT;
+            $btnInsert = Icon::INSERT;
             $formView = $this->conf(self::INSERT_FORM) ?? 'db_edit';
-            $editForm = View::renderHtml($formView, [
+            $formInsert = View::renderHtml($formView, [
                 'title' => Icon::INSERT . ' ' . $this->name,
                 'fields' => $fields,
-                'name' => '-form-db-insert',
+                'name' => '-form-insert',
                 'purpose' => 'insert',
             ]);
         }
         $time = Sys::db()->getLastModTime($this->name);
         $msg = Icon::TIME . '<em>' . date('Y.m.d H:i:s', $time) . '</em>';
-        return ['msg' => $msg, 'btnEdit' => $btnEdit, 'editForm' => $editForm];
+        return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
     public function actionGet()
@@ -91,7 +91,7 @@ final class DbActions extends Actions
         if (isset($script)) {
             Sys::app()->addScript($script);
         }
-        Sys::app()->addScript('js' . DS . 'db_table');
+        Sys::app()->addScript('js' . DS . 'db');
         $columns = Sys::db()->getColumns($this->name);
         $fields = $this->buildFields($columns);
         Sys::app()->addData('_TABLE_FIELDS', array_map(function ($v) {
@@ -101,13 +101,13 @@ final class DbActions extends Actions
             ];
         }, $fields));
         Sys::app()->addData('_TABLE_CAN_DELETE', $this->hasPrivOf(Server::AJAX_DELETE));
-        $meta = $this->buildMeta($fields);
-        View::render('meta', $meta);
+        $ribbon = $this->buildRibbon($fields);
+        View::render('db_ribbon', $ribbon);
         if ($this->hasPrivOf(Server::AJAX_UPDATE)) {
             View::render('db_edit', [
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'fields' => $fields,
-                'name' => '-form-db-update',
+                'name' => '-form-update',
                 'attrs' => [
                     'style' => 'display:none',
                 ],

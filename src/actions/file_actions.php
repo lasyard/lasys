@@ -40,17 +40,17 @@ final class FileActions extends Actions
         }
     }
 
-    private function buildMeta()
+    private function buildRibbon()
     {
         $info = $this->info($this->name);
         if (!$info) {
             return null;
         }
-        $editForm = null;
-        $btnEdit = null;
+        $formUpdate = null;
+        $btnUpdate = null;
         if ($this->hasPrivOf(Server::UPDATE)) {
-            $btnEdit = Icon::EDIT;
-            $editForm = View::renderHtml('upload', [
+            $btnUpdate = Icon::EDIT;
+            $formUpdate = View::renderHtml('upload', [
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'action' => '?' . Server::QUERY_UPDATE,
                 'accept' => self::default(self::ACCEPT),
@@ -67,14 +67,15 @@ final class FileActions extends Actions
         }
         return [
             'msg' => $msg,
-            'btnEdit' => $btnEdit,
+            'btnUpdate' => $btnUpdate,
             'btnDelete' => $btnDelete,
-            'editForm' => $editForm,
+            'formUpdate' => $formUpdate,
         ];
     }
 
     public function actionGet()
     {
+        Sys::app()->addScript('js' . DS . 'file');
         $name = $this->name;
         $file = $this->path . DS . $name;
         if (!is_file($file)) {
@@ -99,12 +100,12 @@ final class FileActions extends Actions
         if (!empty($parser->css)) {
             Sys::app()->addCss($parser->css);
         }
-        $meta = $this->buildMeta();
-        if ($meta) {
+        $ribbon = $this->buildRibbon();
+        if ($ribbon) {
             if (!empty($parser->info)) {
-                $meta['msg'] .= $parser->info;
+                $ribbon['msg'] .= $parser->info;
             }
-            View::render('meta', $meta);
+            View::render('file_ribbon', $ribbon);
         }
         echo $parser->content;
     }

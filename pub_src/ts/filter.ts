@@ -1,5 +1,5 @@
 import { capitalize, objCmp, SortFun } from "./common";
-import { ColumnIndices } from "./db_table";
+import { ColumnIndices } from "./db";
 import { Tag } from "./tag";
 
 export abstract class Filter {

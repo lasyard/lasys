@@ -131,16 +131,25 @@ export class DbTable {
             this.divFilters = Tag.div().putInto(panel);
         }
         this.divData = Tag.div().putInto(panel);
+        const btnInsert = Tag.byId('-btn-insert');
+        const divForm = Tag.byId('-div-form-insert');
+        if (btnInsert && divForm) {
+            btnInsert.event('click', (e) => {
+                divForm.show();
+                e.stopPropagation();
+            });
+            divForm.outClickHide();
+        }
         const self = this;
-        const insertForm = Tag.form('-form-db-insert');
-        if (insertForm) {
-            const form = insertForm.get();
+        const formInsert = Tag.form('-form-insert');
+        if (formInsert) {
+            const form = formInsert.get();
             const action = form.getAttribute('action');
-            insertForm.event('submit', function (e) {
+            formInsert.event('submit', function (e) {
                 const data = DbTable.retrieveFormData(form);
                 Ajax.post(
                     function (res) {
-                        Tag.byId('-meta-div-edit-form').hide();
+                        divForm.hide();
                         DbTable.showMsg(res);
                         self.loadData();
                     },
@@ -152,14 +161,14 @@ export class DbTable {
                 e.preventDefault();
             });
         }
-        const updateForm = Tag.form('-form-db-update');
-        if (updateForm) {
+        const formUpdate = Tag.form('-form-update');
+        if (formUpdate) {
             const callback = function (res: string) {
                 ToolTip.get().hide();
                 DbTable.showMsg(res);
                 self.loadData();
             };
-            const form = updateForm.get();
+            const form = formUpdate.get();
             // Do not use `form.action`, which may overrided by an input named `action`.
             const action = form.getAttribute('action');
             // Do this before updateForm vanished.
@@ -182,7 +191,7 @@ export class DbTable {
                     e.preventDefault();
                 });
             }
-            updateForm.vanish().show().event('submit', function (e) {
+            formUpdate.vanish().show().event('submit', function (e) {
                 const data = DbTable.retrieveFormData(form);
                 const keys: { [index: string]: any } = {};
                 for (const f in data) {
@@ -200,7 +209,7 @@ export class DbTable {
                 );
                 e.preventDefault();
             });
-            this.updateForm = updateForm;
+            this.updateForm = formUpdate;
         }
         return this;
     }

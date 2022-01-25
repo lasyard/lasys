@@ -3,12 +3,11 @@ import { Ajax, MimeType } from "./ajax";
 import { Tag } from './tag';
 
 onLoad(function () {
-    const btnEdit = Tag.byId('-meta-btn-edit');
-    const btnDelete = Tag.byId('-meta-btn-delete');
-    const divForm = Tag.byId('-meta-div-edit-form');
-    const ajaxMsg = Tag.byId('-ajax-msg');
-    if (btnEdit && divForm) {
-        btnEdit.event('click', (e) => {
+    const btnUpdate = Tag.byId('-btn-update');
+    const btnDelete = Tag.byId('-btn-delete');
+    const divForm = Tag.byId('-div-form-update');
+    if (btnUpdate && divForm) {
+        btnUpdate.event('click', (e) => {
             divForm.show();
             e.stopPropagation();
         });
@@ -16,7 +15,7 @@ onLoad(function () {
     }
     if (btnDelete) {
         btnDelete.event('click', () => {
-            const r = confirm('Are you sure to delete this item?');
+            const r = confirm('Are you sure to delete this file?');
             if (r) {
                 Ajax.delete(
                     function (res) {
@@ -28,8 +27,5 @@ onLoad(function () {
                 );
             }
         });
-    }
-    if (ajaxMsg) {
-        ajaxMsg.outClickHide();
     }
 });

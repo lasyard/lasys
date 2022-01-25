@@ -151,7 +151,7 @@ div#bar {
         width: $listWidth;
         margin-bottom: $barHeight;
 
-        div.buttons {
+        div.ribbon {
             @include ribbon;
         }
     }
@@ -162,7 +162,7 @@ div#bar {
         border: 1px solid transparent;
         margin-bottom: $barHeight;
 
-        div#meta {
+        div.ribbon {
             @include ribbon;
         }
     }
@@ -235,7 +235,7 @@ div#list {
 }
 
 div#main {
-    div#meta {
+    div.ribbon {
         background-color: $transBgColor;
         font-size: 0.8em;
         font-family: $headerFont;

@@ -7,13 +7,18 @@ final class File
     {
     }
 
+    public static function mkdirForFile($file)
+    {
+        $dir = dirname($file);
+        if (!is_dir($dir)) {
+            mkdir(dirname($file), 0775, true);
+        }
+    }
+
     public static function openForWriting($file)
     {
-        $fh = fopen($file, 'w');
-        if (!$fh) {
-            mkdir(dirname($file), 0775, true);
-            $fh = fopen($file, 'w');
-        }
+        self::mkdirForFile($file);
+        $fh = @fopen($file, 'w');
         if ($fh) {
             return $fh;
         }
@@ -50,9 +55,7 @@ final class File
         if (!$overwrite && file_exists($newFile)) {
             throw new RuntimeException('File "' . $name . '" exists.');
         }
-        if (!is_dir($path)) {
-            mkdir($path, 0775, true);
-        }
+        self::mkdirForFile($newFile);
         if (!Str::isValidFileName($name)) {
             throw new RuntimeException('Invalid file name \"' . $name . '\".');
         }
