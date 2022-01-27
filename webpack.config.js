@@ -28,6 +28,10 @@ module.exports = {
             import: SRC_DIR + 'ts/db.ts',
             dependOn: 'js/main.js',
         },
+        'js/gallery.js': {
+            import: SRC_DIR + 'ts/gallery.ts',
+            dependOn: 'js/main.js',
+        },
         // MiniCssExtractPlugin will add `.css`.
         'css/main': SRC_DIR + 'scss/index.scss',
     },

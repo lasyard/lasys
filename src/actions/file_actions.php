@@ -42,7 +42,7 @@ final class FileActions extends Actions
 
     private function buildRibbon()
     {
-        $info = $this->info($this->name);
+        $info = Sys::app()->info($this->name);
         if (!$info) {
             return null;
         }
@@ -60,7 +60,7 @@ final class FileActions extends Actions
         $btnDelete = $this->hasPrivOf(Server::AJAX_DELETE) ? Icon::DELETE : null;
         $msg = '';
         if (isset($info['time'])) {
-            $msg .= Icon::TIME . '<em>' . date('Y.m.d H:i:s', $info['time']) . '</em> ';
+            $msg .= Icon::TIME . '<em>' . Str::timeStr($info['time']) . '</em> ';
         }
         if (isset($info['uname'])) {
             $msg .= Icon::USER . $info['uname'];
@@ -164,11 +164,11 @@ final class FileActions extends Actions
                 throw $e;
             }
         }
-        $info = $this->info();
+        $info = Sys::app()->info($name);
         if ($title) {
             $info['title'] = $title;
         }
-        $this->setInfo($info);
+        Sys::app()->setInfo($name, $info);
         Sys::app()->redirect($name);
     }
 

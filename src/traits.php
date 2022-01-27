@@ -23,6 +23,12 @@ abstract class Traits
         return $item;
     }
 
+    public static function showGallery($rPriv = null, $wPriv = null)
+    {
+        require_once 'traits' . DS . 'show_gallery.php';
+        return new ShowGallery($rPriv, $wPriv);
+    }
+
     public static function accessDb($rPriv = null, $wPriv = null)
     {
         require_once 'traits' . DS . 'access_db.php';

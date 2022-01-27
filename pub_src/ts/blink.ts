@@ -25,10 +25,9 @@ export class Blink {
         }
         this.blinkTimes = this.times;
         this.callback = callback;
-        const self = this;
         // `window` is needed to distinguish from node's own `setTimeout`.
-        this.timer = window.setTimeout(function () {
-            self.onTimer();
+        this.timer = window.setTimeout(() => {
+            this.onTimer();
         }, this.time);
     }
 
@@ -56,9 +55,8 @@ export class Blink {
             }
         }
         if (this.blinkTimes > 0) {
-            const self = this;
-            this.timer = window.setTimeout(function () {
-                self.onTimer();
+            this.timer = window.setTimeout(() => {
+                this.onTimer();
             }, this.time);
         } else {
             this.timer = null;

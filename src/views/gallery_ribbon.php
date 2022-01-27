@@ -1,5 +1,5 @@
 <div class="ribbon">
-    <span>
+    <span id="-msg">
         <?php
         if (isset($msg)) {
             echo $msg;
@@ -8,16 +8,16 @@
     </span>
     <span class="buttons">
         <?php
-        if (isset($btnInsert)) {
+        if (isset($btnUpload)) {
         ?>
-            <span id="-btn-insert"><?php echo $btnInsert; ?></span>
+            <span id="-btn-upload"><?php echo $btnUpload; ?></span>
         <?php
         }
         ?>
     </span>
-    <?php if (!empty($formInsert)) { ?>
-        <div id="-div-form-insert" style="display:none">
-            <?php echo $formInsert; ?>
+    <?php if (!empty($formUpload)) { ?>
+        <div id="-div-form-upload" style="display:none">
+            <?php echo $formUpload; ?>
         </div>
     <?php } ?>
     <div id="-popup-msg" style="display:none"></div>

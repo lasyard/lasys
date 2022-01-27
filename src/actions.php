@@ -100,9 +100,9 @@ class Actions
         $this->doError($args[0]);
     }
 
-    protected function hasPrivOf($type)
+    protected function hasPrivOf($type, $uid = null)
     {
-        return Sys::app()->hasPrivOf($this->_name, $type);
+        return Sys::app()->hasPrivOf($this->_name, $type, $uid);
     }
 
     protected function conf($name)
@@ -112,15 +112,5 @@ class Actions
             return $list[$this->_name][$name];
         }
         return null;
-    }
-
-    protected function info()
-    {
-        return Sys::app()->info($this->_name);
-    }
-
-    protected function setInfo($info)
-    {
-        Sys::app()->setInfo($this->_name, $info);
     }
 }

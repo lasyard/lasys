@@ -1,4 +1,4 @@
-import { ToolTip, ToolTipContent } from './tool_tip';
+import { Tooltip, TooltipContent } from './tooltip';
 
 type TagList = (Tag<HTMLElement> | any)[];
 
@@ -21,6 +21,10 @@ export class Tag<T extends HTMLElement> {
 
     public static span(...tags: TagList) {
         return Tag.of<HTMLSpanElement>('span').add(tags);
+    }
+
+    public static a(...tags: TagList) {
+        return Tag.of<HTMLAnchorElement>('a').add(tags);
     }
 
     public static p(...tags: TagList) {
@@ -59,6 +63,10 @@ export class Tag<T extends HTMLElement> {
 
     public get() {
         return this.element;
+    }
+
+    public getHtml() {
+        return this.element.outerHTML;
     }
 
     public getPos() {
@@ -139,8 +147,16 @@ export class Tag<T extends HTMLElement> {
         return this;
     }
 
-    public toolTip(info: ToolTipContent): Tag<T> {
-        return ToolTip.get().on(this, info);
+    public clickShow(tag: Tag<HTMLElement>) {
+        this.element.addEventListener('click', (e) => {
+            tag.show();
+            e.stopPropagation();
+        });
+        return this;
+    }
+
+    public toolTip(info: TooltipContent): Tag<T> {
+        return Tooltip.get().on(this, info);
     }
 
     public putInto(tag: Tag<HTMLElement>) {

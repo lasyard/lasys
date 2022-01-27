@@ -82,10 +82,11 @@ export class Ajax {
         onload: AjaxCallback,
         data: any = null,
         urlStr = '',
+        type = MimeType.JSON,
         accept = MimeType.JSON,
     ) {
         const url = new URL(urlStr, window.location.href);
         url.searchParams.set(TYPE_KEY, DELETE);
-        Ajax.call(onload, HttpMethod.POST, data, url, MimeType.JSON, accept);
+        Ajax.call(onload, HttpMethod.POST, data, url, type, accept);
     }
 }

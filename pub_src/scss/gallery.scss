@@ -1,0 +1,32 @@
+div#main {
+    div.gallery {
+        a.thumb {
+            @extend .border;
+            position: relative;
+            display: inline-block;
+            vertical-align: bottom;
+            margin: 3px;
+            width: 200px;
+            height: 200px;
+            line-height: 200px;
+            text-align: center;
+
+            div.x-button {
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
+
+            >div {
+                display: inline-block;
+                line-height: normal;
+                vertical-align: middle;
+            }
+
+            span.title {
+                font-family: $headerFont;
+                font-size: 0.8em;
+            }
+        }
+    }
+}

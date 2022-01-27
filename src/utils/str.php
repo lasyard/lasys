@@ -50,4 +50,9 @@ final class Str
     {
         return preg_match('/^[A-Za-z\d][\w\-.]+$/', $name) > 0;
     }
+
+    public static function timeStr($timestamp)
+    {
+        return date('Y.m.d H:i:s', $timestamp);
+    }
 }

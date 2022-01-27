@@ -139,7 +139,7 @@ export class MultiCheckFilter extends Filter {
 
     testFunc() {
         const items = document.forms.namedItem(this.formName).namedItem(this.itemName);
-        return function (data: any[][]) {
+        return (data: any[][]) => {
             const selected = [];
             for (const i in items) {
                 if (items[i].checked) {

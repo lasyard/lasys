@@ -1,6 +1,6 @@
 import { SortFun } from './common';
 import { Tag, TagContent } from './tag';
-import { ToolTip } from './tool_tip';
+import { Tooltip } from './tooltip';
 import { onLoad } from './html';
 import { MimeType, Ajax } from './ajax';
 import { Filter } from './filter';
@@ -53,6 +53,7 @@ export class DbTable {
     private divFilters: Tag<HTMLDivElement> = null;
     private divData: Tag<HTMLDivElement> = null;
     private updateForm: Tag<HTMLFormElement> = null;
+    private popupMsg: Tag<HTMLElement> = null;
 
     constructor(conf: DbTableConfig) {
         this.conf = conf;
@@ -118,8 +119,10 @@ export class DbTable {
         return data;
     }
 
-    private static showMsg(msg: string) {
-        Tag.byId('-ajax-msg').html(msg).show();
+    private showMsg(msg: string) {
+        if (this.popupMsg) {
+            this.popupMsg.html(msg).show();
+        }
     }
 
     render(panelId: string) {
@@ -127,6 +130,7 @@ export class DbTable {
         if (!panel) {
             return;
         }
+        this.popupMsg = Tag.byId('-popup-msg').outClickHide();
         if (this.conf.filters) {
             this.divFilters = Tag.div().putInto(panel);
         }
@@ -134,24 +138,20 @@ export class DbTable {
         const btnInsert = Tag.byId('-btn-insert');
         const divForm = Tag.byId('-div-form-insert');
         if (btnInsert && divForm) {
-            btnInsert.event('click', (e) => {
-                divForm.show();
-                e.stopPropagation();
-            });
+            btnInsert.clickShow(divForm);
             divForm.outClickHide();
         }
-        const self = this;
         const formInsert = Tag.form('-form-insert');
         if (formInsert) {
             const form = formInsert.get();
             const action = form.getAttribute('action');
-            formInsert.event('submit', function (e) {
+            formInsert.event('submit', (e) => {
                 const data = DbTable.retrieveFormData(form);
                 Ajax.post(
-                    function (res) {
+                    (r) => {
                         divForm.hide();
-                        DbTable.showMsg(res);
-                        self.loadData();
+                        this.showMsg(r);
+                        this.loadData();
                     },
                     JSON.stringify(data),
                     action,
@@ -163,10 +163,10 @@ export class DbTable {
         }
         const formUpdate = Tag.form('-form-update');
         if (formUpdate) {
-            const callback = function (res: string) {
-                ToolTip.get().hide();
-                DbTable.showMsg(res);
-                self.loadData();
+            const callback = (r: string) => {
+                Tooltip.get().close();
+                this.showMsg(r);
+                this.loadData();
             };
             const form = formUpdate.get();
             // Do not use `form.action`, which may overrided by an input named `action`.
@@ -174,7 +174,7 @@ export class DbTable {
             // Do this before updateForm vanished.
             const btn = Tag.byId('-span-insert-new').find('a');
             if (btn) {
-                btn.event('click', function (e) {
+                btn.event('click', (e) => {
                     const data = DbTable.retrieveFormData(form);
                     for (const f in _TABLE_FIELDS) {
                         if (_TABLE_FIELDS[f].auto) {
@@ -191,7 +191,7 @@ export class DbTable {
                     e.preventDefault();
                 });
             }
-            formUpdate.vanish().show().event('submit', function (e) {
+            formUpdate.vanish().show().event('submit', (e) => {
                 const data = DbTable.retrieveFormData(form);
                 const keys: { [index: string]: any } = {};
                 for (const f in data) {
@@ -303,14 +303,14 @@ export class DbTable {
             }
             if (group.nav) {
                 Tag.of('form').add(Tag.fieldset(group.nav).cls('links').add(
-                    keys.map((k) => Tag.span(Tag.of('a').attr({ href: '#' + k }).add(k)))
+                    keys.map((k) => Tag.span(Tag.a(k).attr({ href: '#' + k })))
                 )).putInto(divData);
             }
             for (const key of keys) {
                 const result = this.getStat(grouped[key], ci);
                 Tag.of('tr').cls('top').add(
                     Tag.of('td').cls('group').attr({ colspan: totalColumns })
-                        .add(Tag.of('span').add(Tag.of('a').name(key).add(key)))
+                        .add(Tag.of('span').add(Tag.a(key).name(key)))
                         .add(Tag.of('span').cls('stat').add(result))
                 ).putInto(table);
                 this.addToTable(table, grouped[key], columns);
@@ -334,7 +334,6 @@ export class DbTable {
         let alt = false;
         let tr = null;
         const cols = this.conf.cols;
-        const self = this;
         for (const dt of data) {
             if (colCount == 0) {
                 tr = Tag.of('tr').cls(alt ? 'alt' : 'def');
@@ -346,17 +345,17 @@ export class DbTable {
                 tr.add(td);
             }
             if (this.updateForm) {
-                Tag.of('td').add(Tag.icon('pencil-square')).putInto(tr).toolTip(function () {
+                Tag.of('td').add(Tag.a(Tag.icon('pencil-square')).toolTip(() => {
                     const data = dt;
-                    self.setFormData(data);
+                    this.setFormData(data);
                     return {
-                        body: self.updateForm,
+                        body: this.updateForm,
                         width: '70%',
                     }
-                });
+                })).putInto(tr);
             }
             if (_TABLE_CAN_DELETE) {
-                Tag.of('td').add(Tag.icon('x-square')).putInto(tr).event('click', () => {
+                Tag.of('td').add(Tag.a(Tag.icon('x-square')).event('click', () => {
                     const r = confirm('Are you sure to delete item [' + dt + ']?');
                     if (r) {
                         const data: { [index: string]: any } = {};
@@ -366,16 +365,17 @@ export class DbTable {
                             }
                         }
                         Ajax.delete(
-                            function (res) {
-                                DbTable.showMsg(res);
-                                self.loadData();
+                            (r) => {
+                                this.showMsg(r);
+                                this.loadData();
                             },
                             JSON.stringify(data),
                             '',
+                            MimeType.JSON,
                             MimeType.HTML
                         );
                     }
-                });
+                })).putInto(tr);
             }
             colCount++;
             if (colCount == columns) {
@@ -398,6 +398,8 @@ export class DbTable {
 
 declare const dbTableConfig: () => DbTableConfig;
 
-onLoad(function () {
-    new DbTable((typeof dbTableConfig === 'function') ? dbTableConfig() : {}).render('main').loadData();
+onLoad(() => {
+    new DbTable((typeof dbTableConfig === 'function') ? dbTableConfig() : {})
+        .render('main')
+        .loadData();
 });

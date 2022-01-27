@@ -20,6 +20,21 @@ export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+export function timeStr(time: string | number) {
+    if (typeof time === 'string') {
+        time = parseInt(time);
+    }
+    return new Date(time * 1000).toLocaleString([], {
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+}
+
 export function html(str: string) {
     return str
         .replace(/[<>&]/gm, (s: String) => "&#" + s.charCodeAt(0) + ";")

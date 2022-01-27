@@ -87,10 +87,27 @@ final class User
         if ($this->_user == null) {
             return false;
         }
-        if ($this->user['id'] === $priv) {
+        $id = $this->user['id'];
+        if ($id === $priv || $id === User::ADMIN) {
             return true;
         }
         $privs = $this->_user['priv'];
         return in_array($priv, $privs);
+    }
+
+    public function hasPrivs($privs, $uid)
+    {
+        foreach ($privs as $priv) {
+            if ($priv === User::OWNER) {
+                if (isset($uid) && $this->hasPriv($uid)) {
+                    continue;
+                }
+                return false;
+            }
+            if (!$this->hasPriv($priv)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -2,15 +2,12 @@ import { onLoad } from './html';
 import { Ajax, MimeType } from "./ajax";
 import { Tag } from './tag';
 
-onLoad(function () {
+onLoad(() => {
     const btnUpdate = Tag.byId('-btn-update');
     const btnDelete = Tag.byId('-btn-delete');
     const divForm = Tag.byId('-div-form-update');
     if (btnUpdate && divForm) {
-        btnUpdate.event('click', (e) => {
-            divForm.show();
-            e.stopPropagation();
-        });
+        btnUpdate.clickShow(divForm);
         divForm.outClickHide();
     }
     if (btnDelete) {
@@ -18,11 +15,12 @@ onLoad(function () {
             const r = confirm('Are you sure to delete this file?');
             if (r) {
                 Ajax.delete(
-                    function (res) {
-                        Tag.byId('main').html(res);
+                    (r) => {
+                        Tag.byId('main').html(r);
                     },
                     null,
                     '',
+                    MimeType.JSON,
                     MimeType.HTML
                 );
             }

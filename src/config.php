@@ -21,7 +21,7 @@ final class Config
         self::DEFAULT_ITEM => 'index',
         self::READ_PRIV => [],
         self::EDIT_PRIV => [User::OWNER, User::EDIT],
-        self::EXCLUDES => ['.*', 'index.*', '_*'],
+        self::EXCLUDES => ['index.*', '_*'],
         self::LIST => [],
     ];
 

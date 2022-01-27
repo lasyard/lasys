@@ -15,3 +15,8 @@ test('Tag', () => {
     expect(div.id).toBe('id');
     expect(div.className).toBe('class');
 });
+
+test('getHtml', () => {
+    const div = Tag.div(Tag.p('pee'));
+    expect(div.getHtml()).toBe('<div><p>pee</p></div>');
+});

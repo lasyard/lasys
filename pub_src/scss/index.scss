@@ -69,16 +69,8 @@ body {
     color: $sysColor !important;
 }
 
-.left {
-    text-align: left;
-}
-
 .center {
     text-align: center;
-}
-
-.right {
-    text-align: right;
 }
 
 .centered {
@@ -245,13 +237,9 @@ div#main {
             float: right;
         }
 
-        div#-ajax-msg {
+        div#-popup-msg {
             background-color: $whiteColor;
         }
-    }
-
-    img {
-        @extend .centered
     }
 }
 
@@ -335,7 +323,8 @@ blockquote {
 }
 
 @import 'form';
-@import 'picture';
+@import 'gallery';
+@import 'image';
 @import 'stylized';
 @import 'text';
-@import 'tool_tip';
+@import 'tooltip';

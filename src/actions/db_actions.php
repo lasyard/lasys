@@ -81,7 +81,7 @@ final class DbActions extends Actions
             ]);
         }
         $time = Sys::db()->getLastModTime($this->name);
-        $msg = Icon::TIME . '<em>' . date('Y.m.d H:i:s', $time) . '</em>';
+        $msg = Icon::TIME . '<em>' . Str::timeStr($time) . '</em>';
         return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
@@ -132,7 +132,7 @@ final class DbActions extends Actions
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $row = Sys::db()->update($this->name, $data['keys'], $data['data']);
-        self::echoInfo('Succeeded to update ' . $row . ' records.');
+        Msg::info('Succeeded to update ' . $row . ' records.');
     }
 
     // This is not used because of ajaxfy.
@@ -148,29 +148,19 @@ final class DbActions extends Actions
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $row = Sys::db()->insert($this->name, $data);
-        self::echoInfo('Succeeded to insert ' . $row . ' records.');
+        Msg::info('Succeeded to insert ' . $row . ' records.');
     }
 
     public function actionAjaxDelete()
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $row = Sys::db()->delete($this->name, $data);
-        self::echoInfo('Succeeded to delete ' . $row . ' records.');
+        Msg::info('Succeeded to delete ' . $row . ' records.');
     }
 
     public function actionDump()
     {
         Sys::db()->dump($this->path . DS . '_dump');
         echo '<p class="sys center">Dumping succeed!</p>';
-    }
-
-    public static function echoInfo($msg)
-    {
-        echo '<p class="center">', Icon::INFO, ' ', $msg, '</p>', PHP_EOL;
-    }
-
-    public static function echoHotInfo($msg)
-    {
-        echo '<p class="hot center">', Icon::WARN, ' ', $msg, '</p>', PHP_EOL;
     }
 }

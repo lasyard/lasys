@@ -5,6 +5,7 @@ import {
     capitalize,
     html,
     textBuilder,
+    timeStr,
 } from '../ts/common';
 
 test('objCmp', () => {
@@ -24,6 +25,11 @@ test('dateCmp', () => {
 test('capitalize', () => {
     expect(capitalize('abc')).toBe('Abc');
 });
+
+test('timeStr', () => {
+    expect(timeStr(0)).toBe('1970/01/01 08:00:00');
+    expect(timeStr('10')).toBe('1970/01/01 08:00:10');
+})
 
 test('html', () => {
     expect(html('<a>')).toBe('&#60;a&#62;');

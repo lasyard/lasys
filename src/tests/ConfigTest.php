@@ -23,8 +23,6 @@ final class ConfigTest extends TestCase
     public function testExcluded()
     {
         $conf = new Config('default');
-        $this->assertTrue($conf->excluded('.'));
-        $this->assertTrue($conf->excluded('..'));
         $this->assertTrue($conf->excluded('index.html'));
         $this->assertTrue($conf->excluded('_list.json'));
     }
