@@ -20,6 +20,8 @@ final class DoUpload extends Traits
             Server::GET => FileActions::uploadForm()->priv(User::EDIT),
             Server::POST => FileActions::post()->priv(User::EDIT),
         ];
+        $conf[Config::ETC][Server::UPDATE] ??= FileActions::update()->priv(...$conf[Config::EDIT_PRIV]);
+        $conf[Config::ETC][Server::AJAX_DELETE] ??= FileActions::ajaxDelete()->priv(...$conf[Config::EDIT_PRIV]);
         return $conf;
     }
 

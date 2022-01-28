@@ -9,6 +9,7 @@ final class Config
     public const EDIT_PRIV = 'editPriv';
     public const EXCLUDES = 'excludes';
     public const LIST = 'list';
+    public const ETC = '*';
 
     // item config
     public const TITLE = 'title';
@@ -68,10 +69,21 @@ final class Config
         $this->mergeArray($conf, self::EXCLUDES);
         $this->setDefault($conf, self::TRAITS);
         $this->setDefault($conf, self::LIST);
+        // Set get to view files not in list or with no actions set. Do it here to read `READ_PRIV` conf.
+        $conf[self::ETC] = [Server::GET => FileActions::get()->priv($conf[self::READ_PRIV])];
+        // Call `forChid` first to allow mangling of new conf.
+        foreach ($this->_conf[self::TRAITS] as $trait) {
+            $conf = $trait->forChild($conf, $this->_conf);
+        }
+        foreach ($conf[self::TRAITS] as $trait) {
+            $conf = $trait->forSelf($conf, $this->_conf);
+        }
         foreach ($conf[self::LIST] as &$item) {
             if (is_string($item)) {
                 $item = [self::TITLE => $item];
-            } else if ($item instanceof Actions || is_array($item) && isset($item[Actions::ACTION])) {
+            } else if ($item instanceof Actions) {
+                $item = [Server::GET => $item->priv($conf[self::READ_PRIV])];
+            } else if (is_array($item) && isset($item[Actions::ACTION])) {
                 $item = [Server::GET => $item];
             } else if (isset($item[Config::TRAITS])) {
                 $traits = $item[Config::TRAITS];
@@ -83,12 +95,6 @@ final class Config
                     $item = $traits->forItem($item, $conf);
                 }
             }
-        }
-        foreach ($this->_conf[self::TRAITS] as $trait) {
-            $conf = $trait->forChild($conf, $this->_conf);
-        }
-        foreach ($conf[self::TRAITS] as $trait) {
-            $conf = $trait->forSelf($conf, $this->_conf);
         }
         $this->_conf = $conf;
     }

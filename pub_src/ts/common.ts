@@ -24,7 +24,7 @@ export function timeStr(time: string | number) {
     if (typeof time === 'string') {
         time = parseInt(time);
     }
-    return new Date(time * 1000).toLocaleString([], {
+    return new Date(time * 1000).toLocaleString(['zh-CN'], {
         hour12: false,
         year: 'numeric',
         month: '2-digit',

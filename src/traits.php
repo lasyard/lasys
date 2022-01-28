@@ -1,8 +1,7 @@
 <?php
 abstract class Traits
 {
-    private static $_doUpload = null;
-    private static $_passDownDefaultPage = null;
+    private static $_cache = [];
 
     protected function __construct()
     {
@@ -23,33 +22,16 @@ abstract class Traits
         return $item;
     }
 
-    public static function showGallery($rPriv = null, $wPriv = null)
+    public static function __callStatic($method, $args)
     {
-        require_once 'traits' . DS . 'show_gallery.php';
-        return new ShowGallery($rPriv, $wPriv);
-    }
-
-    public static function accessDb($rPriv = null, $wPriv = null)
-    {
-        require_once 'traits' . DS . 'access_db.php';
-        return new AccessDb($rPriv, $wPriv);
-    }
-
-    public static function doUpload($recursive = true)
-    {
-        if (self::$_doUpload === null) {
-            require_once 'traits' . DS . 'do_upload.php';
-            self::$_doUpload = new DoUpload();
+        $class = ucfirst($method);
+        require_once 'traits' . DS . Str::classToFile($class) . '.php';
+        if (count($args) == 0) {
+            if (!isset(self::$_cache[$method])) {
+                self::$_cache[$method] = new $class(...$args);
+            }
+            return self::$_cache[$method];
         }
-        return self::$_doUpload;
-    }
-
-    public static function passDownDefaultPage()
-    {
-        if (self::$_passDownDefaultPage === null) {
-            require_once 'traits' . DS . 'pass_down_default_page.php';
-            self::$_passDownDefaultPage = new PassDownDefaultPage();
-        }
-        return self::$_passDownDefaultPage;
+        return new $class(...$args);
     }
 }

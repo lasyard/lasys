@@ -182,30 +182,6 @@ final class FileActions extends Actions
         ]);
     }
 
-    public static function action($readOnly, $type)
-    {
-        if ($readOnly) {
-            if ($type == Server::GET) {
-                return FileActions::get()->priv();
-            }
-        } else {
-            switch ($type) {
-                case Server::GET:
-                    return  FileActions::get()->priv(...Sys::app()->conf(Config::READ_PRIV));
-                    break;
-                case Server::UPDATE:
-                    return  FileActions::update()->priv(...Sys::app()->conf(Config::EDIT_PRIV));
-                    break;
-                case Server::AJAX_DELETE:
-                    return  FileActions::ajaxDelete()->priv(...Sys::app()->conf(Config::EDIT_PRIV));
-                    break;
-                default:
-                    break;
-            }
-        }
-        return null;
-    }
-
     public static function byTime($descend = true)
     {
         if ($descend) {

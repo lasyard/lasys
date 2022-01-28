@@ -38,7 +38,10 @@ class Actions
     // As a stub to set priv of directory.
     public static function noop(...$priv)
     {
-        return [self::ACTION => null, self::PRIV => $priv];
+        return [
+            self::ACTION => null,
+            self::PRIV => $priv
+        ];
     }
 
     public function priv(...$priv)

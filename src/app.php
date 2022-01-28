@@ -127,10 +127,8 @@ final class App
         $file = $this->_path . DS . $name;
         if (is_dir($file)) {
             return Actions::noop();
-        } else if (is_file($file)) {
-            return FileActions::action($conf->get(Config::READ_ONLY), $type);
         }
-        return Actions::default()->priv();
+        return $conf->get(Config::ETC)[$type] ?? Actions::default()->priv();
     }
 
     private function header($httpHeaders)
