@@ -60,11 +60,6 @@ final class Server
         return in_array($type, [self::AJAX_GET, self::AJAX_POST, self::AJAX_UPDATE, self::AJAX_DELETE]);
     }
 
-    public static function isEdit($type)
-    {
-        return !in_array($type, [self::GET, self::AJAX_GET]);
-    }
-
     private static function isAjaxRequest()
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])

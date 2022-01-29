@@ -7,19 +7,35 @@ abstract class Traits
     {
     }
 
-    public function forSelf($conf, $oldConf)
+    protected function addTo(&$target)
     {
-        return $conf;
+        Arr::toArray($target[Config::TRAITS]);
+        foreach ($target[Config::TRAITS] as $t) {
+            if (get_class($t) == get_class($this)) {
+                return;
+            }
+        }
+        $target[Config::TRAITS][] = $this;
     }
 
-    public function forChild($conf, $oldConf)
+    // Apply to the conf if traits is configured in the conf.
+    public function forSelf(&$conf, $oldConf)
     {
-        return $conf;
     }
 
-    public function forItem($item, $conf)
+    // Apply to each item if traits is configured in the conf.
+    public function forEachItem(&$item, $conf)
     {
-        return $item;
+    }
+
+    // Apply to the item if traits is configured on the item.
+    public function forItem(&$item, $conf)
+    {
+    }
+
+    // Apply to the new conf got by read the item if traits is configured on the item.
+    public function forChild(&$conf, $oldConf)
+    {
     }
 
     public static function __callStatic($method, $args)
@@ -28,7 +44,7 @@ abstract class Traits
         require_once 'traits' . DS . Str::classToFile($class) . '.php';
         if (count($args) == 0) {
             if (!isset(self::$_cache[$method])) {
-                self::$_cache[$method] = new $class(...$args);
+                self::$_cache[$method] = new $class();
             }
             return self::$_cache[$method];
         }

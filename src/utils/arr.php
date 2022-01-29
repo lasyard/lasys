@@ -29,4 +29,13 @@ final class Arr
             }
         }
     }
+
+    public static function toArray(&$obj)
+    {
+        if (!isset($obj)) {
+            $obj = [];
+        } else if (!is_array($obj)) {
+            $obj = [$obj];
+        }
+    }
 }

@@ -1,7 +1,26 @@
 <?php
 final class DoUpload extends Traits
 {
-    public function forSelf($conf, $oldConf)
+    public function forSelf(&$conf, $oldConf)
+    {
+        if (!$conf[Config::READ_ONLY]) {
+            $upload = &$conf[Config::LIST][FileActions::UPLOAD_ITEM];
+            $upload[Config::TITLE] ??= $conf[FileActions::UPLOAD_TITLE]
+                ?? FileActions::DEFAULT[FileActions::UPLOAD_TITLE];
+            $upload[Config::BUTTON] ??= Icon::UPLOAD;
+            $upload[Server::GET] ??= FileActions::uploadForm()->priv(...$conf[Config::PRIV_POST]);
+            $upload[Server::POST] ??= FileActions::post()->priv(...$conf[Config::PRIV_POST]);
+            $conf[Config::ETC][Server::UPDATE] ??= FileActions::update()->priv(...$conf[Config::PRIV_EDIT]);
+            $conf[Config::ETC][Server::AJAX_DELETE] ??= FileActions::ajaxDelete()->priv(...$conf[Config::PRIV_EDIT]);
+        }
+    }
+
+    public function forEachItem(&$item, $conf)
+    {
+        $this->addTo($item);
+    }
+
+    public function forChild(&$conf, $oldConf)
     {
         Arr::copyNonExistingKeys(
             $conf,
@@ -11,23 +30,6 @@ final class DoUpload extends Traits
             FileActions::SIZE_LIMIT,
             FileActions::ORDER,
         );
-        if (isset($conf[Config::READ_ONLY]) && $conf[Config::READ_ONLY]) {
-            return $conf;
-        }
-        $conf[Config::LIST][FileActions::UPLOAD_ITEM] = [
-            Config::TITLE => $conf[FileActions::UPLOAD_TITLE] ?? FileActions::DEFAULT[FileActions::UPLOAD_TITLE],
-            Config::BUTTON => Icon::UPLOAD,
-            Server::GET => FileActions::uploadForm()->priv(User::EDIT),
-            Server::POST => FileActions::post()->priv(User::EDIT),
-        ];
-        $conf[Config::ETC][Server::UPDATE] ??= FileActions::update()->priv(...$conf[Config::EDIT_PRIV]);
-        $conf[Config::ETC][Server::AJAX_DELETE] ??= FileActions::ajaxDelete()->priv(...$conf[Config::EDIT_PRIV]);
-        return $conf;
-    }
-
-    public function forChild($conf, $oldConf)
-    {
-        $conf[Config::TRAITS][] = $this;
-        return $conf;
+        $this->addTo($conf);
     }
 }

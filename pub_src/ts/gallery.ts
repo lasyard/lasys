@@ -5,16 +5,27 @@ import { Tooltip } from './tooltip';
 import { numCmp, timeStr } from './common';
 
 interface Image {
-    file: string; // Url of file.
-    thumb: string; // Url of thumb.
+    name: string; // Name of image file.
     title: string;
     time: string; // Timestamp.
     user: string; // Name of the uploader.
     delete?: boolean; // If the image can be delete by current user.
 }
 
+interface ImageSet {
+    image: {
+        prefix: string;
+        suffix: string;
+    };
+    thumb: {
+        prefix: string;
+        suffix: string;
+    }
+    list: Image[];
+}
+
 export class Gallery {
-    private imageSet: Image[];
+    private imageSet: ImageSet;
     private divThumbs: Tag<HTMLDivElement>;
     private divImage: Tag<HTMLDivElement>;
     private msg: Tag<HTMLElement>;
@@ -56,22 +67,25 @@ export class Gallery {
         return this;
     }
 
-    private data(imageSet: Image[]) {
+    private data(imageSet: ImageSet) {
         this.imageSet = imageSet;
         return this;
     }
 
     private refresh() {
         const imageSet = this.imageSet;
-        imageSet.sort((a, b) => -numCmp(a.time, b.time));
+        const images = imageSet.list;
+        images.sort((a, b) => -numCmp(a.time, b.time));
         this.divThumbs.clear();
         this.closeImage();
-        for (let i = 0; i < imageSet.length; ++i) {
-            const image = imageSet[i];
+        for (let i = 0; i < images.length; ++i) {
+            const image = images[i];
             const title = Gallery.title(image);
             const thumb = Tag.a(
                 Tag.div(
-                    Tag.of('img').attr({ src: image.thumb }).toolTip({
+                    Tag.of('img').attr({
+                        src: imageSet.thumb.prefix + image.name + imageSet.thumb.suffix
+                    }).toolTip({
                         title: image.title,
                         body: Tag.of('ul').cls('icon').addAll(
                             Tag.li(Tag.icon('clock'), timeStr(image.time)),
@@ -99,9 +113,9 @@ export class Gallery {
                                 this.showPopupMsg(r);
                                 this.loadData();
                             },
-                            image.file,
-                            '',
-                            MimeType.TEXT,
+                            null,
+                            imageSet.image.prefix + image.name + imageSet.image.suffix,
+                            MimeType.JSON,
                             MimeType.HTML
                         );
                     }
@@ -124,7 +138,7 @@ export class Gallery {
                 }
                 break;
             case 'ArrowRight':
-                if (this.current < this.imageSet.length - 1) {
+                if (this.current < this.imageSet.list.length - 1) {
                     ++this.current;
                     this.refreshImage();
                 }
@@ -145,13 +159,16 @@ export class Gallery {
         document.body.removeEventListener('keydown', this.keyDownHandler);
         this.divImage.hide();
         this.divThumbs.show();
-        this.showMsg(Tag.span(Tag.icon('info-circle'), 'Total ' + this.imageSet.length + ' images').getHtml());
+        this.showMsg(Tag.span(
+            Tag.icon('info-circle'), 'Total ' + this.imageSet.list.length + ' images'
+        ).getHtml());
     }
 
     private refreshImage() {
-        const image = this.imageSet[this.current];
+        const imageSet = this.imageSet;
+        const image = imageSet.list[this.current];
         Tag.div(
-            Tag.of('img').attr({ src: image.file })
+            Tag.of('img').attr({ src: imageSet.image.prefix + image.name + imageSet.image.suffix })
         ).cls('image').putInto(this.divImage.clear());
         this.showMsg(Tag.span(
             Tag.icon('info-circle'), Gallery.title(image), ' ',

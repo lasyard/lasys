@@ -48,4 +48,20 @@ final class ArrTest extends TestCase
         $this->assertSame(2, $target['b']);
         $this->assertSame(2, $target['c']);
     }
+
+    public function testToArray()
+    {
+        Arr::toArray($obj);
+        $this->assertSame([], $obj);
+        $obj['a'] = null;
+        Arr::toArray($obj['a']);
+        $this->assertSame([], $obj['a']);
+        Arr::toArray($obj['b']);
+        $this->assertSame([], $obj['b']);
+        Arr::toArray($obj['b']['c']);
+        $this->assertSame([], $obj['b']['c']);
+        $obj = 'hello';
+        Arr::toArray($obj);
+        $this->assertSame(['hello'], $obj);
+    }
 }

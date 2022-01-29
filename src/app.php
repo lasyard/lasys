@@ -29,7 +29,7 @@ final class App
         session_start();
         $this->_base = $this->_home;
         $this->_path = DATA_PATH;
-        $this->_conf = new Config(CONF_PATH);
+        $this->_conf = Config::root(CONF_PATH);
         $title = null;
         $action = Actions::noop();
         $breadcrumbs = [];
@@ -38,7 +38,7 @@ final class App
             if ($name == '') {
                 continue;
             }
-            $action = $this->action($name, $type);
+            $action = $this->_conf->action($name, $type);
             if ($action[Actions::ACTION]) {
                 break;
             }
@@ -50,9 +50,9 @@ final class App
             $this->_base .= $name . '/';
             $title = $this->_conf->title($name);
             if ($this->hasPriv($name, $action[Actions::PRIV])) {
-                $this->_conf->shift($name);
+                $this->_conf = $this->_conf->read($name);
             } else {
-                $action = Actions::error('You do not have privilege to access "' . $name . '".');
+                $action = Actions::error('You do not have privilege to access "' . $name . '".')->priv();
                 break;
             }
         }
@@ -61,7 +61,7 @@ final class App
         }
         if ($action[Actions::ACTION] === null) {
             $this->_name = $this->_conf->get(Config::DEFAULT_ITEM);
-            $action = $this->action($this->_name, $type);
+            $action = $this->_conf->action($this->_name, $type);
         } else {
             $this->_name = $name;
         }
@@ -117,20 +117,6 @@ final class App
         $this->view('main');
     }
 
-    private function action($name, $type)
-    {
-        $conf = $this->_conf;
-        $action = $conf->action($name, $type);
-        if ($action) {
-            return $action;
-        }
-        $file = $this->_path . DS . $name;
-        if (is_dir($file)) {
-            return Actions::noop();
-        }
-        return $conf->get(Config::ETC)[$type] ?? Actions::default()->priv();
-    }
-
     private function header($httpHeaders)
     {
         if (isset($httpHeaders)) {
@@ -175,7 +161,7 @@ final class App
             if (isset($info[Config::BUTTON])) {
                 $buttons[] = $this->makeButton($name, $info);
             } else {
-                $info['isDir'] = $this->isDir($name);
+                $info['isDir'] = ($conf->action($name, Server::GET)[Actions::ACTION] === null);
                 $list0[] = $this->makeItem($name, $info);
             }
         }
@@ -190,11 +176,6 @@ final class App
         return ['buttons' => $buttons, 'files' => array_column(array_merge($list0, $list1), 'li')];
     }
 
-    private function isDir($name)
-    {
-        return $this->action($name, Server::GET)[Actions::ACTION] === null;
-    }
-
     public function hasPriv($name, $privs, $uid = null)
     {
         if ($uid == null) {
@@ -205,7 +186,7 @@ final class App
 
     public function hasPrivOf($name, $type, $uid = null)
     {
-        $actions = $this->action($name, $type);
+        $actions = $this->_conf->action($name, $type);
         if ($actions) {
             return $this->hasPriv($name, $actions[Actions::PRIV], $uid);
         }
@@ -215,6 +196,11 @@ final class App
     public function conf($name)
     {
         return $this->_conf->get($name);
+    }
+
+    public function readConf($name)
+    {
+        return $this->_conf->read($name);
     }
 
     public function info($name)

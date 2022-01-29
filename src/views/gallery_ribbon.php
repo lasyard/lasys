@@ -1,11 +1,5 @@
 <div class="ribbon">
-    <span id="-msg">
-        <?php
-        if (isset($msg)) {
-            echo $msg;
-        }
-        ?>
-    </span>
+    <span id="-msg"></span>
     <span class="buttons">
         <?php
         if (isset($btnUpload)) {

@@ -11,22 +11,18 @@ final class GalleryActions extends Actions
         FileActions::ACCEPT => 'image/*',
     ];
 
-    private static function thumbFile($file)
+    private static function relPath($path)
     {
         $len = strlen(DATA_PATH);
-        if (substr($file, 0, $len) === DATA_PATH) {
-            return PUB_PATH . DS . self::THUMB_DIR . substr($file, $len);
+        if (substr($path, 0, $len) === DATA_PATH) {
+            return substr($path, $len);
         }
-        return false;
+        throw new RuntimeException('The path "' . $path . '" is not in "DATA_PATH".');
     }
 
-    private static function thumbUrl($file)
+    private static function thumbFile($file)
     {
-        $len = strlen(DATA_PATH);
-        if (substr($file, 0, $len) === DATA_PATH) {
-            return PUB_URL . self::THUMB_DIR . str_replace(DS, '/', substr($file, $len));
-        }
-        return false;
+        return PUB_PATH . DS . self::THUMB_DIR . self::relPath($file);
     }
 
     public function default($confName)
@@ -47,7 +43,6 @@ final class GalleryActions extends Actions
             ]);
         }
         return [
-            'msg' => $this->conf(Config::TITLE) ?? Str::captalize($this->name),
             'btnUpload' => $btnUpload,
             'formUpload' => $formUpload,
         ];
@@ -63,18 +58,32 @@ final class GalleryActions extends Actions
     public function actionAjaxGet()
     {
         $files = Meta::loadFileList($this->path . DS . $this->name);
-        $fileList = [];
+        $images = [];
+        $conf = Sys::app()->readConf($this->name);
         foreach ($files as $name => $info) {
-            $fileList[] = [
-                'file' => $this->base . $this->name . '/' . $name . '?' . Server::QUERY_GET_RAW,
-                'thumb' => self::thumbUrl($this->path . DS . $this->name . DS . $name),
+            $delAction = $conf->action($name, Server::AJAX_DELETE);
+            $images[] = [
+                'name' => $name,
                 'title' => $info['title'] ?? '',
-                'time' => $info['time'],
-                'user' => $info['uname'],
-                'delete' => $this->hasPrivOf(Server::AJAX_DELETE) && Sys::user()->hasPriv($info['uid']),
+                'time' => $info['time'] ?? 0,
+                'user' => $info['uname'] ?? 'Anonymous',
+                'delete' => $delAction != null && isset($info['uid'])
+                    && Sys::user()->hasPrivs($delAction[Actions::PRIV], $info['uid']),
             ];
         }
-        echo json_encode($fileList, JSON_UNESCAPED_UNICODE);
+        echo json_encode([
+            'image' => [
+                'prefix' => $this->base . $this->name . '/',
+                'suffix' => '?' . Server::QUERY_GET_RAW,
+            ],
+            'thumb' => [
+                'prefix' => PUB_URL . self::THUMB_DIR
+                    . str_replace(DS, '/', self::relPath($this->path))
+                    . '/' . $this->name . '/',
+                'suffix' => '',
+            ],
+            'list' => $images,
+        ], JSON_UNESCAPED_UNICODE);
     }
 
     public function actionPost()
@@ -83,6 +92,13 @@ final class GalleryActions extends Actions
         $origName = File::upload($path, null, false, $this->default(FileActions::SIZE_LIMIT));
         $origFile = $path . DS . $origName;
         $name = sha1_file($origFile) . '.' . pathinfo($origName, PATHINFO_EXTENSION);
+        $file = $path . DS . $name;
+        if (file_exists($file)) {
+            unlink($origFile);
+            throw new RuntimeException('Image "' . $name . '" exists.');
+        }
+        Image::optimizeJpegFile($origFile, $file);
+        unlink($origFile);
         $time = Image::getExifDate($origFile);
         if (!$time) {
             $time = $_SERVER['REQUEST_TIME'];
@@ -99,16 +115,10 @@ final class GalleryActions extends Actions
         $meta = Meta::load($path);
         $meta[$name] = $info;
         Meta::save($path, $meta);
-        $file = $path . DS . $name;
-        if (file_exists($file)) {
-            throw new RuntimeException('Image "' . $name . '" exists.');
-        }
-        Image::optimizeJpegFile($origFile, $file);
-        unlink($origFile);
         $thumb = self::thumbFile($file);
         if ($thumb) {
             $size = $this->default(self::THUMB_SIZE);
-            Image::createThumbnail($file, self::thumbFile($file), $size, $size);
+            Image::createThumbnail($file, $thumb, $size, $size);
         } else {
             throw new RuntimeException("Cannot create thumb for this file.");
         }
@@ -117,19 +127,12 @@ final class GalleryActions extends Actions
 
     public function actionAjaxDelete()
     {
-        $data = file_get_contents('php://input');
-        $name = basename(parse_url($data, PHP_URL_PATH));
-        $files = Meta::loadFileList($this->path . DS . $this->name);
-        $uid = $files[$name]['uid'] ?? null;
-        if ($uid && Sys::user()->hasPriv($uid)) {
-            $file = $this->path . DS . $this->name . DS . $name;
-            if (unlink($file) && unlink(self::thumbFile($file))) {
-                Msg::info('Succeeded to delete image file "' . $name . '".');
-            } else {
-                Msg::warn('Failed to delete image file "' . $name . '" or its thumbnail.');
-            }
+        $name = $this->name;
+        $file = $this->path . DS . $name;
+        if (unlink($file) && unlink(self::thumbFile($file))) {
+            Msg::info('Succeeded to delete image file "' . $name . '".');
         } else {
-            Msg::warn('You do not has previlege to delete image "' . $name . '".');
+            Msg::warn('Failed to delete image file "' . $name . '" or its thumbnail.');
         }
     }
 }

@@ -1,15 +1,19 @@
 <?php
 final class Config
 {
+    private const CONFIG_FILE = 'list.php';
+
     // config
     public const TRAITS = 'traits';
     public const READ_ONLY = 'readOnly';
     public const DEFAULT_ITEM = 'defaultItem';
-    public const READ_PRIV = 'readPriv';
-    public const EDIT_PRIV = 'editPriv';
     public const EXCLUDES = 'excludes';
     public const LIST = 'list';
     public const ETC = '*';
+    public const PRIV_READ = 'privRead';
+    public const PRIV_EDIT = 'privEdit';
+    public const PRIV_POST = 'privPost';
+    public const IS_DIR = 'isDir';
 
     // item config
     public const TITLE = 'title';
@@ -20,26 +24,57 @@ final class Config
         self::TRAITS => [],
         self::READ_ONLY => true,
         self::DEFAULT_ITEM => 'index',
-        self::READ_PRIV => [],
-        self::EDIT_PRIV => [User::OWNER, User::EDIT],
         self::EXCLUDES => ['index.*', '_*'],
         self::LIST => [],
+        self::PRIV_READ => [],
+        self::PRIV_EDIT => [User::OWNER, User::EDIT],
+        self::PRIV_POST => [User::EDIT],
     ];
 
     private const RECURSIVE_CONF = [
         self::READ_ONLY,
         self::DEFAULT_ITEM,
-        self::READ_PRIV,
-        self::EDIT_PRIV,
+        self::PRIV_READ,
+        self::PRIV_EDIT,
+        self::PRIV_POST,
     ];
 
     private $_path;
-    private $_conf = Config::DEFAULT;
+    private $_conf;
 
-    public function __construct($path)
+    public static function root($path)
+    {
+        return new Config($path, self::DEFAULT);
+    }
+
+    private function __construct($path, $oldConf, $traits = [])
     {
         $this->_path = $path;
-        $this->read();
+        $file = $this->_path . DS . self::CONFIG_FILE;
+        $conf = is_file($file) ? include $file : [];
+        foreach (self::RECURSIVE_CONF as $c) {
+            self::setDefault($conf, $c, $oldConf);
+        }
+        self::mergeArray($conf, self::EXCLUDES, $oldConf);
+        self::setDefault($conf, self::TRAITS);
+        self::setDefault($conf, self::LIST);
+        // Call `forChid` first to allow mangling of new conf.
+        self::applyTraits($conf, $traits, 'forChild', $oldConf);
+        self::applyTraits($conf, $conf[self::TRAITS], 'forSelf', $oldConf);
+        foreach ($conf[self::LIST] as &$item) {
+            if (is_string($item)) {
+                $item = [self::TITLE => $item];
+            } else if ($item instanceof Actions) {
+                $item = [Server::GET => $item->priv($conf[self::PRIV_READ])];
+            } else if (is_array($item) && isset($item[Actions::ACTION])) {
+                $item = [Server::GET => $item];
+            }
+            self::applyTraits($item, $conf[self::TRAITS], 'forEachItem', $conf);
+            if (isset($item[Config::TRAITS])) {
+                self::applyTraits($item, $item[self::TRAITS], 'forItem', $conf);
+            }
+        }
+        $this->_conf = $conf;
     }
 
     public function get($name)
@@ -47,62 +82,36 @@ final class Config
         return array_key_exists($name, $this->_conf) ? $this->_conf[$name] : null;
     }
 
-    private function setDefault(&$conf, $opt, $recursive = false)
+    private static function setDefault(&$conf, $opt, $oldConf = null)
     {
         if (!isset($conf[$opt])) {
-            $conf[$opt] = $recursive ? $this->_conf[$opt] : Config::DEFAULT[$opt];
+            $conf[$opt] = $oldConf ? $oldConf[$opt] : self::DEFAULT[$opt];
         }
     }
 
-    private function mergeArray(&$conf, $opt)
+    private static function mergeArray(&$conf, $opt, $oldConf)
     {
-        $conf[$opt] = array_unique($conf[$opt] ?? [] + $this->_conf[$opt]);
+        $conf[$opt] = array_unique($conf[$opt] ?? [] + $oldConf[$opt]);
     }
 
-    private function read()
+    private static function applyTraits(&$target, $traits, $method, $conf)
     {
-        $file = $this->_path . DS . 'list.php';
-        $conf = is_file($file) ? include $file : [];
-        foreach (self::RECURSIVE_CONF as $c) {
-            $this->setDefault($conf, $c, true);
-        }
-        $this->mergeArray($conf, self::EXCLUDES);
-        $this->setDefault($conf, self::TRAITS);
-        $this->setDefault($conf, self::LIST);
-        // Set get to view files not in list or with no actions set. Do it here to read `READ_PRIV` conf.
-        $conf[self::ETC] = [Server::GET => FileActions::get()->priv($conf[self::READ_PRIV])];
-        // Call `forChid` first to allow mangling of new conf.
-        foreach ($this->_conf[self::TRAITS] as $trait) {
-            $conf = $trait->forChild($conf, $this->_conf);
-        }
-        foreach ($conf[self::TRAITS] as $trait) {
-            $conf = $trait->forSelf($conf, $this->_conf);
-        }
-        foreach ($conf[self::LIST] as &$item) {
-            if (is_string($item)) {
-                $item = [self::TITLE => $item];
-            } else if ($item instanceof Actions) {
-                $item = [Server::GET => $item->priv($conf[self::READ_PRIV])];
-            } else if (is_array($item) && isset($item[Actions::ACTION])) {
-                $item = [Server::GET => $item];
-            } else if (isset($item[Config::TRAITS])) {
-                $traits = $item[Config::TRAITS];
-                if (is_array($traits)) {
-                    foreach ($traits as $trait) {
-                        $item = $trait->forItem($item, $conf);
-                    }
-                } else {
-                    $item = $traits->forItem($item, $conf);
-                }
+        if (is_array($traits)) {
+            foreach ($traits as $trait) {
+                $trait->$method($target, $conf);
             }
+        } else {
+            $traits->$method($target, $conf);
         }
-        $this->_conf = $conf;
     }
 
-    public function shift($name)
+    public function read($name)
     {
-        $this->_path .= DS . $name;
-        $this->read();
+        return new Config(
+            $this->_path . DS . $name,
+            $this->_conf,
+            $this->_conf[self::LIST][$name][self::TRAITS] ?? []
+        );
     }
 
     public function list()
@@ -140,13 +149,16 @@ final class Config
         $list = $this->_conf[self::LIST];
         if (isset($list[$name][$type])) {
             $action = $list[$name][$type];
-            if ($action instanceof Actions) {
-                return $action->priv(
-                    ...(Server::isEdit($type) ? $this->_conf[self::EDIT_PRIV] : $this->_conf[self::READ_PRIV])
-                );
-            }
-            return $action;
+        } else if (is_dir($this->_path . DS . $name)) {
+            $action = Actions::noop();
+        } else if (isset($this->_conf[Config::ETC][$type])) {
+            $action = $this->_conf[Config::ETC][$type];
+        } else {
+            $action = Actions::default()->priv();
         }
-        return null;
+        if ($action instanceof Actions) {
+            return $action->priv();
+        }
+        return $action;
     }
 }

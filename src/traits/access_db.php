@@ -1,24 +1,14 @@
 <?php
 final class AccessDb extends Traits
 {
-    private $_rPriv;
-    private $_wPriv;
-
-    public function __construct($rPriv = null, $wPriv = null)
+    public function forItem(&$item, $conf)
     {
-        $this->_rPriv = $rPriv;
-        $this->_wPriv = $wPriv;
-    }
-
-    public function forItem($item, $conf)
-    {
-        $rPriv = $this->_rPriv ? $this->_rPriv : $conf[Config::READ_PRIV];
-        $wPriv = $this->_wPriv ? $this->_wPriv : $conf[Config::EDIT_PRIV];
+        $rPriv = $item[Config::PRIV_READ] ?? $conf[Config::PRIV_READ];
+        $wPriv = $item[Config::PRIV_EDIT] ?? $conf[Config::PRIV_EDIT];
         $item[Server::GET] ??= DbActions::get()->priv(...$rPriv);
         $item[Server::AJAX_GET] ??= DbActions::ajaxGet()->priv(...$rPriv);
         $item[Server::AJAX_UPDATE] ??= DbActions::ajaxUpdate()->priv(...$wPriv);
         $item[Server::AJAX_POST] ??= DbActions::ajaxPost()->priv(...$wPriv);
         $item[Server::AJAX_DELETE] ??= DbActions::ajaxDelete()->priv(...$wPriv);
-        return $item;
     }
 }

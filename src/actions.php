@@ -100,7 +100,7 @@ class Actions
 
     public function actionError(...$args)
     {
-        $this->doError($args[0]);
+        throw new RuntimeException(...$args);
     }
 
     protected function hasPrivOf($type, $uid = null)
