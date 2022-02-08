@@ -98,8 +98,8 @@ final class GalleryActions extends Actions
             throw new RuntimeException('Image "' . $name . '" exists.');
         }
         Image::optimizeJpegFile($origFile, $file);
-        unlink($origFile);
         $time = Image::getExifDate($origFile);
+        unlink($origFile);
         if (!$time) {
             $time = $_SERVER['REQUEST_TIME'];
         }
