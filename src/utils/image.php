@@ -29,7 +29,7 @@ final class Image
 
     public static function getExifDate($file)
     {
-        $info = exif_read_data($file);
+        $info = @exif_read_data($file);
         if (!$info || !isset($info['DateTimeOriginal'])) {
             return false;
         }

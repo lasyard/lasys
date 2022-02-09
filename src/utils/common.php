@@ -20,4 +20,16 @@ final class Common
         }
         return $buffer;
     }
+
+    public static function funCmpBy($index, $descend = true)
+    {
+        if ($descend) {
+            return function ($b, $a) use ($index) {
+                return $a[$index] <=> $b[$index];
+            };
+        }
+        return function ($a, $b) use ($index) {
+            return $a[$index] <=> $b[$index];
+        };
+    }
 }

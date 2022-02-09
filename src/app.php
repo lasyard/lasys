@@ -169,7 +169,7 @@ final class App
         foreach ($files as $name => $file) {
             $list1[] = $this->makeItem($name, $file);
         }
-        $order = $conf->get(FileActions::ORDER);
+        $order = $conf->get(Config::ORDER);
         if ($order) {
             usort($list1, $order);
         }

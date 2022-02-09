@@ -75,36 +75,36 @@ export class Gallery {
     private refresh() {
         const imageSet = this.imageSet;
         const images = imageSet.list;
-        images.sort((a, b) => -numCmp(a.time, b.time));
         this.divThumbs.clear();
         this.closeImage();
         for (let i = 0; i < images.length; ++i) {
             const image = images[i];
             const title = Gallery.title(image);
-            const thumb = Tag.a(
-                Tag.div(
-                    Tag.of('img').attr({
-                        src: imageSet.thumb.prefix + image.name + imageSet.thumb.suffix
-                    }).toolTip({
-                        title: image.title,
-                        body: Tag.of('ul').cls('icon').addAll(
-                            Tag.li(Tag.icon('clock'), timeStr(image.time)),
-                            Tag.li(Tag.icon('person'), image.user),
-                        ),
-                    }),
-                    Tag.br(),
-                    Tag.span(title).cls('title'),
-                )
-            )
-                .cls("thumb")
-                .attr({ href: 'javascript:void(0)' })
-                .event('click', (e) => {
+            let src: string;
+            let box: Tag<HTMLElement>;
+            if (imageSet.thumb) {
+                src = imageSet.thumb.prefix + image.name + imageSet.thumb.suffix;
+                box = Tag.a().cls("thumb").event('click', (e) => {
                     this.openImage(i);
                     e.preventDefault();
-                })
-                .putInto(this.divThumbs);
+                }).attr({ href: 'javascript:void(0)' });
+            } else {
+                src = imageSet.image.prefix + image.name + imageSet.image.suffix;
+                box = Tag.div().cls("image");
+            }
+            box.add(Tag.div(
+                Tag.of('img').attr({ src: src }).toolTip({
+                    title: image.title,
+                    body: Tag.of('ul').cls('icon').addAll(
+                        Tag.li(Tag.icon('clock'), timeStr(image.time)),
+                        Tag.li(Tag.icon('person'), image.user),
+                    ),
+                }),
+                Tag.br(),
+                Tag.span(title).cls('title'),
+            )).putInto(this.divThumbs);
             if (image.delete) {
-                thumb.add(Tag.div(Tag.icon('x')).cls('x-button').event('click', (e) => {
+                box.add(Tag.div(Tag.icon('x')).cls('x-button').event('click', (e) => {
                     e.stopPropagation();
                     const r = confirm('Are you sure to delete image "' + title + '"?');
                     if (r) {

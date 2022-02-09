@@ -1,14 +1,14 @@
 div#main {
     div.gallery {
+
+        div.image,
         a.thumb {
             @extend .border;
             position: relative;
             display: inline-block;
             vertical-align: bottom;
             margin: 3px;
-            width: 200px;
-            height: 200px;
-            line-height: 200px;
+            padding: 8px;
             text-align: center;
 
             div.x-button {
@@ -27,6 +27,12 @@ div#main {
                 font-family: $headerFont;
                 font-size: 0.8em;
             }
+        }
+
+        a.thumb {
+            width: 200px;
+            height: 200px;
+            line-height: 200px;
         }
     }
 }

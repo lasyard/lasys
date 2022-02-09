@@ -48,6 +48,11 @@ final class GalleryActions extends Actions
         ];
     }
 
+    private function hasThumbnail()
+    {
+        return $this->default(self::THUMB_SIZE) > 0;
+    }
+
     public function actionGet()
     {
         Sys::app()->addScript('js' . DS . 'gallery');
@@ -71,19 +76,26 @@ final class GalleryActions extends Actions
                     && Sys::user()->hasPrivs($delAction[Actions::PRIV], $info['uid']),
             ];
         }
-        echo json_encode([
+        $order = $this->conf(Config::ORDER);
+        if ($order) {
+            usort($images, $order);
+        }
+        $res = [
             'image' => [
                 'prefix' => $this->base . $this->name . '/',
                 'suffix' => '?' . Server::QUERY_GET_RAW,
             ],
-            'thumb' => [
+            'list' => $images,
+        ];
+        if ($this->hasThumbnail()) {
+            $res['thumb'] = [
                 'prefix' => PUB_URL . self::THUMB_DIR
                     . str_replace(DS, '/', self::relPath($this->path))
                     . '/' . $this->name . '/',
                 'suffix' => '',
-            ],
-            'list' => $images,
-        ], JSON_UNESCAPED_UNICODE);
+            ];
+        }
+        echo json_encode($res, JSON_UNESCAPED_UNICODE);
     }
 
     public function actionPost()
@@ -115,12 +127,14 @@ final class GalleryActions extends Actions
         $meta = Meta::load($path);
         $meta[$name] = $info;
         Meta::save($path, $meta);
-        $thumb = self::thumbFile($file);
-        if ($thumb) {
-            $size = $this->default(self::THUMB_SIZE);
-            Image::createThumbnail($file, $thumb, $size, $size);
-        } else {
-            throw new RuntimeException("Cannot create thumb for this file.");
+        if ($this->hasThumbnail()) {
+            $thumb = self::thumbFile($file);
+            if ($thumb) {
+                $size = $this->default(self::THUMB_SIZE);
+                Image::createThumbnail($file, $thumb, $size, $size);
+            } else {
+                throw new RuntimeException("Cannot create thumb for this file.");
+            }
         }
         Sys::app()->redirect($this->name);
     }
@@ -129,10 +143,18 @@ final class GalleryActions extends Actions
     {
         $name = $this->name;
         $file = $this->path . DS . $name;
-        if (unlink($file) && unlink(self::thumbFile($file))) {
+        if (unlink($file)) {
             Msg::info('Succeeded to delete image file "' . $name . '".');
         } else {
-            Msg::warn('Failed to delete image file "' . $name . '" or its thumbnail.');
+            Msg::warn('Failed to delete image file "' . $name . '".');
+        }
+        $thumb = self::thumbFile($file);
+        if (is_file($thumb)) {
+            if (unlink($thumb)) {
+                Msg::info('Succeeded to delete image thumbnail "' . $name . '".');
+            } else {
+                Msg::warn('Failed to delete image thumbnail "' . $name . '".');
+            }
         }
     }
 }

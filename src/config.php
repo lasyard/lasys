@@ -20,6 +20,9 @@ final class Config
     public const BUTTON = 'button';
     public const HIDDEN = 'hidden';
 
+    // common config
+    public const ORDER = 'order';
+
     private const DEFAULT = [
         self::TRAITS => [],
         self::READ_ONLY => true,

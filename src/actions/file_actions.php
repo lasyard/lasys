@@ -5,7 +5,6 @@ final class FileActions extends Actions
     public const UPLOAD_TITLE = 'file:uploadTitle';
     public const SIZE_LIMIT = 'file:sizeLimit';
     public const ACCEPT = 'file:accept';
-    public const ORDER = 'file:order';
 
     public const DEFAULT = [
         self::UPLOAD_TITLE => 'Upload',
@@ -180,29 +179,5 @@ final class FileActions extends Actions
             'accept' => self::default(self::ACCEPT),
             'sizeLimit' => self::default(self::SIZE_LIMIT),
         ]);
-    }
-
-    public static function byTime($descend = true)
-    {
-        if ($descend) {
-            return function ($b, $a) {
-                return $a['time'] <=> $b['time'];
-            };
-        }
-        return function ($a, $b) {
-            return $a['time'] <=> $b['time'];
-        };
-    }
-
-    public static function byName($descend = false)
-    {
-        if (!$descend) {
-            return function ($a, $b) {
-                return strnatcasecmp($a['name'], $b['name']);
-            };
-        }
-        return function ($b, $a) {
-            return strnatcasecmp($a['name'], $b['name']);
-        };
     }
 }

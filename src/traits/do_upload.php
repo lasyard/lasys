@@ -28,7 +28,7 @@ final class DoUpload extends Traits
             FileActions::UPLOAD_TITLE,
             FileActions::ACCEPT,
             FileActions::SIZE_LIMIT,
-            FileActions::ORDER,
+            Config::ORDER,
         );
         $this->addTo($conf);
     }
