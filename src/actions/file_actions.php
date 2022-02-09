@@ -120,13 +120,9 @@ final class FileActions extends Actions
     {
         if (!empty($_POST['title'])) {
             return $_POST['title'];
-        } else {
-            $parser = $this->getParser($name);
-            if ($parser->title) {
-                return $parser->title;
-            }
         }
-        return null;
+        $parser = $this->getParser($name);
+        return $parser->title ?? null;
     }
 
     public function actionPost()

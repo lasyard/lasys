@@ -5,9 +5,14 @@ final class Image
     {
     }
 
+    public static function isJpeg($fname)
+    {
+        return fnmatch('*.jpg', $fname) || fnmatch('*.jpeg', $fname);
+    }
+
     public static function optimizeJpegFile($old, $new)
     {
-        if (fnmatch('*.jpg', $old) || fnmatch('*.jpeg', $old)) {
+        if (self::isJpeg($old)) {
             if (extension_loaded('imagick')) {
                 $img = new Imagick($old);
                 $img->setImageCompressionQuality(80);
@@ -39,7 +44,7 @@ final class Image
 
     public static function createThumbnail($origFile, $file, $mx, $my)
     {
-        if (!is_file($origFile)) {
+        if (!is_file($origFile) || !self::isJpeg($origFile)) {
             return;
         }
         $imOrig = imagecreatefromjpeg($origFile);
