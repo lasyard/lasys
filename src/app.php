@@ -139,7 +139,7 @@ final class App
         $li .= $info['isDir'] ? Icon::FOLDER : '';
         $li .= '</li>';
         return [
-            'name' => $title,
+            'title' => $title,
             'time' => $info['time'] ?? 0,
             'li' => $li,
         ];

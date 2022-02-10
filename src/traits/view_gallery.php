@@ -3,6 +3,13 @@ final class ViewGallery extends Traits
 {
     private $_wPriv;
 
+    public function forEachItem(&$item, $conf)
+    {
+        $this->addTo($item);
+        $item[GalleryActions::THUMB_SIZE] ??= $conf[GalleryActions::THUMB_SIZE] ?? null;
+        $item[Config::ORDER] ??= $conf[Config::ORDER] ?? null;
+    }
+
     public function forChild(&$conf, $oldConf)
     {
         $conf[Config::READ_ONLY] = false;
