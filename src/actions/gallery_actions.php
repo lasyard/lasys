@@ -66,14 +66,16 @@ final class GalleryActions extends Actions
         $images = [];
         $conf = Sys::app()->readConf($this->name);
         foreach ($files as $name => $info) {
-            $delAction = $conf->action($name, Server::AJAX_DELETE);
+            $deleteAction = $conf->action($name, Server::AJAX_DELETE);
+            $updateAction = $conf->action($name, Server::AJAX_UPDATE);
+            $uid = $info['uid'] ?? User::ADMIN;
             $images[] = [
                 'name' => $name,
                 'title' => $info['title'] ?? '',
                 'time' => $info['time'] ?? 0,
                 'user' => $info['uname'] ?? 'Anonymous',
-                'delete' => $delAction != null && isset($info['uid'])
-                    && Sys::user()->hasPrivs($delAction[Actions::PRIV], $info['uid']),
+                'delete' => $deleteAction != null && Sys::user()->hasPrivs($deleteAction[Actions::PRIV], $uid),
+                'update' => $updateAction != null && Sys::user()->hasPrivs($updateAction[Actions::PRIV], $uid),
             ];
         }
         $order = $this->conf(Config::ORDER);
@@ -155,6 +157,21 @@ final class GalleryActions extends Actions
             } else {
                 Msg::warn('Failed to delete image thumbnail "' . $name . '".');
             }
+        }
+    }
+
+    public function actionAjaxUpdate()
+    {
+        $title = file_get_contents('php://input');
+        $title = trim($title);
+        $name = $this->name;
+        if (!empty($title)) {
+            $meta = Meta::load($this->path);
+            $meta[$name]['title'] = $title;
+            Meta::save($this->path, $meta);
+            Msg::info('Set the title of image "' . $name . '" to "' . $title . '".');
+        } else {
+            Msg::warn('The title of image "' . $name . '" is not set.');
         }
     }
 }

@@ -10,6 +10,7 @@ interface Image {
     time: string; // Timestamp.
     user: string; // Name of the uploader.
     delete?: boolean; // If the image can be delete by current user.
+    update?: boolean; // If the title of image can be update by current user.
 }
 
 interface ImageSet {
@@ -49,6 +50,11 @@ export class Gallery {
         }
     }
 
+    private ajaxResponse(r: any) {
+        this.showPopupMsg(r);
+        this.loadData();
+    }
+
     render(panelId: string) {
         const panel = Tag.byId(panelId);
         if (!panel) {
@@ -82,6 +88,7 @@ export class Gallery {
             const title = Gallery.title(image);
             let src: string;
             let box: Tag<HTMLElement>;
+            const imageUrl = imageSet.image.prefix + image.name + imageSet.image.suffix;
             if (imageSet.thumb) {
                 src = imageSet.thumb.prefix + image.name + imageSet.thumb.suffix;
                 box = Tag.a().cls("thumb").event('click', (e) => {
@@ -89,12 +96,12 @@ export class Gallery {
                     e.preventDefault();
                 }).attr({ href: 'javascript:void(0)' });
             } else {
-                src = imageSet.image.prefix + image.name + imageSet.image.suffix;
+                src = imageUrl;
                 box = Tag.div().cls("image");
             }
             box.add(Tag.div(
                 Tag.of('img').attr({ src: src }).toolTip({
-                    title: image.title,
+                    title: title,
                     body: Tag.of('ul').cls('icon').addAll(
                         Tag.li(Tag.icon('clock'), timeStr(image.time)),
                         Tag.li(Tag.icon('person'), image.user),
@@ -103,18 +110,31 @@ export class Gallery {
                 Tag.br(),
                 Tag.span(title).cls('title'),
             )).putInto(this.divThumbs);
+            const btns = Tag.div().cls('buttons').putInto(box);
+            if (image.update) {
+                btns.add(Tag.icon('dash').event('click', (e) => {
+                    e.stopPropagation();
+                    const newTitle = prompt('New title for image "' + title + '":');
+                    if (newTitle) {
+                        Ajax.update(
+                            this.ajaxResponse.bind(this),
+                            newTitle,
+                            imageUrl,
+                            MimeType.TEXT,
+                            MimeType.HTML
+                        );
+                    }
+                }));
+            }
             if (image.delete) {
-                box.add(Tag.div(Tag.icon('x')).cls('x-button').event('click', (e) => {
+                btns.add(Tag.icon('x').event('click', (e) => {
                     e.stopPropagation();
                     const r = confirm('Are you sure to delete image "' + title + '"?');
                     if (r) {
                         Ajax.delete(
-                            (r) => {
-                                this.showPopupMsg(r);
-                                this.loadData();
-                            },
+                            this.ajaxResponse.bind(this),
                             null,
-                            imageSet.image.prefix + image.name + imageSet.image.suffix,
+                            imageUrl,
                             MimeType.JSON,
                             MimeType.HTML
                         );

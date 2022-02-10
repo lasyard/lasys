@@ -14,6 +14,7 @@ final class ViewGallery extends Traits
     {
         $conf[Config::READ_ONLY] = false;
         $conf[Config::ETC][Server::AJAX_DELETE] ??= GalleryActions::ajaxDelete()->priv(...$this->_wPriv);
+        $conf[Config::ETC][Server::AJAX_UPDATE] ??= GalleryActions::ajaxUpdate()->priv(...$this->_wPriv);
     }
 
     public function forItem(&$item, $conf)
@@ -24,8 +25,9 @@ final class ViewGallery extends Traits
         $item[Server::GET] ??= GalleryActions::get()->priv(...$rPriv);
         $item[Server::AJAX_GET] ??= GalleryActions::ajaxGet()->priv(...$rPriv);
         $item[Server::POST] ??= GalleryActions::post()->priv(...$pPriv);
-        // Set this to pass down ajax delete.
+        // Set this to pass down ajax delete & update.
         $item[Server::AJAX_DELETE] ??= Actions::noop();
+        $item[Server::AJAX_UPDATE] ??= Actions::noop();
         $this->_wPriv = $wPriv;
     }
 }
