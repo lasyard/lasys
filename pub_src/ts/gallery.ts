@@ -114,8 +114,8 @@ export class Gallery {
             if (image.update) {
                 btns.add(Tag.icon('dash').event('click', (e) => {
                     e.stopPropagation();
-                    const newTitle = prompt('New title for image "' + title + '":');
-                    if (newTitle) {
+                    const newTitle = prompt('New title for image "' + title + '":', title);
+                    if (newTitle && newTitle != title) {
                         Ajax.update(
                             this.ajaxResponse.bind(this),
                             newTitle,
