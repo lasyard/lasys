@@ -2,6 +2,7 @@
 final class DbActions extends Actions
 {
     // configs
+    public const TABLE = 'db:table';
     public const SCRIPT = 'db:script';
     public const LABELS = 'db:labels';
     public const INSERT_FORM = 'db:insertForm';
@@ -10,6 +11,11 @@ final class DbActions extends Actions
     {
         $labels = $this->conf(self::LABELS);
         return ($labels && array_key_exists($name, $labels)) ? $labels[$name] : ucfirst($name);
+    }
+
+    private function getTable()
+    {
+        return $this->conf(self::TABLE) ?? $this->name;
     }
 
     private function buildFields($columns)
@@ -80,7 +86,7 @@ final class DbActions extends Actions
                 'purpose' => 'insert',
             ]);
         }
-        $time = Sys::db()->getLastModTime($this->name);
+        $time = Sys::db()->getLastModTime($this->getTable());
         $msg = Icon::TIME . '<em>' . Str::timeStr($time) . '</em>';
         return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
@@ -92,7 +98,7 @@ final class DbActions extends Actions
             Sys::app()->addScript($script);
         }
         Sys::app()->addScript('js' . DS . 'db');
-        $columns = Sys::db()->getColumns($this->name);
+        $columns = Sys::db()->getColumns($this->getTable());
         $fields = $this->buildFields($columns);
         Sys::app()->addData('_TABLE_FIELDS', array_map(function ($v) {
             return [
@@ -116,9 +122,9 @@ final class DbActions extends Actions
         }
     }
 
-    public function actionAjaxGet()
+    public function actionAjaxGet($sql = null)
     {
-        $sql = 'select * from ' . $this->name;
+        $sql ??= 'select * from ' . $this->getTable();
         $result = Sys::db()->getDataSet($sql);
         $labels = [];
         foreach ($result['columns'] as $name => $index) {
@@ -131,30 +137,29 @@ final class DbActions extends Actions
     public function actionAjaxUpdate()
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $row = Sys::db()->update($this->name, $data['keys'], $data['data']);
+        $row = Sys::db()->update($this->getTable(), $data['keys'], $data['data']);
         Msg::info('Succeeded to update ' . $row . ' records.');
     }
 
     // This is not used because of ajaxfy.
     public function actionUpdate()
     {
-        $name = $this->name;
-        Sys::db()->insert($name, $_POST);
+        Sys::db()->insert($this->getTable(), $_POST);
         // Do redirect to remove the 'update' query key.
-        Sys::app()->redirect($name);
+        Sys::app()->redirect($this->name);
     }
 
     public function actionAjaxPost()
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $row = Sys::db()->insert($this->name, $data);
+        $row = Sys::db()->insert($this->getTable(), $data);
         Msg::info('Succeeded to insert ' . $row . ' records.');
     }
 
     public function actionAjaxDelete()
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $row = Sys::db()->delete($this->name, $data);
+        $row = Sys::db()->delete($this->getTable(), $data);
         Msg::info('Succeeded to delete ' . $row . ' records.');
     }
 
