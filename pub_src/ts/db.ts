@@ -42,6 +42,7 @@ interface DbTableConfig {
     };
     sort?: SortFun<ValueCallback>;
     stat?: ((count: number) => TagContent) | StatObject;
+    show?: (dbt: DbTable) => void;
 }
 
 declare const _TABLE_FIELDS: { [index: string]: { primary: boolean, auto: boolean } };
@@ -72,6 +73,9 @@ export class DbTable {
             this.conf.cols = Object.keys(dataSet.columns).map(
                 c => ({ th: c, td: c } as ColumnDefinition)
             );
+        }
+        if (!this.conf.show) {
+            this.conf.show = DbTable.defaultShow;
         }
         return this;
     }
@@ -247,9 +251,13 @@ export class DbTable {
             return;
         }
         divData.clear();
-        const conf = this.conf;
+        this.conf.show(this);
+    }
+
+    private static defaultShow(self: DbTable) {
+        const conf = self.conf;
         const columns = conf.columns ? conf.columns : 1;
-        const dataSet = this.dataSet;
+        const dataSet = self.dataSet;
         const ci = dataSet.columns;
         const cols = conf.cols ? conf.cols : Object.keys(dataSet.columns).map(
             c => ({ th: c, td: c } as ColumnDefinition)
@@ -269,7 +277,7 @@ export class DbTable {
                 }
                 th.putInto(headers);
             }
-            if (this.updateForm) {
+            if (self.updateForm) {
                 Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
                 Tag.of('th').putInto(headers);
             }
@@ -287,6 +295,7 @@ export class DbTable {
             }
         }
         const group = conf.group;
+        const divData = self.divData;
         if (group) {
             const keyCol = group.key;
             const grouped: { [index: string]: any[][] } = {};
@@ -307,18 +316,18 @@ export class DbTable {
                 )).putInto(divData);
             }
             for (const key of keys) {
-                const result = this.getStat(grouped[key], ci);
+                const result = self.getStat(grouped[key], ci);
                 Tag.of('tr').cls('top').add(
                     Tag.of('td').cls('group').attr({ colspan: totalColumns })
                         .add(Tag.of('span').add(Tag.a(key).name(key)))
                         .add(Tag.of('span').cls('stat').add(result))
                 ).putInto(table);
-                this.addToTable(table, grouped[key], columns);
+                self.addToTable(table, grouped[key], columns);
             }
         } else {
-            this.addToTable(table, data, columns);
+            self.addToTable(table, data, columns);
         }
-        const result = this.getStat(data, ci);
+        const result = self.getStat(data, ci);
         Tag.div(Tag.of('span').cls('stat').add(result)).putInto(divData);
         table.putInto(divData);
     }

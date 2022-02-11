@@ -30,7 +30,8 @@ final class Arr
         }
     }
 
-    public static function toArray($obj)
+    // Pass in by ref to check existence though it is not to be modified.
+    public static function toArray(&$obj)
     {
         if (!isset($obj)) {
             return [];
@@ -56,7 +57,7 @@ final class Arr
         }
     }
 
-    public static function uniqueMerge($a1, $a2)
+    public static function uniqueMerge(&$a1, &$a2)
     {
         return array_unique(array_merge(self::toArray($a1), self::toArray($a2)));
     }
