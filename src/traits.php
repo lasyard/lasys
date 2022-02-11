@@ -9,7 +9,7 @@ abstract class Traits
 
     protected function addTo(&$target)
     {
-        Arr::toArray($target[Config::TRAITS]);
+        Arr::makeArray($target[Config::TRAITS]);
         foreach ($target[Config::TRAITS] as $t) {
             if (get_class($t) == get_class($this)) {
                 return;

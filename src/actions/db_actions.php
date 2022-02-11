@@ -95,7 +95,9 @@ final class DbActions extends Actions
     {
         $script = $this->conf(self::SCRIPT);
         if (isset($script)) {
-            Sys::app()->addScript($script);
+            Arr::forOneOrMany($script, function ($s) {
+                Sys::app()->addScript($s);
+            });
         }
         Sys::app()->addScript('js' . DS . 'db');
         $columns = Sys::db()->getColumns($this->getTable());

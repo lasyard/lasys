@@ -58,9 +58,9 @@ final class Config
         foreach (self::RECURSIVE_CONF as $c) {
             self::setDefault($conf, $c, $oldConf);
         }
-        self::mergeArray($conf, self::EXCLUDES, $oldConf);
         self::setDefault($conf, self::TRAITS);
         self::setDefault($conf, self::LIST);
+        $conf[self::EXCLUDES] = Arr::uniqueMerge($conf[self::EXCLUDES], $oldConf[self::EXCLUDES]);
         // Call `forChid` first to allow mangling of new conf.
         self::applyTraits($conf, $traits, 'forChild', $oldConf);
         self::applyTraits($conf, $conf[self::TRAITS], 'forSelf', $oldConf);
@@ -92,20 +92,11 @@ final class Config
         }
     }
 
-    private static function mergeArray(&$conf, $opt, $oldConf)
-    {
-        $conf[$opt] = array_unique($conf[$opt] ?? [] + $oldConf[$opt]);
-    }
-
     private static function applyTraits(&$target, $traits, $method, $conf)
     {
-        if (is_array($traits)) {
-            foreach ($traits as $trait) {
-                $trait->$method($target, $conf);
-            }
-        } else {
-            $traits->$method($target, $conf);
-        }
+        Arr::forOneOrMany($traits, function ($trait) use ($method, &$target, $conf) {
+            $trait->$method($target, $conf);
+        });
     }
 
     public function read($name)

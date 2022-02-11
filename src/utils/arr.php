@@ -30,12 +30,34 @@ final class Arr
         }
     }
 
-    public static function toArray(&$obj)
+    public static function toArray($obj)
     {
         if (!isset($obj)) {
-            $obj = [];
+            return [];
         } else if (!is_array($obj)) {
-            $obj = [$obj];
+            return [$obj];
         }
+        return $obj;
+    }
+
+    public static function makeArray(&$obj)
+    {
+        $obj = self::toArray($obj);
+    }
+
+    public static function forOneOrMany(&$objs, $fun)
+    {
+        if (is_array($objs)) {
+            foreach ($objs as &$obj) {
+                $fun($obj);
+            }
+        } else {
+            $fun($objs);
+        }
+    }
+
+    public static function uniqueMerge($a1, $a2)
+    {
+        return array_unique(array_merge(self::toArray($a1), self::toArray($a2)));
     }
 }

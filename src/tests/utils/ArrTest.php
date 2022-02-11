@@ -49,19 +49,33 @@ final class ArrTest extends TestCase
         $this->assertSame(2, $target['c']);
     }
 
-    public function testToArray()
+    public function testMakeArray()
     {
-        Arr::toArray($obj);
+        Arr::makeArray($obj);
         $this->assertSame([], $obj);
         $obj['a'] = null;
-        Arr::toArray($obj['a']);
+        Arr::makeArray($obj['a']);
         $this->assertSame([], $obj['a']);
-        Arr::toArray($obj['b']);
+        Arr::makeArray($obj['b']);
         $this->assertSame([], $obj['b']);
-        Arr::toArray($obj['b']['c']);
+        Arr::makeArray($obj['b']['c']);
         $this->assertSame([], $obj['b']['c']);
         $obj = 'hello';
-        Arr::toArray($obj);
+        Arr::makeArray($obj);
         $this->assertSame(['hello'], $obj);
+    }
+
+    public function testForOneOrMany()
+    {
+        $obj = 10;
+        Arr::forOneOrMany($obj, function (&$o) {
+            $o = $o * 2;
+        });
+        $this->assertSame(20, $obj);
+        $objs = [1, 2, 3];
+        Arr::forOneOrMany($objs, function (&$o) {
+            $o = $o * 2;
+        });
+        $this->assertSame([2, 4, 6], $objs);
     }
 }
