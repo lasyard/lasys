@@ -1,5 +1,5 @@
 <?php
-final class DbActions extends Actions
+class DbActions extends Actions
 {
     // configs
     public const TABLE = 'db:table';
@@ -124,21 +124,32 @@ final class DbActions extends Actions
         }
     }
 
-    public function actionAjaxGet($sql = null)
+    public function actionAjaxGet()
     {
-        $sql ??= 'select * from ' . $this->getTable();
+        $sql = 'select * from ' . $this->getTable();
+        return $this->actionAjaxGetCustomized($sql);
+    }
+
+    public function actionAjaxGetCustomized($sql, $trans = null)
+    {
         $result = Sys::db()->getDataSet($sql);
         $labels = [];
         foreach ($result['columns'] as $name => $index) {
             $labels[$index] = $this->getLabel($name);
         }
         $result['labels'] = $labels;
+        if ($trans) {
+            $trans($result);
+        }
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
-    public function actionAjaxUpdate()
+    public function actionAjaxUpdate($trans = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
+        if ($trans) {
+            $trans($data['keys'], $data['data']);
+        }
         $row = Sys::db()->update($this->getTable(), $data['keys'], $data['data']);
         Msg::info('Succeeded to update ' . $row . ' records.');
     }
@@ -151,16 +162,22 @@ final class DbActions extends Actions
         Sys::app()->redirect($this->name);
     }
 
-    public function actionAjaxPost()
+    public function actionAjaxPost($trans = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
+        if ($trans) {
+            $trans($data);
+        }
         $row = Sys::db()->insert($this->getTable(), $data);
         Msg::info('Succeeded to insert ' . $row . ' records.');
     }
 
-    public function actionAjaxDelete()
+    public function actionAjaxDelete($trans = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
+        if ($trans) {
+            $trans($data);
+        }
         $row = Sys::db()->delete($this->getTable(), $data);
         Msg::info('Succeeded to delete ' . $row . ' records.');
     }
