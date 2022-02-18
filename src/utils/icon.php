@@ -14,6 +14,7 @@ final class Icon
     public const TIME = '<i class="bi bi-clock"></i>';
     public const INFO = '<i class="bi bi-info-circle"></i>';
     public const WARN = '<i class="bi bi-exclamation-triangle-fill"></i>';
+    public const IMAGES = '<i class="bi bi-images"></i>';
 
     private function __construct()
     {

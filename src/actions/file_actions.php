@@ -4,15 +4,18 @@ final class FileActions extends Actions
     // folder configs
     public const UPLOAD_TITLE = 'file:uploadTitle';
     public const SIZE_LIMIT = 'file:sizeLimit';
+    public const IMAGE_SIZE_LIMIT = 'file::imageSizeLimit';
     public const ACCEPT = 'file:accept';
 
     public const DEFAULT = [
         self::UPLOAD_TITLE => 'Upload',
         self::SIZE_LIMIT => 65536,
+        self::IMAGE_SIZE_LIMIT => 1024 * 1024,
         self::ACCEPT => '.txt,text/plain',
     ];
 
-    public const UPLOAD_ITEM = 'upload';
+    public const UPLOAD_ITEM = '_upload';
+    public const IMAGES_ITEM = '_images';
 
     public static function default($confName)
     {
@@ -142,6 +145,12 @@ final class FileActions extends Actions
         Sys::app()->redirect($name);
     }
 
+    public function actionPostRaw()
+    {
+        File::upload($this->path . DS . $this->name, null, false, self::default(self::SIZE_LIMIT));
+        Sys::app()->redirect($this->name);
+    }
+
     public function actionUpdate()
     {
         $name = $this->name;
@@ -170,10 +179,20 @@ final class FileActions extends Actions
     public function actionUploadForm()
     {
         View::render('upload', [
-            'title' => self::default(self::UPLOAD_TITLE),
+            'title' => Icon::UPLOAD . ' ' . self::default(self::UPLOAD_TITLE),
             'action' => $this->base . self::UPLOAD_ITEM,
             'accept' => self::default(self::ACCEPT),
             'sizeLimit' => self::default(self::SIZE_LIMIT),
+        ]);
+    }
+
+    public function actionImageUploadForm()
+    {
+        View::render('upload', [
+            'title' => Icon::IMAGES . ' Upload image',
+            'action' => '',
+            'accept' => '.jpg,.jpeg,.png,images/*',
+            'sizeLimit' => self::default(self::IMAGE_SIZE_LIMIT),
         ]);
     }
 }

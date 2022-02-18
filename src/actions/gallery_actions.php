@@ -4,11 +4,13 @@ final class GalleryActions extends Actions
     private const THUMB_DIR = 'thumbs';
 
     public const THUMB_SIZE = 'gallery:thumbSize';
+    public const KEEP_NAME = 'gallery:keepName';
 
     public const DEFAULT = [
         self::THUMB_SIZE => 128,
         FileActions::SIZE_LIMIT => 65536 * 8,
         FileActions::ACCEPT => 'image/*',
+        self::KEEP_NAME => false,
     ];
 
     private static function relPath($path)
@@ -71,7 +73,7 @@ final class GalleryActions extends Actions
             $uid = $info['uid'] ?? User::ADMIN;
             $images[] = [
                 'name' => $name,
-                'title' => $info['title'] ?? '',
+                'title' => $info['title'] ?? ($this->conf(self::KEEP_NAME) ? $name : ''),
                 'time' => $info['time'] ?? 0,
                 'user' => $info['uname'] ?? 'Anonymous',
                 'delete' => $deleteAction != null && Sys::user()->hasPrivs($deleteAction[Actions::PRIV], $uid),
@@ -105,7 +107,14 @@ final class GalleryActions extends Actions
         $path = $this->path . DS . $this->name;
         $origName = File::upload($path, null, false, $this->default(FileActions::SIZE_LIMIT));
         $origFile = $path . DS . $origName;
-        $name = sha1_file($origFile) . '.' . pathinfo($origName, PATHINFO_EXTENSION);
+        if ($this->default(self::KEEP_NAME)) {
+            $tempFile = $path . DS . '_temp';
+            rename($origFile, $tempFile);
+            $origFile = $tempFile;
+            $name = $origName;
+        } else {
+            $name =  sha1_file($origFile) . '.' . pathinfo($origName, PATHINFO_EXTENSION);
+        }
         $file = $path . DS . $name;
         if (file_exists($file)) {
             unlink($origFile);
