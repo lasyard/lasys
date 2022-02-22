@@ -8,17 +8,18 @@
     <fieldset>
         <legend><?php echo $title; ?></legend>
         <?php foreach ($fields as $name => $f) {
-            if ($purpose === 'insert' && $f['auto']) {
+            extract($f);
+            if ($purpose === 'insert' && $auto) {
                 continue;
             }
-            if ($purpose === 'update' && ($f['primary'] || $f['readOnly'] || $f['auto'])) {
-                $f['attrs']['disabled'] = 1;
+            if ($purpose === 'update' && ($primary || $readOnly || $auto)) {
+                $attrs['disabled'] = 1;
             }
         ?>
             <div class="field">
-                <span class="label"><?php echo $f['label']; ?></span>
+                <span class="label"><?php echo $label; ?></span>
                 <?php
-                echo Html::input($name, $f['type'], $f['required'], $f['attrs']);
+                echo Html::input($name, $type, $required, $attrs);
                 ?>
             </div>
         <?php } ?>

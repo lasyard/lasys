@@ -111,9 +111,6 @@ class Actions
     protected function conf($name)
     {
         $list = Sys::app()->conf(Config::LIST);
-        if (isset($list[$this->_name][$name])) {
-            return $list[$this->_name][$name];
-        }
-        return null;
+        return $list[$this->_name][$name] ?? null;
     }
 }

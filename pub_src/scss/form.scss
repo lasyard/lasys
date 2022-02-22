@@ -1,3 +1,10 @@
+@mixin fixed-width {
+    @extend .nobr;
+    display: inline-block;
+    min-width: 18%;
+    font-size: 0.8em;
+}
+
 form {
     fieldset {
         @extend .border;
@@ -39,14 +46,21 @@ form {
             margin-top: 0.3em;
             vertical-align: top;
         }
+
+        div.checkbox {
+            @extend .border;
+            display: inline-block;
+            width: 80%;
+
+            span {
+                @include fixed-width;
+            }
+        }
     }
 
     fieldset.checkbox {
         span {
-            @extend .nobr;
-            display: inline-block;
-            min-width: 18%;
-            font-size: 0.8em;
+            @include fixed-width;
         }
     }
 

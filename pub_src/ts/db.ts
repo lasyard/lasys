@@ -80,23 +80,28 @@ export class DbTable {
         return this;
     }
 
-    private setFormData(data: any[]) {
-        const ci = this.dataSet.columns;
-        const form = this.updateForm;
-        for (const col in ci) {
-            const field = form.get().elements.namedItem(col);
-            if (field instanceof HTMLInputElement) {
-                const f = field as HTMLInputElement;
-                const v = data[ci[col]];
-                if (f.type === 'checkbox') {
-                    f.checked = (v == '1' ? true : false);
+    private static setFormData(form: HTMLFormElement, d: (k: string) => any) {
+        for (let i = 0; i < form.elements.length; ++i) {
+            const f = form.elements[i];
+            if (f instanceof HTMLInputElement) {
+                if (f.type === 'submit') {
+                    continue;
+                } else if (f.type === 'checkbox') {
+                    const found = f.name.match(/(.+)\[(\d+)\]/);
+                    if (found) { // checkbox array
+                        const n = found[1];
+                        const k = parseInt(found[2]);
+                        f.checked = d(n).includes(k);
+                    } else {
+                        f.checked = (d(f.name) == '1' ? true : false);
+                    }
                 } else {
-                    f.value = v;
+                    f.value = d(f.name);
                 }
-            } else if (field instanceof HTMLTextAreaElement) {
-                (field as HTMLTextAreaElement).value = data[ci[col]];
-            } else if (field instanceof HTMLSelectElement) {
-                (field as HTMLSelectElement).value = data[ci[col]];
+            } else if (f instanceof HTMLTextAreaElement) {
+                (f as HTMLTextAreaElement).value = d(f.name);
+            } else if (f instanceof HTMLSelectElement) {
+                (f as HTMLSelectElement).value = d(f.name);
             }
         }
     }
@@ -105,19 +110,28 @@ export class DbTable {
         const data: { [index: string]: any } = {};
         for (let i = 0; i < form.elements.length; ++i) {
             const f = form.elements[i];
-            if (
-                f instanceof HTMLInputElement
-                || f instanceof HTMLTextAreaElement
-                || f instanceof HTMLSelectElement
-            ) {
+            if (f instanceof HTMLInputElement) {
                 if (f.type === 'submit') {
                     continue;
-                }
-                if (f.type === 'checkbox') {
-                    data[f.name] = (f as HTMLInputElement).checked ? 1 : 0;
+                } else if (f.type === 'checkbox') {
+                    const found = f.name.match(/(.+)\[(\d+)\]/);
+                    if (found) { // checkbox array
+                        const n = found[1];
+                        const k = parseInt(found[2]);
+                        if (!data[n]) {
+                            data[n] = [];
+                        }
+                        if ((f as HTMLInputElement).checked) {
+                            data[n].push(k);
+                        }
+                    } else {
+                        data[f.name] = (f as HTMLInputElement).checked ? 1 : 0;
+                    }
                 } else {
                     data[f.name] = f.value;
                 }
+            } else if (f instanceof HTMLTextAreaElement || f instanceof HTMLSelectElement) {
+                data[f.name] = f.value;
             }
         }
         return data;
@@ -355,8 +369,8 @@ export class DbTable {
             }
             if (this.updateForm) {
                 Tag.of('td').add(Tag.a(Tag.icon('pencil-square')).toolTip(() => {
-                    const data = dt;
-                    this.setFormData(data);
+                    const d = dt;
+                    DbTable.setFormData(this.updateForm.get(), (k) => d[ci[k]]);
                     return {
                         body: this.updateForm,
                         width: '70%',

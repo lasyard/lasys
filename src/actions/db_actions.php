@@ -6,20 +6,22 @@ class DbActions extends Actions
     public const SCRIPT = 'db:script';
     public const LABELS = 'db:labels';
     public const INSERT_FORM = 'db:insertForm';
+    public const RELS = 'db:rels';
 
-    private function getLabel($name)
+    protected function getLabel($name)
     {
         $labels = $this->conf(self::LABELS);
         return ($labels && array_key_exists($name, $labels)) ? $labels[$name] : ucfirst($name);
     }
 
-    private function getTable()
+    protected function getTable()
     {
         return $this->conf(self::TABLE) ?? $this->name;
     }
 
-    private function buildFields($columns)
+    protected function buildFields()
     {
+        $columns = Sys::db()->getColumns($this->getTable());
         $fields = [];
         foreach ($columns as $c) {
             $name = $c['Field'];
@@ -91,8 +93,9 @@ class DbActions extends Actions
         return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
-    public function actionGet()
+    public function actionGet($fields = null)
     {
+        $fields ??= $this->buildFields();
         $script = $this->conf(self::SCRIPT);
         if (isset($script)) {
             Arr::forOneOrMany($script, function ($s) {
@@ -100,12 +103,10 @@ class DbActions extends Actions
             });
         }
         Sys::app()->addScript('js' . DS . 'db');
-        $columns = Sys::db()->getColumns($this->getTable());
-        $fields = $this->buildFields($columns);
         Sys::app()->addData('_TABLE_FIELDS', array_map(function ($v) {
             return [
-                'primary' => $v['primary'],
-                'auto' => $v['auto']
+                'primary' => $v['primary'] ?? false,
+                'auto' => $v['auto'] ?? false,
             ];
         }, $fields));
         Sys::app()->addData('_TABLE_CAN_DELETE', $this->hasPrivOf(Server::AJAX_DELETE));
@@ -130,7 +131,7 @@ class DbActions extends Actions
         return $this->actionAjaxGetCustomized($sql);
     }
 
-    public function actionAjaxGetCustomized($sql, $trans = null)
+    public function actionAjaxGetCustomized($sql, $post = null)
     {
         $result = Sys::db()->getDataSet($sql);
         $labels = [];
@@ -138,20 +139,38 @@ class DbActions extends Actions
             $labels[$index] = $this->getLabel($name);
         }
         $result['labels'] = $labels;
-        if ($trans) {
-            $trans($result);
+        if ($post) {
+            $post($result);
         }
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
-    public function actionAjaxUpdate($trans = null)
+    /**
+     * $table: name of the relation table
+     * $kv: key-value pairs for relation table
+     * $cols: column names in relation table other than key
+     * $values: values for columns in relation table other than key
+     */
+    public static function updateRelation($table, $kv, $cols, $values)
+    {
+        $rows1 = Sys::db()->delete($table, $kv);
+        $cols = array_merge(Arr::toArray($cols), array_keys($kv));
+        $vKey = array_values($kv);
+        $rows2 = Sys::db()->insertBatch($table, $cols, array_map(function ($v) use ($vKey) {
+            return array_merge(Arr::toArray($v), $vKey);
+        }, $values));
+        Msg::info('Replaced ' . $rows1 . ' relations with ' . $rows2 . ' relations.');
+    }
+
+    public function actionAjaxUpdate($pre = null, $post = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        if ($trans) {
-            $trans($data['keys'], $data['data']);
+        $ctx = $pre ? $pre($data['keys'], $data['data']) : null;
+        $rows = Sys::db()->update($this->getTable(), $data['keys'], $data['data']);
+        Msg::info('Succeeded to update ' . $rows . ' records.');
+        if ($post) {
+            $post($ctx, $rows);
         }
-        $row = Sys::db()->update($this->getTable(), $data['keys'], $data['data']);
-        Msg::info('Succeeded to update ' . $row . ' records.');
     }
 
     // This is not used because of ajaxfy.
@@ -162,24 +181,26 @@ class DbActions extends Actions
         Sys::app()->redirect($this->name);
     }
 
-    public function actionAjaxPost($trans = null)
+    public function actionAjaxPost($pre = null, $post = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        if ($trans) {
-            $trans($data);
+        $ctx = $pre ? $pre($data) : null;
+        list($rows, $id) = Sys::db()->insert($this->getTable(), $data);
+        Msg::info('Succeeded to insert ' . $rows . ' records.');
+        if ($post) {
+            $post($ctx, $rows, $id);
         }
-        $row = Sys::db()->insert($this->getTable(), $data);
-        Msg::info('Succeeded to insert ' . $row . ' records.');
     }
 
-    public function actionAjaxDelete($trans = null)
+    public function actionAjaxDelete($pre = null, $post = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        if ($trans) {
-            $trans($data);
+        $ctx = $pre ? $pre($data) : null;
+        $rows = Sys::db()->delete($this->getTable(), $data);
+        Msg::info('Succeeded to delete ' . $rows . ' records.');
+        if ($post) {
+            $post($ctx);
         }
-        $row = Sys::db()->delete($this->getTable(), $data);
-        Msg::info('Succeeded to delete ' . $row . ' records.');
     }
 
     public function actionDump()

@@ -59,6 +59,15 @@ final class Html
             case 'textarea':
                 $html = '<textarea name="' . $name . '"' . self::inlineAttrs($required, $attrs) . '></textarea>';
                 break;
+            case 'checkboxes':
+                $items = $attrs['items'];
+                unset($attrs['items']);
+                $html = '<div class="checkbox">' . PHP_EOL;
+                foreach ($items as $index => $label) {
+                    $html .= '<span><input type="checkbox" name="' . $name . '[' . $index . ']" />' . $label . '</span>' . PHP_EOL;
+                }
+                $html .= '</div>';
+                break;
             default:
                 $html = '<input name="' . $name . '" type="' . $type . '"' . self::inlineAttrs($required, $attrs) . '></input>';
         }

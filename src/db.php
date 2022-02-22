@@ -38,12 +38,26 @@ final class Db extends PDO
 
     public function insert($tbl, $kv)
     {
+        $row = $this->insertBatch($tbl, array_keys($kv), [array_values($kv)]);
+        $id = null;
+        if ($row == 1) {
+            $id = $this->lastInsertId();
+        }
+        return [$row, $id];
+    }
+
+    public function insertBatch($tbl, $k, $vs)
+    {
         $sql = 'insert into `' . $tbl . '`(' . join(', ', array_map(function ($k) {
             return '`' . $k . '`';
-        }, array_keys($kv))) . ') values(' . join(', ', array_fill(0, count($kv), '?')) . ')';
+        }, $k)) . ') values(' . join(', ', array_fill(0, count($k), '?')) . ')';
         $st = $this->prepare($sql);
-        $st->execute(array_values($kv));
-        return $st->rowCount();
+        $row = 0;
+        foreach ($vs as $v) {
+            $st->execute($v);
+            $row += $st->rowCount();
+        }
+        return $row;
     }
 
     public function update($tbl, $kvPrimary, $kv)
