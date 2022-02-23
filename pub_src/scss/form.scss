@@ -34,6 +34,7 @@ form {
             font-weight: bold;
             text-align: right;
             width: 15%;
+            vertical-align: top;
         }
 
         input[type=text],
@@ -44,7 +45,6 @@ form {
         textarea {
             width: 80%;
             margin-top: 0.3em;
-            vertical-align: top;
         }
 
         div.checkbox {

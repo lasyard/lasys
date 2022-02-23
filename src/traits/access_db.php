@@ -4,7 +4,6 @@ final class AccessDb extends Traits
     public function forEachItem(&$item, $conf)
     {
         $this->addTo($item);
-        $item[DbActions::LABELS] ??= $conf[DbActions::LABELS] ?? null;
         $item[DbActions::SCRIPT] = Arr::uniqueMerge($conf[DbActions::SCRIPT], $item[DbActions::SCRIPT]);
     }
 

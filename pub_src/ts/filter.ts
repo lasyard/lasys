@@ -3,7 +3,7 @@ import { ColumnIndices } from "./db";
 import { Tag } from "./tag";
 
 export abstract class Filter {
-    protected static readonly FORM_NAME = '-form-filter-';
+    protected static readonly FORM_NAME = '-form-filter';
 
     public key: string;
     protected title: string;
@@ -39,7 +39,7 @@ export abstract class Filter {
     }
 
     public render(data: any[][], ci: ColumnIndices, handler: (e: Event) => any): Tag<HTMLFormElement> {
-        this.formName = Filter.FORM_NAME + this.key;
+        this.formName = Filter.FORM_NAME + '-' + this.key;
         this.itemName = this.formName + '-item';
         this.handler = handler;
         this.index = ci[this.key];
@@ -134,31 +134,14 @@ export class CheckFilter extends Filter {
 
 export class MultiCheckFilter extends Filter {
     protected createChecks(values: { [index: string]: number; }, keys: string[]): Tag<HTMLElement>[] {
-        return keys.map((v, i) => this.checkbox(this.itemName, 'checkbox', v, values[v], true));
+        return keys.map((v, i) => this.checkbox(this.itemName, 'checkbox', v, values[v], false));
     }
 
-    testFunc() {
-        const items = document.forms.namedItem(this.formName).namedItem(this.itemName);
-        return (data: any[][]) => {
-            const selected = [];
-            for (const i in items) {
-                if (items[i].checked) {
-                    selected.push(items[i].value);
-                }
-            }
-            for (const i in selected) {
-                if (typeof data[i][selected[i]] == 'undefined') {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    getValueCount(data: any[][]) {
+    protected getValuesCount(data: any[][]) {
         const values: { [index: string]: number } = {};
         for (const d of data) {
-            for (const v of d[this.index] as string[]) {
+            const vs = d[this.index];
+            for (const v of vs) {
                 if (!values[v]) {
                     values[v] = 0;
                 }
@@ -166,5 +149,22 @@ export class MultiCheckFilter extends Filter {
             }
         }
         return values;
+    }
+
+    testFunc() {
+        const items = document.forms.namedItem(this.formName).elements.namedItem(this.itemName);
+        if (items instanceof RadioNodeList) {
+            return (data: any[]) => {
+                for (let i = 0; i < items.length; ++i) {
+                    const c = items.item(i) as HTMLInputElement;
+                    const v = parseInt(c.value);
+                    if (c.checked && !data[this.index].includes(isNaN(v) ? c.value : v)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return (_d: any[]) => true;
     }
 }

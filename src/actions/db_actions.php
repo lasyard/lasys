@@ -11,7 +11,8 @@ class DbActions extends Actions
     protected function getLabel($name)
     {
         $labels = $this->conf(self::LABELS);
-        return ($labels && array_key_exists($name, $labels)) ? $labels[$name] : ucfirst($name);
+        $labels1 = Sys::app()->conf(self::LABELS);
+        return $labels[$name] ?? $labels1[$name] ?? ucfirst($name);
     }
 
     protected function getTable()
