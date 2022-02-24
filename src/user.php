@@ -54,9 +54,13 @@ final class User
                     'name' => $user['name'],
                     'priv' => explode(',', $user['priv']),
                 );
-                $expire = time() + 60 * 60 * 24 * 30;
-                setcookie('id', $id, $expire, '/');
-                setcookie('password', $password, $expire, '/');
+                $options = [
+                    'expires' => time() + 60 * 60 * 24 * 30,
+                    'path' => '/',
+                    'samesite' => 'Strict',
+                ];
+                setcookie('id', $id, $options);
+                setcookie('password', $password, $options);
                 $this->_user = $_SESSION['user'];
                 return;
             }
