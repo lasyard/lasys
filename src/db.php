@@ -36,9 +36,9 @@ final class Db extends PDO
         return compact('columns', 'data');
     }
 
-    public function insert($tbl, $kv)
+    public function insert($tbl, $kv, $trans = null)
     {
-        $row = $this->insertBatch($tbl, array_keys($kv), [array_values($kv)]);
+        $row = $this->insertBatch($tbl, array_keys($kv), [array_values($kv)], $trans);
         $id = null;
         if ($row == 1) {
             $id = $this->lastInsertId();
@@ -46,11 +46,15 @@ final class Db extends PDO
         return [$row, $id];
     }
 
-    public function insertBatch($tbl, $k, $vs)
+    public function insertBatch($tbl, $k, $vs, $trans = null)
     {
+        $trans ??= function ($k) {
+            return '?';
+        };
+        $values = $trans ? $trans($k) : array_fill(0, count($k), '?');
         $sql = 'insert into `' . $tbl . '`(' . join(', ', array_map(function ($k) {
             return '`' . $k . '`';
-        }, $k)) . ') values(' . join(', ', array_fill(0, count($k), '?')) . ')';
+        }, $k)) . ') values(' . join(', ', array_map($trans, $k)) . ')';
         $st = $this->prepare($sql);
         $row = 0;
         foreach ($vs as $v) {
@@ -60,10 +64,13 @@ final class Db extends PDO
         return $row;
     }
 
-    public function update($tbl, $kvPrimary, $kv)
+    public function update($tbl, $kvPrimary, $kv, $trans = null)
     {
-        $sql = 'update ' . $tbl . ' set ' . join(', ', array_map(function ($k) {
-            return '`' . $k . '` = ?';
+        $trans ??= function ($k) {
+            return '?';
+        };
+        $sql = 'update ' . $tbl . ' set ' . join(', ', array_map(function ($k) use ($trans) {
+            return '`' . $k . '` = ' . $trans($k);
         }, array_keys($kv))) . ' where ' . join(' and ', array_map(function ($k) {
             return '`' . $k . '` = ?';
         }, array_keys($kvPrimary)));

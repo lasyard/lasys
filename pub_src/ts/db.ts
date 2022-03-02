@@ -53,7 +53,7 @@ export class DbTable {
     private conf: DbTableConfig;
     private divFilters: Tag<HTMLDivElement> = null;
     private divData: Tag<HTMLDivElement> = null;
-    private updateForm: Tag<HTMLFormElement> = null;
+    private formUpdate: Tag<HTMLFormElement> = null;
     private popupMsg: Tag<HTMLElement> = null;
 
     constructor(conf: DbTableConfig) {
@@ -227,7 +227,7 @@ export class DbTable {
                 );
                 e.preventDefault();
             });
-            this.updateForm = formUpdate;
+            this.formUpdate = formUpdate;
         }
         return this;
     }
@@ -260,15 +260,15 @@ export class DbTable {
     }
 
     private refresh() {
-        const divData = this.divData;
-        if (!divData) {
-            return;
-        }
-        divData.clear();
         this.conf.show(this);
     }
 
     private static defaultShow(self: DbTable) {
+        const divData = self.divData;
+        if (!divData) {
+            return;
+        }
+        divData.clear();
         const conf = self.conf;
         const columns = conf.columns ? conf.columns : 1;
         const dataSet = self.dataSet;
@@ -291,7 +291,7 @@ export class DbTable {
                 }
                 th.putInto(headers);
             }
-            if (self.updateForm) {
+            if (self.formUpdate) {
                 Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
                 Tag.of('th').putInto(headers);
             }
@@ -309,7 +309,6 @@ export class DbTable {
             }
         }
         const group = conf.group;
-        const divData = self.divData;
         if (group) {
             const keyCol = group.key;
             const grouped: { [index: string]: any[][] } = {};
@@ -367,12 +366,12 @@ export class DbTable {
                 DbTable.addContent(td, dt, typeof col === 'string' ? col : col.td, ci);
                 tr.add(td);
             }
-            if (this.updateForm) {
+            if (this.formUpdate) {
                 Tag.of('td').add(Tag.a(Tag.icon('pencil-square')).toolTip(() => {
                     const d = dt;
-                    DbTable.setFormData(this.updateForm.get(), (k) => d[ci[k]]);
+                    DbTable.setFormData(this.formUpdate.get(), (k) => d[ci[k]]);
                     return {
-                        body: this.updateForm,
+                        body: this.formUpdate,
                         width: '70%',
                     }
                 })).putInto(tr);

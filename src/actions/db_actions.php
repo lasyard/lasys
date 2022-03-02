@@ -163,11 +163,11 @@ class DbActions extends Actions
         Msg::info('Replaced ' . $rows1 . ' relations with ' . $rows2 . ' relations.');
     }
 
-    public function actionAjaxUpdate($pre = null, $post = null)
+    public function actionAjaxUpdate($pre = null, $post = null, $trans = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $ctx = $pre ? $pre($data['keys'], $data['data']) : null;
-        $rows = Sys::db()->update($this->getTable(), $data['keys'], $data['data']);
+        $rows = Sys::db()->update($this->getTable(), $data['keys'], $data['data'], $trans);
         Msg::info('Succeeded to update ' . $rows . ' records.');
         if ($post) {
             $post($ctx, $rows);
@@ -182,11 +182,11 @@ class DbActions extends Actions
         Sys::app()->redirect($this->name);
     }
 
-    public function actionAjaxPost($pre = null, $post = null)
+    public function actionAjaxPost($pre = null, $post = null, $trans = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $ctx = $pre ? $pre($data) : null;
-        list($rows, $id) = Sys::db()->insert($this->getTable(), $data);
+        list($rows, $id) = Sys::db()->insert($this->getTable(), $data, $trans);
         Msg::info('Succeeded to insert ' . $rows . ' records.');
         if ($post) {
             $post($ctx, $rows, $id);
