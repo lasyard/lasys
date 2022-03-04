@@ -80,6 +80,25 @@ export class DbTable {
         return this;
     }
 
+    private static clearFormData(form: HTMLFormElement) {
+        for (let i = 0; i < form.elements.length; ++i) {
+            const f = form.elements[i];
+            if (f instanceof HTMLInputElement) {
+                if (f.type === 'submit') {
+                    continue;
+                } else if (f.type === 'checkbox') {
+                    f.checked = false;
+                } else {
+                    f.value = '';
+                }
+            } else if (f instanceof HTMLTextAreaElement) {
+                (f as HTMLTextAreaElement).value = '';
+            } else if (f instanceof HTMLSelectElement) {
+                (f as HTMLSelectElement).value = '';
+            }
+        }
+    }
+
     private static setFormData(form: HTMLFormElement, d: (k: string) => any) {
         for (let i = 0; i < form.elements.length; ++i) {
             const f = form.elements[i];
@@ -167,6 +186,7 @@ export class DbTable {
                 const data = DbTable.retrieveFormData(form);
                 Ajax.post(
                     (r) => {
+                        DbTable.clearFormData(form);
                         divForm.hide();
                         this.showMsg(r);
                         this.loadData();
