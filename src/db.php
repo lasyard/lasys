@@ -51,7 +51,6 @@ final class Db extends PDO
         $trans ??= function ($k) {
             return '?';
         };
-        $values = $trans ? $trans($k) : array_fill(0, count($k), '?');
         $sql = 'insert into `' . $tbl . '`(' . join(', ', array_map(function ($k) {
             return '`' . $k . '`';
         }, $k)) . ') values(' . join(', ', array_map($trans, $k)) . ')';

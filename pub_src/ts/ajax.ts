@@ -16,7 +16,7 @@ const TYPE_KEY = 'requestType';
 const UPDATE = 'update';
 const DELETE = 'delete';
 
-export type AjaxCallback = (response: any, type: XMLHttpRequestResponseType) => any;
+export type AjaxCallback = (response: any, type: MimeType) => any;
 
 export class Ajax {
     private static call(
@@ -30,7 +30,8 @@ export class Ajax {
         const xhr = new XMLHttpRequest();
         xhr.onload = function () {
             if (this.status == 200) {
-                onload(this.response, this.responseType);
+                const t = this.getResponseHeader('Content-Type');
+                onload(this.response, t as MimeType);
             } else {
                 alert('Ajax request received status ' + this.status + '.');
             }

@@ -113,6 +113,9 @@ class DbActions extends Actions
         Sys::app()->addData('_TABLE_CAN_DELETE', $this->hasPrivOf(Server::AJAX_DELETE));
         $ribbon = $this->buildRibbon($fields);
         View::render('db_ribbon', $ribbon);
+        if (!empty($this->title)) {
+            echo '<h1>', $this->title, '</h1>', PHP_EOL;
+        }
         if ($this->hasPrivOf(Server::AJAX_UPDATE)) {
             View::render('db_edit', [
                 'title' => Icon::EDIT . ' ' . $this->name,
@@ -132,9 +135,9 @@ class DbActions extends Actions
         return $this->actionAjaxGetCustomized($sql);
     }
 
-    public function actionAjaxGetCustomized($sql, $post = null)
+    public function actionAjaxGetCustomized($sql, $post = null, ...$paras)
     {
-        $result = Sys::db()->getDataSet($sql);
+        $result = Sys::db()->getDataSet($sql, ...$paras);
         $labels = [];
         foreach ($result['columns'] as $name => $index) {
             $labels[$index] = $this->getLabel($name);
@@ -143,6 +146,7 @@ class DbActions extends Actions
         if ($post) {
             $post($result);
         }
+        $this->_httpHeaders[] = 'Content-Type: application/json';
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
@@ -208,5 +212,16 @@ class DbActions extends Actions
     {
         Sys::db()->dump($this->path . DS . '_dump');
         echo '<p class="sys center">Dumping succeed!</p>';
+    }
+
+    public static function splitIdsFun($col)
+    {
+        return function (&$r) use ($col) {
+            $ci = $r['columns'][$col];
+            foreach ($r['data'] as &$d) {
+                $c = &$d[$ci];
+                $c = array_map('intval', explode(',', $c));
+            }
+        };
     }
 }

@@ -1,6 +1,7 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title><?php echo $title; ?></title>
+<base href="<?php echo $base; ?>" />
 <?php
 if (!empty($datum)) {
     echo '<script>', PHP_EOL;

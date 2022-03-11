@@ -65,12 +65,6 @@ final class App
         } else {
             $this->_name = $name;
         }
-        $httpHeaders = $action[Actions::ACTION]->httpHeaders;
-        if ($type == Server::HEAD) {
-            // Seems never run to this.
-            $this->header($httpHeaders);
-            exit;
-        }
         if ($this->_conf->get(Config::READ_ONLY)) {
             $this->_files = [];
         } else {
@@ -88,9 +82,15 @@ final class App
         } else {
             $actionDo->doError('You do not have privilege to do this.');
         }
+        // This is set after `do`.
+        $httpHeaders = $action[Actions::ACTION]->httpHeaders;
+        $this->header($httpHeaders);
+        if ($type == Server::HEAD) {
+            // Seems never run to this.
+            exit;
+        }
         $content = $actionDo->content;
         if (Server::isAjax($type)) {
-            // This is needed for CORS post, put and delete.
             echo $content;
             exit;
         }
@@ -113,7 +113,6 @@ final class App
             'files' => $list['files'],
             'content' => $content,
         ];
-        $this->header($httpHeaders);
         $this->view('main');
     }
 

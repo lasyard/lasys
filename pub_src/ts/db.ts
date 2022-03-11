@@ -432,8 +432,12 @@ export class DbTable {
     }
 
     loadData() {
-        Ajax.get((r) => {
-            this.data(JSON.parse(r)).refresh();
+        Ajax.get((r, t) => {
+            if (t === MimeType.JSON) {
+                this.data(JSON.parse(r)).refresh();
+            } else {
+                this.divData.html(r);
+            }
         });
     }
 }

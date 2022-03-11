@@ -12,9 +12,16 @@ test('url construct', () => {
     expect(url.toString()).toBe('http://localhost/xiha');
 });
 
-test('url with serach params', () => {
+test('url with search params', () => {
     const url = new URL('', window.location.href);
     url.searchParams.set('type', 'foo');
+    url.searchParams.set('name', 'bar')
+    expect(url.toString()).toBe('http://localhost/?type=foo&name=bar');
+});
+
+test('url dup search params', () => {
+    const url = new URL('?type=foo', window.location.href);
+    expect(url.searchParams.get('type')).toBe('foo');
     url.searchParams.set('name', 'bar')
     expect(url.toString()).toBe('http://localhost/?type=foo&name=bar');
 });
