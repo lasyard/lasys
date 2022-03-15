@@ -27,13 +27,13 @@ table.stylized {
 
     th {
         @include cell;
-        font-family: Sans-Serif;
+        font-family: $headerFont;
         background: $bgColor3;
     }
 
     td {
         @include cell;
-        font-family: Serif;
+        font-family: $normalFont;
 
         i.bi {
             font-size: 0.8em;
@@ -41,7 +41,7 @@ table.stylized {
     }
 
     td.group {
-        font-family: Sans-Serif;
+        font-family: $headerFont;
         background: $highColor;
 
         >:first-child {

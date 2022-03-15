@@ -34,6 +34,7 @@ interface DbTableConfig {
     cols?: (ColumnDefinition | string)[];
     columns?: number;
     filters?: Filter[];
+    pre?: (dataSet: DataSet) => void;
     group?: {
         key: string,
         title?: (k: string) => TagContent,
@@ -42,7 +43,6 @@ interface DbTableConfig {
     };
     sort?: SortFun<ValueCallback>;
     stat?: ((count: number) => TagContent) | StatObject;
-    show?: (dbt: DbTable) => void;
 }
 
 declare const _TABLE_FIELDS: { [index: string]: { primary: boolean, auto: boolean } };
@@ -73,9 +73,6 @@ export class DbTable {
             this.conf.cols = Object.keys(dataSet.columns).map(
                 c => ({ th: c, td: c } as ColumnDefinition)
             );
-        }
-        if (!this.conf.show) {
-            this.conf.show = DbTable.defaultShow;
         }
         return this;
     }
@@ -279,19 +276,15 @@ export class DbTable {
         return result;
     }
 
-    private refresh() {
-        this.conf.show(this);
-    }
-
-    private static defaultShow(self: DbTable) {
-        const divData = self.divData;
+    public refresh() {
+        const divData = this.divData;
         if (!divData) {
             return;
         }
         divData.clear();
-        const conf = self.conf;
+        const conf = this.conf;
         const columns = conf.columns ? conf.columns : 1;
-        const dataSet = self.dataSet;
+        const dataSet = this.dataSet;
         const ci = dataSet.columns;
         const cols = conf.cols ? conf.cols : Object.keys(dataSet.columns).map(
             c => ({ th: c, td: c } as ColumnDefinition)
@@ -311,7 +304,7 @@ export class DbTable {
                 }
                 th.putInto(headers);
             }
-            if (self.formUpdate) {
+            if (this.formUpdate) {
                 Tag.of('col').style({ width: '2ex' }).putInto(colgroup);
                 Tag.of('th').putInto(headers);
             }
@@ -349,18 +342,18 @@ export class DbTable {
                 )).putInto(divData);
             }
             for (const key of keys) {
-                const result = self.getStat(grouped[key], ci);
+                const result = this.getStat(grouped[key], ci);
                 Tag.of('tr').cls('top').add(
                     Tag.of('td').cls('group').attr({ colspan: totalColumns })
                         .add(Tag.of('span').add(Tag.a(key).name(key)))
                         .add(Tag.of('span').cls('stat').add(result))
                 ).putInto(table);
-                self.addToTable(table, grouped[key], columns);
+                this.addToTable(table, grouped[key], columns);
             }
         } else {
-            self.addToTable(table, data, columns);
+            this.addToTable(table, data, columns);
         }
-        const result = self.getStat(data, ci);
+        const result = this.getStat(data, ci);
         Tag.div(Tag.of('span').cls('stat').add(result)).putInto(divData);
         table.putInto(divData);
     }
@@ -434,9 +427,14 @@ export class DbTable {
     loadData() {
         Ajax.get((r, t) => {
             if (t === MimeType.JSON) {
-                this.data(JSON.parse(r)).refresh();
+                const dataSet = JSON.parse(r);
+                if (this.conf.pre) {
+                    this.conf.pre(dataSet);
+                }
+                this.data(dataSet).refresh();
             } else {
-                this.divData.html(r);
+                this.divData.clear();
+                this.popupMsg.html(r).show();
             }
         });
     }

@@ -17,7 +17,7 @@
             }
         ?>
             <div class="field">
-                <span class="label"><?php echo $label; ?></span>
+                <label for="<?php echo $name; ?>"><?php echo $label; ?></label>
                 <?php
                 echo Html::input($name, $type, $required, $attrs);
                 ?>

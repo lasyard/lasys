@@ -148,7 +148,7 @@ final class Config
         } else if (isset($this->_conf[Config::ETC][$type])) {
             $action = $this->_conf[Config::ETC][$type];
         } else {
-            $action = Actions::default()->priv();
+            $action = null; // Actions::default()->priv();
         }
         if ($action instanceof Actions) {
             return $action->priv();

@@ -1,17 +1,16 @@
-<fieldset>
-    <legend>登录</legend>
-    <form name="login" action="" method="POST">
+<form name="login" action="" method="POST">
+    <fieldset>
+        <legend>登录</legend>
         <div class="field">
-            <span class="label">User</span>
+            <label for="name">User</label>
             <input type="text" name="name" required />
         </div>
         <div class="field">
-            <span class="label">Password</span>
+            <label for="password">Password</label>
             <input type="password" name="password" required />
         </div>
-        <div class="field">
-            <span class="label"></span>
-            <input type="submit" />
-        </div>
-    </form>
-</fieldset>
+    </fieldset>
+    <div class="buttons">
+        <input type="submit" />
+    </div>
+</form>

@@ -17,6 +17,12 @@ final class Db extends PDO
         return $st->fetch();
     }
 
+    public function count($tbl)
+    {
+        $r = $this->getOne('select count(1) as ct from ' . $tbl);
+        return $r['ct'];
+    }
+
     public function getAll($sql, ...$paras)
     {
         $st = $this->prepare($sql);

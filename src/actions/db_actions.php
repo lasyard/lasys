@@ -94,15 +94,20 @@ class DbActions extends Actions
         return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
-    public function actionGet($fields = null)
+    private function addScript($script)
     {
-        $fields ??= $this->buildFields();
-        $script = $this->conf(self::SCRIPT);
-        if (isset($script)) {
+        if (!empty($script)) {
             Arr::forOneOrMany($script, function ($s) {
                 Sys::app()->addScript($s);
             });
         }
+    }
+
+    public function actionGet($fields = null, $pre = null)
+    {
+        $fields ??= $this->buildFields();
+        $this->addScript(Sys::app()->conf(self::SCRIPT));
+        $this->addScript($this->conf(self::SCRIPT));
         Sys::app()->addScript('js' . DS . 'db');
         Sys::app()->addData('_TABLE_FIELDS', array_map(function ($v) {
             return [
@@ -113,8 +118,8 @@ class DbActions extends Actions
         Sys::app()->addData('_TABLE_CAN_DELETE', $this->hasPrivOf(Server::AJAX_DELETE));
         $ribbon = $this->buildRibbon($fields);
         View::render('db_ribbon', $ribbon);
-        if (!empty($this->title)) {
-            echo '<h1>', $this->title, '</h1>', PHP_EOL;
+        if ($pre) {
+            $pre();
         }
         if ($this->hasPrivOf(Server::AJAX_UPDATE)) {
             View::render('db_edit', [
@@ -220,7 +225,7 @@ class DbActions extends Actions
             $ci = $r['columns'][$col];
             foreach ($r['data'] as &$d) {
                 $c = &$d[$ci];
-                $c = array_map('intval', explode(',', $c));
+                $c = $c != null ? array_map('intval', explode(',', $c)) : [];
             }
         };
     }

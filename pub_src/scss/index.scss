@@ -201,7 +201,7 @@ div#list {
         @include list-box;
 
         legend {
-            font-family: Sans-Serif;
+            font-family: $headerFont;
             font-size: 0.8em;
         }
     }
