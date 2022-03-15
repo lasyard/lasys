@@ -10,6 +10,13 @@ final class Db extends PDO
         ]);
     }
 
+    public function run($sql, ...$paras)
+    {
+        $st = $this->prepare($sql);
+        $st->execute($paras);
+        return $st->rowCount();
+    }
+
     public function getOne($sql, ...$paras)
     {
         $st = $this->prepare($sql);

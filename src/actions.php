@@ -20,6 +20,7 @@ class Actions
 
     protected $_httpHeaders = [];
     protected $_title;
+    protected $_rawOutput = false;
 
     public static function __callStatic($method, $args)
     {

@@ -161,15 +161,19 @@ class DbActions extends Actions
      * $cols: column names in relation table other than key
      * $values: values for columns in relation table other than key
      */
-    public static function updateRelation($table, $kv, $cols, $values)
+    public static function updateRelation($table, $kv, $cols = [], $values = [])
     {
         $rows1 = Sys::db()->delete($table, $kv);
-        $cols = array_merge(Arr::toArray($cols), array_keys($kv));
-        $vKey = array_values($kv);
-        $rows2 = Sys::db()->insertBatch($table, $cols, array_map(function ($v) use ($vKey) {
-            return array_merge(Arr::toArray($v), $vKey);
-        }, $values));
-        Msg::info('Replaced ' . $rows1 . ' relations with ' . $rows2 . ' relations.');
+        if (!empty($values)) {
+            $cols = array_merge(Arr::toArray($cols), array_keys($kv));
+            $vKey = array_values($kv);
+            $rows2 = Sys::db()->insertBatch($table, $cols, array_map(function ($v) use ($vKey) {
+                return array_merge(Arr::toArray($v), $vKey);
+            }, $values));
+            Msg::info('Replaced ' . $rows1 . ' records with ' . $rows2 . ' records in table \"' . $table . '\".');
+        } else {
+            Msg::info('Deleted ' . $rows1 . ' records in table \"' . $table . '\".');
+        }
     }
 
     public function actionAjaxUpdate($pre = null, $post = null, $trans = null)
@@ -194,7 +198,7 @@ class DbActions extends Actions
     public function actionAjaxPost($pre = null, $post = null, $trans = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $ctx = $pre ? $pre($data) : null;
+        $ctx = $pre ? $pre($data) : $data;
         list($rows, $id) = Sys::db()->insert($this->getTable(), $data, $trans);
         Msg::info('Succeeded to insert ' . $rows . ' records.');
         if ($post) {
@@ -205,7 +209,7 @@ class DbActions extends Actions
     public function actionAjaxDelete($pre = null, $post = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $ctx = $pre ? $pre($data) : null;
+        $ctx = $pre ? $pre($data) : $data;
         $rows = Sys::db()->delete($this->getTable(), $data);
         Msg::info('Succeeded to delete ' . $rows . ' records.');
         if ($post) {
