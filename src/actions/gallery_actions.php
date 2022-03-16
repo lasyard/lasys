@@ -27,9 +27,9 @@ final class GalleryActions extends Actions
         return PUB_PATH . DS . self::THUMB_DIR . self::relPath($file);
     }
 
-    public function default($confName)
+    protected function default($confName)
     {
-        return $this->conf($confName) ?? self::DEFAULT[$confName] ?? null;
+        return parent::default($confName) ?? self::DEFAULT[$confName] ?? null;
     }
 
     private function buildRibbon()
@@ -39,7 +39,8 @@ final class GalleryActions extends Actions
         if ($this->hasPrivOf(Server::POST)) {
             $btnUpload = Icon::UPLOAD;
             $formUpload = View::renderHtml('upload', [
-                'title' => Icon::EDIT . ' ' . $this->name,
+                'title' => Icon::EDIT . ' ' . ($this->default(FileActions::UPLOAD_TITLE) ?? $this->name),
+                'action' => $this->base . $this->name,
                 'accept' => $this->default(FileActions::ACCEPT),
                 'sizeLimit' => $this->default(FileActions::SIZE_LIMIT),
             ]);

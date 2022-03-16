@@ -90,7 +90,7 @@ final class App
             exit;
         }
         $content = $actionDo->content;
-        if (Server::isAjax($type) || $actionDo->rawOutput) {
+        if (Server::isAjax($type)) {
             echo $content;
             exit;
         }

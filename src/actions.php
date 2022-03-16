@@ -20,7 +20,6 @@ class Actions
 
     protected $_httpHeaders = [];
     protected $_title;
-    protected $_rawOutput = false;
 
     public static function __callStatic($method, $args)
     {
@@ -63,6 +62,11 @@ class Actions
         $this->_args = $args;
     }
 
+    protected function default($confName)
+    {
+        return $this->conf($confName) ?? Sys::app()->conf($confName);
+    }
+
     public function do($pathVars, $base, $path, $name)
     {
         $this->_pathVars = $pathVars;
@@ -71,7 +75,13 @@ class Actions
         $this->_name = $name;
         try {
             $this->_content = Common::getOutput([$this, $this->_method], $this->_args);
+            if (Sys::db()->inTransaction()) {
+                Sys::db()->commit();
+            }
         } catch (Exception $e) {
+            if (Sys::db()->inTransaction()) {
+                Sys::db()->rollBack();
+            }
             $this->doError($e->getMessage());
         }
     }

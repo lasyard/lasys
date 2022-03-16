@@ -6,7 +6,6 @@ class DbActions extends Actions
     public const SCRIPT = 'db:script';
     public const LABELS = 'db:labels';
     public const INSERT_FORM = 'db:insertForm';
-    public const RELS = 'db:rels';
 
     protected function getLabel($name)
     {
@@ -180,6 +179,7 @@ class DbActions extends Actions
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $ctx = $pre ? $pre($data['keys'], $data['data']) : null;
+        Sys::db()->beginTransaction();
         $rows = Sys::db()->update($this->getTable(), $data['keys'], $data['data'], $trans);
         Msg::info('Succeeded to update ' . $rows . ' records.');
         if ($post) {
@@ -199,6 +199,7 @@ class DbActions extends Actions
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $ctx = $pre ? $pre($data) : $data;
+        Sys::db()->beginTransaction();
         list($rows, $id) = Sys::db()->insert($this->getTable(), $data, $trans);
         Msg::info('Succeeded to insert ' . $rows . ' records.');
         if ($post) {
@@ -210,6 +211,7 @@ class DbActions extends Actions
     {
         $data = json_decode(file_get_contents('php://input'), true);
         $ctx = $pre ? $pre($data) : $data;
+        Sys::db()->beginTransaction();
         $rows = Sys::db()->delete($this->getTable(), $data);
         Msg::info('Succeeded to delete ' . $rows . ' records.');
         if ($post) {
@@ -231,6 +233,13 @@ class DbActions extends Actions
                 $c = &$d[$ci];
                 $c = $c != null ? array_map('intval', explode(',', $c)) : [];
             }
+        };
+    }
+
+    public static function getColFun($col)
+    {
+        return function ($d) use ($col) {
+            return $d[$col];
         };
     }
 }

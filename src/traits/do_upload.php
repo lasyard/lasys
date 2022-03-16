@@ -1,5 +1,5 @@
 <?php
-final class DoUpload extends Traits
+class DoUpload extends Traits
 {
     public function forSelf(&$conf, $oldConf)
     {
@@ -12,13 +12,6 @@ final class DoUpload extends Traits
             $upload[Server::POST] ??= FileActions::post()->priv(...$conf[Config::PRIV_POST]);
             $conf[Config::ETC][Server::UPDATE] ??= FileActions::update()->priv(...$conf[Config::PRIV_EDIT]);
             $conf[Config::ETC][Server::AJAX_DELETE] ??= FileActions::ajaxDelete()->priv(...$conf[Config::PRIV_EDIT]);
-            $conf[Config::LIST][FileActions::IMAGES_ITEM] = [
-                Config::TRAITS => [Traits::viewGallery()],
-                GalleryActions::THUMB_SIZE => -1,
-                GalleryActions::KEEP_NAME => true,
-                Config::BUTTON => Icon::IMAGES,
-                Config::PRIV_READ => $conf[Config::PRIV_POST],
-            ];
         }
     }
 

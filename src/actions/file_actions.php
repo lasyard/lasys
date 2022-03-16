@@ -17,9 +17,9 @@ final class FileActions extends Actions
     public const UPLOAD_ITEM = '_upload';
     public const IMAGES_ITEM = '_images';
 
-    public static function default($confName)
+    protected function default($confName)
     {
-        return Sys::app()->conf($confName) ?? self::DEFAULT[$confName] ?? null;
+        return parent::default($confName) ?? self::DEFAULT[$confName] ?? null;
     }
 
     private function getParser($name)
@@ -55,8 +55,8 @@ final class FileActions extends Actions
             $formUpdate = View::renderHtml('upload', [
                 'title' => Icon::EDIT . ' ' . $this->name,
                 'action' => '?' . Server::QUERY_UPDATE,
-                'accept' => self::default(self::ACCEPT),
-                'sizeLimit' => self::default(self::SIZE_LIMIT),
+                'accept' => $this->default(self::ACCEPT),
+                'sizeLimit' => $this->default(self::SIZE_LIMIT),
             ]);
         }
         $btnDelete = $this->hasPrivOf(Server::AJAX_DELETE) ? Icon::DELETE : null;
@@ -130,7 +130,7 @@ final class FileActions extends Actions
 
     public function actionPost()
     {
-        $name = File::upload($this->path, null, false, self::default(self::SIZE_LIMIT));
+        $name = File::upload($this->path, null, false, $this->default(self::SIZE_LIMIT));
         $user = Sys::user();
         $info = [
             'time' => $_SERVER['REQUEST_TIME'],
@@ -147,7 +147,7 @@ final class FileActions extends Actions
 
     public function actionPostRaw()
     {
-        File::upload($this->path . DS . $this->name, null, false, self::default(self::SIZE_LIMIT));
+        File::upload($this->path . DS . $this->name, null, false, $this->default(self::SIZE_LIMIT));
         Sys::app()->redirect($this->name);
     }
 
@@ -155,7 +155,7 @@ final class FileActions extends Actions
     {
         $name = $this->name;
         try {
-            File::upload($this->path, $name, true, self::default(self::SIZE_LIMIT));
+            File::upload($this->path, $name, true, $this->default(self::SIZE_LIMIT));
             $title = $this->getTitle($name);
         } catch (RuntimeException $e) {
             if ($e->getCode() === File::NO_FILE_SENT) {
@@ -179,10 +179,10 @@ final class FileActions extends Actions
     public function actionUploadForm()
     {
         View::render('upload', [
-            'title' => Icon::UPLOAD . ' ' . self::default(self::UPLOAD_TITLE),
-            'action' => $this->base . self::UPLOAD_ITEM,
-            'accept' => self::default(self::ACCEPT),
-            'sizeLimit' => self::default(self::SIZE_LIMIT),
+            'title' => Icon::UPLOAD . ' ' . $this->default(self::UPLOAD_TITLE),
+            'action' => $this->base . $this->name,
+            'accept' => $this->default(self::ACCEPT),
+            'sizeLimit' => $this->default(self::SIZE_LIMIT),
         ]);
     }
 
@@ -192,7 +192,7 @@ final class FileActions extends Actions
             'title' => Icon::IMAGES . ' Upload image',
             'action' => '',
             'accept' => '.jpg,.jpeg,.png,images/*',
-            'sizeLimit' => self::default(self::IMAGE_SIZE_LIMIT),
+            'sizeLimit' => $this->default(self::IMAGE_SIZE_LIMIT),
         ]);
     }
 }
