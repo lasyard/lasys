@@ -7,6 +7,7 @@ final class TextParser
     private const NOT_PUNC = '[^\x{FF0C}\x{3002}\x{FF1A}\x{FF01}\x{FF1F},.:!?;=<>_]';
     private const POEM_LINE_THRESHOLD = 40;
 
+    private $_applyDict = true;
     private $_title;
     private $_info;
 

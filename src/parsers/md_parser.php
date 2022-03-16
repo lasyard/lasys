@@ -7,6 +7,7 @@ final class MdParser
 
     private $_htmlParser;
 
+    private $_applyDict = true;
     private $_info;
 
     private function __construct($text)

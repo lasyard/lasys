@@ -6,6 +6,7 @@ final class FileActions extends Actions
     public const SIZE_LIMIT = 'file:sizeLimit';
     public const IMAGE_SIZE_LIMIT = 'file::imageSizeLimit';
     public const ACCEPT = 'file:accept';
+    public const DICT = 'file::dict';
 
     public const DEFAULT = [
         self::UPLOAD_TITLE => 'Upload',
@@ -37,6 +38,8 @@ final class FileActions extends Actions
             case 'png':
             case 'jpg':
                 return ImageParser::fileUrl($path . DS . $name, $base . $name);
+            case 'dict':
+                return DictParser::file($path . DS . $name);
             default:
                 throw new RuntimeException('Unsupported file type "' . $ext . '".');
         }
@@ -109,7 +112,29 @@ final class FileActions extends Actions
             }
             View::render('file_ribbon', $ribbon);
         }
-        echo $parser->content;
+        $content = $parser->content;
+        $dicts = $this->default(self::DICT);
+        if ($parser->applyDict ?? false && $dicts) {
+            Arr::makeArray($dicts);
+            $words = [];
+            foreach ($dicts as $dict) {
+                $dictFile = $this->path . DS . $dict . '.dict';
+                if (is_file($dictFile)) {
+                    $words += DictParser::file($this->path . DS . $dict . '.dict')->dict;
+                }
+            }
+            uksort($words, function ($a, $b) {
+                return strlen($b) <=> strlen(($a));
+            });
+            foreach ($words as $key => $value) {
+                $content = preg_replace(
+                    '/\s*\b' . preg_quote($key) . '\b\s*/',
+                    '<span style="color:magenta">' . $value . '</span>',
+                    $content
+                );
+            }
+        }
+        echo $content;
     }
 
     public function actionAjaxDelete()
