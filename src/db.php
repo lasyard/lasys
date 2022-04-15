@@ -204,9 +204,9 @@ final class Db extends PDO
         for ($i = 0; $i < $result->columnCount(); ++$i) {
             $meta = $result->getColumnMeta($i);
             $name = $meta['name'];
-            $fields[$name] = [];
             if ($excludes && in_array($name, $excludes)) {
-                $fields[$name]['skipped'] = true;
+                // skipped
+                $fields[$name] = false;
                 continue;
             }
             $fieldStrs[] = "`$name`";
@@ -219,27 +219,31 @@ final class Db extends PDO
                 case 'INT24':
                 case 'LONGLONG':
                 case 'TIMESTAMP':
-                    $quote = false;
+                    $fields[$name] = 'number';
+                    break;
+                case 'GEOMETRY':
+                    $fields[$name] = 'hex';
                     break;
                 default:
-                    $quote = true;
+                    $fields[$name] = 'string';
             }
-            $fields[$name]['quote'] = $quote;
         }
         $insertLine = "INSERT INTO `" . $table . "` (" . join(', ', $fieldStrs) . ") VALUES" . PHP_EOL;
-        $row = $result->fetch();
+        $row = $result->fetch(PDO::FETCH_ASSOC);
         while ($row) {
             fwrite($fh, $insertLine);
             for ($count = 0;;) {
                 $v = [];
                 foreach ($row as $key => $value) {
-                    if (isset($fields[$key]['skipped']) && $fields[$key]['skipped']) {
+                    if (!$fields[$key]) {
                         continue;
                     }
                     if (!isset($value)) {
                         $v[] = 'NULL';
-                    } elseif ($fields[$key]['quote']) {
+                    } elseif ($fields[$key] === 'string') {
                         $v[] = $this->quote($value);
+                    } elseif ($fields[$key] === 'hex') {
+                        $v[] = '0x' . bin2hex($value);
                     } else {
                         $v[] = $value;
                     }
