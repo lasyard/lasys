@@ -88,9 +88,11 @@ class DbActions extends Actions
                 'purpose' => 'insert',
             ]);
         }
+        /* Time consuming operation in some env. Remove it.
         $time = Sys::db()->getLastModTime($this->getTable());
         $msg = Icon::TIME . '<em>' . Str::timeStr($time) . '</em>';
-        return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
+        */
+        return ['msg' => '', 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
     private function addScript($script)
