@@ -92,7 +92,8 @@ class DbActions extends Actions
         $time = Sys::db()->getLastModTime($this->getTable());
         $msg = Icon::TIME . '<em>' . Str::timeStr($time) . '</em>';
         */
-        return ['msg' => '', 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
+        $msg = $this->default('title') ?? '&nbsp;';
+        return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
     private function addScript($script)
