@@ -1,5 +1,8 @@
 # lasys
 
+[![PHP Composer](https://github.com/lasyard/lasys/actions/workflows/php.yml/badge.svg)](https://github.com/lasyard/lasys/actions/workflows/php.yml)
+[![NodeJS with Webpack](https://github.com/lasyard/lasys/actions/workflows/webpack.yml/badge.svg)](https://github.com/lasyard/lasys/actions/workflows/webpack.yml)
+
 `Lasys` is a simple PHP framework.
 
 ## Usage
