@@ -58,6 +58,7 @@ final class GalleryActions extends Actions
 
     public function actionGet()
     {
+        $this->configScriptsAndStyles();
         Sys::app()->addScript('js' . DS . 'gallery');
         $ribbon = $this->buildRibbon();
         View::render('gallery_ribbon', $ribbon);

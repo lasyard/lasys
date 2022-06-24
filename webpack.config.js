@@ -32,6 +32,10 @@ module.exports = {
             import: SRC_DIR + 'ts/gallery.ts',
             dependOn: 'js/main.js',
         },
+        'js/katex-on.js': {
+            import: SRC_DIR + 'ts/katex-on.ts',
+            dependOn: 'js/main.js',
+        },
         // MiniCssExtractPlugin will add `.css`.
         'css/main': SRC_DIR + 'scss/index.scss',
     },
@@ -64,13 +68,25 @@ module.exports = {
         new CopyPlugin({
             patterns: [{
                 from: 'node_modules/bootstrap-icons/font/bootstrap-icons.css',
-                to: 'lib/'
+                to: 'lib/',
             }, {
-                from: 'node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2',
-                to: 'lib/fonts/'
+                from: 'node_modules/bootstrap-icons/font/fonts/*.woff2',
+                to: 'lib/fonts/[name][ext]',
             }, {
-                from: 'node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff',
-                to: 'lib/fonts/'
+                from: 'node_modules/bootstrap-icons/font/fonts/*.woff',
+                to: 'lib/fonts/[name][ext]',
+            }, {
+                from: 'node_modules/katex/dist/katex.min.css',
+                to: 'lib/',
+            }, {
+                from: 'node_modules/katex/dist/fonts/*.woff2',
+                to: 'lib/fonts/[name][ext]',
+            }, {
+                from: 'node_modules/katex/dist/fonts/*.woff',
+                to: 'lib/fonts/[name][ext]',
+            }, {
+                from: 'node_modules/katex/dist/fonts/*.ttf',
+                to: 'lib/fonts/[name][ext]',
             }],
         }),
     ],
