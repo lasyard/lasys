@@ -62,11 +62,6 @@ class Actions
         $this->_args = $args;
     }
 
-    protected function default($confName)
-    {
-        return $this->conf($confName) ?? Sys::app()->conf($confName);
-    }
-
     public function do($pathVars, $base, $path, $name)
     {
         $this->_pathVars = $pathVars;
@@ -119,9 +114,42 @@ class Actions
         return Sys::app()->hasPrivOf($this->_name, $type, $uid);
     }
 
+    protected function default($confName)
+    {
+        return $this->conf($confName) ?? Sys::app()->conf($confName);
+    }
+
     protected function conf($name)
     {
         $list = Sys::app()->conf(Config::LIST);
-        return $list[$this->_name][$name] ?? null;
+        if ($list) {
+            $confs = array_key_exists($this->_name, $list) ? $list[$this->_name] : Sys::app()->conf(Config::ETC);
+            return $confs[$name] ?? null;
+        }
+        return null;
+    }
+
+    protected function addScripts($scripts)
+    {
+        if (!empty($scripts)) {
+            Arr::forOneOrMany($scripts, function ($s) {
+                Sys::app()->addScript($s);
+            });
+        }
+    }
+
+    protected function addStyles($styles)
+    {
+        if (!empty($styles)) {
+            Arr::forOneOrMany($styles, function ($s) {
+                Sys::app()->addStyle($s);
+            });
+        }
+    }
+
+    protected function configScriptsAndStyles()
+    {
+        $this->addScripts($this->conf(Config::SCRIPTS));
+        $this->addStyles($this->conf(Config::STYLES));
     }
 }

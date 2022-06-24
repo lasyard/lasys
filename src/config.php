@@ -14,6 +14,8 @@ final class Config
     public const PRIV_EDIT = 'privEdit';
     public const PRIV_POST = 'privPost';
     public const IS_DIR = 'isDir';
+    public const SCRIPTS = 'scripts';
+    public const STYLES = 'styles';
 
     // item config
     public const TITLE = 'title';

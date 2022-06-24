@@ -3,7 +3,6 @@ class DbActions extends Actions
 {
     // configs
     public const TABLE = 'db:table';
-    public const SCRIPT = 'db:script';
     public const LABELS = 'db:labels';
     public const INSERT_FORM = 'db:insertForm';
 
@@ -96,20 +95,10 @@ class DbActions extends Actions
         return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
-    private function addScript($script)
-    {
-        if (!empty($script)) {
-            Arr::forOneOrMany($script, function ($s) {
-                Sys::app()->addScript($s);
-            });
-        }
-    }
-
     public function actionGet($fields = null, $pre = null)
     {
         $fields ??= $this->buildFields();
-        $this->addScript(Sys::app()->conf(self::SCRIPT));
-        $this->addScript($this->conf(self::SCRIPT));
+        $this->configScriptsAndStyles();
         Sys::app()->addScript('js' . DS . 'db');
         Sys::app()->addData('_TABLE_FIELDS', array_map(function ($v) {
             return [

@@ -80,6 +80,7 @@ final class FileActions extends Actions
 
     public function actionGet()
     {
+        $this->configScriptsAndStyles();
         Sys::app()->addScript('js' . DS . 'file');
         $name = $this->name;
         $file = $this->path . DS . $name;
