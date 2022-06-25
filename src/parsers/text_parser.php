@@ -128,13 +128,34 @@ final class TextParser
         $html = '<div class="text">' . PHP_EOL;
         $html .= '<h1>' . $this->_title . '</h1>' . PHP_EOL;
         $cLines = [];
+        $katex = 0;
         foreach ($lines as $line) {
             $line = trim($line);
-            if (empty($line)) {
-                $html .= self::packLines($cLines);
-                $cLines = [];
-            } else {
+            if (str_starts_with($line, '\begin{')) { // KaTeX starts
+                ++$katex;
+                if ($katex === 1) {
+                    $html .= self::packLines($cLines);
+                    $cLines = [];
+                    $html .= '<p>' . $line . PHP_EOL;
+                    continue;
+                }
+            } else if (str_starts_with($line, '\end{')) { // KaTeX ends
+                --$katex;
+                if ($katex === 0) {
+                    $html .= $line . '</p>' . PHP_EOL;
+                    continue;
+                }
+            } else if (empty($line)) {
+                if ($katex === 0) {
+                    $html .= self::packLines($cLines);
+                    $cLines = [];
+                    continue;
+                }
+            }
+            if ($katex === 0) {
                 $cLines[] = Str::filterLinks(htmlspecialchars(Str::filterEmoji($line)));
+            } else {
+                $html .= $line . PHP_EOL;
             }
         }
         $html .= self::packLines(($cLines));

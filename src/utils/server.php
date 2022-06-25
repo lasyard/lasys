@@ -41,13 +41,13 @@ final class Server
         if (substr($prefix, -1) != '/') {
             $prefix .= '/';
         }
-        if (strpos($path, $prefix) === 0) {
+        if (str_starts_with($path, $prefix)) {
             $path = substr_replace($path, '', 0, strlen($prefix));
             $home .= $prefix;
         }
         $type = self::requestType();
         if ($type == self::GET_RAW) {
-            if (strpos($_SERVER['HTTP_REFERER'], $home) === 0) {
+            if (str_starts_with($_SERVER['HTTP_REFERER'], $home)) {
                 self::rawFile(DATA_PATH . DS . $path);
             }
             exit;
@@ -122,7 +122,7 @@ final class Server
     public static function rawUrl($url)
     {
         // ! absolute, protocol, inline, javascript
-        if (strpos($url, ':') === false and !preg_match('/^\//', $url)) {
+        if (!str_contains($url, ':') and !preg_match('/^\//', $url)) {
             return $url . '?' . self::QUERY_GET_RAW;
         }
         return $url;

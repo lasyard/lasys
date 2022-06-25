@@ -1,4 +1,18 @@
 <?php
+// For PHP version < 8
+if (!function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle)
+    {
+        return strpos($haystack, $needle) === 0;
+    }
+}
+if (!function_exists('str_contains')) {
+    function str_contains($haystack, $needle)
+    {
+        return strpos($haystack, $needle) !== false;
+    }
+}
+
 define('DS', DIRECTORY_SEPARATOR);
 if (!defined('SITE')) {
     define('SITE', 'unknown');

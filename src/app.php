@@ -268,7 +268,7 @@ final class App
 
     public function redirect($name)
     {
-        $url = (strpos($name, '//') === false) ? $this->_base . $name : $name;
+        $url = (!str_contains($name, '//')) ? $this->_base . $name : $name;
         header('Location: ' . $url);
         exit;
     }
