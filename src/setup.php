@@ -12,6 +12,16 @@ if (!function_exists('str_contains')) {
         return strpos($haystack, $needle) !== false;
     }
 }
+if (!function_exists('str_ends_with')) {
+    function str_ends_with($haystack, $needle)
+    {
+        if ('' === $haystack && '' !== $needle) {
+            return false;
+        }
+        $len = strlen($needle);
+        return 0 === substr_compare($haystack, $needle, -$len, $len);
+    }
+}
 
 define('DS', DIRECTORY_SEPARATOR);
 if (!defined('SITE')) {

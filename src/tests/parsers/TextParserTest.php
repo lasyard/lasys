@@ -109,4 +109,36 @@ final class TextParserTest extends TestCase
             $textParser->content
         );
     }
+
+    public function testKatex()
+    {
+        $text = join(PHP_EOL, [
+            'TestPre',
+            '',
+            'haha',
+            '$$ x = 2 $$',
+            'hehe',
+            '$$',
+            '1. abcd',
+            '2. efgh',
+            '$$',
+        ]);
+        $textParser = TextParser::str($text);
+        $this->assertSame('TestPre', $textParser->title);
+        $this->assertSame(
+            join(PHP_EOL, [
+                '<div class="text">',
+                '<h1>TestPre</h1>',
+                '<p>haha</p>',
+                '$$ x = 2 $$',
+                '<p>hehe</p>',
+                '$$',
+                '1. abcd',
+                '2. efgh',
+                '$$',
+                '</div>',
+            ]),
+            $textParser->content
+        );
+    }
 }
