@@ -1,38 +1,49 @@
 div#main {
     div.gallery {
-
-        div.image,
-        a.thumb {
-            @extend .border;
-            position: relative;
-            display: inline-block;
-            vertical-align: bottom;
-            margin: 3px;
-            padding: 8px;
+        p.image-ctrl {
+            color: $bgColor3;
+            font-size: 1.5em;
+            letter-spacing: 0.3em;
             text-align: center;
-
-            div.buttons {
-                position: absolute;
-                right: 0;
-                top: 0;
-            }
-
-            >div {
-                display: inline-block;
-                line-height: normal;
-                vertical-align: middle;
-            }
-
-            span.title {
-                font-family: $headerFont;
-                font-size: 0.8em;
-            }
+            line-height: 1;
+            margin-bottom: 0;
         }
 
-        a.thumb {
-            width: 200px;
-            height: 200px;
-            line-height: 200px;
+        div.thumbs {
+
+            div.image,
+            a.thumb {
+                @extend .border;
+                position: relative;
+                display: inline-block;
+                vertical-align: bottom;
+                margin: 3px;
+                padding: 8px;
+                text-align: center;
+
+                div.buttons {
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                }
+
+                >div {
+                    display: inline-block;
+                    line-height: normal;
+                    vertical-align: middle;
+                }
+
+                span.title {
+                    font-family: $headerFont;
+                    font-size: 0.8em;
+                }
+            }
+
+            a.thumb {
+                width: 200px;
+                height: 200px;
+                line-height: 200px;
+            }
         }
     }
 }

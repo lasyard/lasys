@@ -86,7 +86,7 @@ export abstract class Filter {
 
 export class RadioFilter extends Filter {
     protected createChecks(values: { [index: string]: number; }, keys: string[]): Tag<HTMLElement>[] {
-        const checks = [];
+        const checks: Array<Tag<HTMLElement>> = [];
         checks.push(this.checkbox(
             this.itemName,
             'radio',
@@ -101,7 +101,7 @@ export class RadioFilter extends Filter {
     }
 
     protected testFunc() {
-        const items = document.forms.namedItem(this.formName).elements.namedItem(this.itemName);
+        const items = document.forms.namedItem(this.formName)?.elements.namedItem(this.itemName);
         if (items instanceof RadioNodeList) {
             // RadioNodeList support 'value' for radio buttons.
             return (d: any[]) => items.value == 'All' || items.value == d[this.index];
@@ -116,7 +116,7 @@ export class CheckFilter extends Filter {
     }
 
     testFunc() {
-        const items = document.forms.namedItem(this.formName).elements.namedItem(this.itemName);
+        const items = document.forms.namedItem(this.formName)?.elements.namedItem(this.itemName);
         if (items instanceof RadioNodeList) {
             return (data: any[]) => {
                 for (let i = 0; i < items.length; ++i) {
@@ -152,7 +152,7 @@ export class MultiCheckFilter extends Filter {
     }
 
     testFunc() {
-        const items = document.forms.namedItem(this.formName).elements.namedItem(this.itemName);
+        const items = document.forms.namedItem(this.formName)?.elements.namedItem(this.itemName);
         if (items instanceof RadioNodeList) {
             return (data: any[]) => {
                 for (let i = 0; i < items.length; ++i) {

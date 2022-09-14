@@ -8,3 +8,13 @@ div#main {
         }
     }
 }
+
+@media screen and (max-width: 54rem) {
+    div#main {
+        div.image {
+            img {
+                max-width: 100%;
+            }
+        }
+    }
+}

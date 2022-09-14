@@ -9,7 +9,7 @@ export class Blink {
     private nodes: HTMLElement[];
     private blinkTimes: number;
     private callback: BlinkCallback;
-    private timer: number;
+    private timer: number | null;
 
     public constructor(time = 200, times = 6, color = '#F00') {
         this.time = time;

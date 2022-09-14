@@ -29,8 +29,9 @@ export class Gallery {
     private imageSet: ImageSet;
     private divThumbs: Tag<HTMLDivElement>;
     private divImage: Tag<HTMLDivElement>;
-    private msg: Tag<HTMLElement>;
-    private popupMsg: Tag<HTMLElement>;
+    private divImageBox: Tag<HTMLDivElement>;
+    private msg: Tag<HTMLElement> | null;
+    private popupMsg: Tag<HTMLElement> | null;
     private current = -1;
     private readonly keyDownHandler = this.handleKeyDown.bind(this);
 
@@ -39,15 +40,11 @@ export class Gallery {
     }
 
     private showMsg(msg: string) {
-        if (this.msg) {
-            this.msg.html(msg);
-        }
+        this.msg?.html(msg);
     }
 
     private showPopupMsg(msg: string) {
-        if (this.popupMsg) {
-            this.popupMsg.html(msg).show();
-        }
+        this.popupMsg?.html(msg).show();
     }
 
     private ajaxResponse(r: any) {
@@ -58,12 +55,29 @@ export class Gallery {
     render(panelId: string) {
         const panel = Tag.byId(panelId);
         if (!panel) {
-            return;
+            return this;
         }
         this.msg = Tag.byId('-msg');
-        this.popupMsg = Tag.byId('-popup-msg').outClickHide();
-        this.divThumbs = Tag.div().cls('gallery').putInto(panel);
-        this.divImage = Tag.div().hide().putInto(panel);
+        this.popupMsg = Tag.byId('-popup-msg');
+        this.popupMsg?.outClickHide();
+        const div = Tag.div().cls('gallery').putInto(panel);
+        this.divThumbs = Tag.div().cls('thumbs').putInto(div);
+        this.divImage = Tag.div().hide().putInto(div);
+        Tag.p(
+            Tag.icon('escape').event('click', (e) => {
+                e.stopPropagation();
+                this.closeImage();
+            }),
+            Tag.icon('arrow-left-circle').event('click', (e) => {
+                e.stopPropagation();
+                this.showImageOnLeft();
+            }),
+            Tag.icon('arrow-right-circle').event('click', (e) => {
+                e.stopPropagation();
+                this.showImageOnRight();
+            })
+        ).cls('image-ctrl').putInto(this.divImage);
+        this.divImageBox = Tag.div().cls('image').putInto(this.divImage);
         const btnUpload = Tag.byId('-btn-upload');
         const divForm = Tag.byId('-div-form-upload');
         if (btnUpload && divForm) {
@@ -152,16 +166,10 @@ export class Gallery {
                 this.closeImage();
                 break;
             case 'ArrowLeft':
-                if (this.current > 0) {
-                    --this.current;
-                    this.refreshImage();
-                }
+                this.showImageOnLeft();
                 break;
             case 'ArrowRight':
-                if (this.current < this.imageSet.list.length - 1) {
-                    ++this.current;
-                    this.refreshImage();
-                }
+                this.showImageOnRight();
                 break;
         }
     }
@@ -184,12 +192,26 @@ export class Gallery {
         ).getHtml());
     }
 
+    private showImageOnLeft() {
+        if (this.current > 0) {
+            --this.current;
+            this.refreshImage();
+        }
+    }
+
+    private showImageOnRight() {
+        if (this.current < this.imageSet.list.length - 1) {
+            ++this.current;
+            this.refreshImage();
+        }
+    }
+
     private refreshImage() {
         const imageSet = this.imageSet;
         const image = imageSet.list[this.current];
-        Tag.div(
-            Tag.of('img').attr({ src: imageSet.image.prefix + image.name + imageSet.image.suffix })
-        ).cls('image').putInto(this.divImage.clear());
+        Tag.of('img').attr({
+            src: imageSet.image.prefix + image.name + imageSet.image.suffix
+        }).putInto(this.divImageBox.clear());
         this.showMsg(Tag.span(
             Tag.icon('info-circle'), Gallery.title(image), ' ',
             Tag.icon('clock'), timeStr(image.time), ' ',

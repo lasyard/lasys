@@ -16,7 +16,7 @@ onLoad(() => {
             if (r) {
                 Ajax.delete(
                     (r) => {
-                        Tag.byId('main').html(r);
+                        Tag.byId('main')?.html(r);
                     },
                     null,
                     '',

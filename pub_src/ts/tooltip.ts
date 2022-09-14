@@ -12,14 +12,14 @@ type TooltipInfoCallback = () => TooltipInfo;
 export type TooltipContent = TooltipInfo | TooltipInfoCallback;
 
 export class Tooltip {
-    private static tooltip: Tooltip = null;
+    private static tooltip: Tooltip;
 
     private divTooltip: Tag<HTMLDivElement>;
     private spanTitle: Tag<HTMLSpanElement>;
     private divBody: Tag<HTMLDivElement>;
     private showTimer: number = 0;
     private hideTimer: number = 0;
-    private owner: Tag<HTMLElement> = null;
+    private owner: Tag<HTMLElement> | null = null;
 
     private constructor() {
         this.spanTitle = Tag.of('span');

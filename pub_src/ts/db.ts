@@ -51,10 +51,10 @@ declare const _TABLE_CAN_DELETE: boolean;
 export class DbTable {
     private dataSet: DataSet;
     private conf: DbTableConfig;
-    private divFilters: Tag<HTMLDivElement> = null;
-    private divData: Tag<HTMLDivElement> = null;
-    private formUpdate: Tag<HTMLFormElement> = null;
-    private popupMsg: Tag<HTMLElement> = null;
+    private divFilters: Tag<HTMLDivElement> | null = null;
+    private divData: Tag<HTMLDivElement>;
+    private formUpdate: Tag<HTMLFormElement> | null = null;
+    private popupMsg: Tag<HTMLElement> | null = null;
 
     constructor(conf: DbTableConfig) {
         this.conf = conf;
@@ -65,8 +65,10 @@ export class DbTable {
         if (this.divFilters) {
             const div = this.divFilters;
             div.clear();
-            for (const filter of this.conf.filters) {
-                div.add(filter.render(dataSet.data, dataSet.columns, this.refresh.bind(this)));
+            if (this.conf.filters) {
+                for (const filter of this.conf.filters) {
+                    div.add(filter.render(dataSet.data, dataSet.columns, this.refresh.bind(this)));
+                }
             }
         }
         if (!this.conf.cols) {
@@ -162,9 +164,10 @@ export class DbTable {
     render(panelId: string) {
         const panel = Tag.byId(panelId);
         if (!panel) {
-            return;
+            return this;
         }
-        this.popupMsg = Tag.byId('-popup-msg').outClickHide();
+        this.popupMsg = Tag.byId('-popup-msg');
+        this.popupMsg?.outClickHide();
         if (this.conf.filters) {
             this.divFilters = Tag.div().putInto(panel);
         }
@@ -184,12 +187,12 @@ export class DbTable {
                 Ajax.post(
                     (r) => {
                         DbTable.clearFormData(form);
-                        divForm.hide();
+                        divForm?.hide();
                         this.showMsg(r);
                         this.loadData();
                     },
                     JSON.stringify(data),
-                    action,
+                    action ? action : '',
                     MimeType.JSON,
                     MimeType.HTML
                 );
@@ -207,25 +210,22 @@ export class DbTable {
             // Do not use `form.action`, which may overrided by an input named `action`.
             const action = form.getAttribute('action');
             // Do this before updateForm vanished.
-            const btn = Tag.byId('-span-insert-new').find('a');
-            if (btn) {
-                btn.event('click', (e) => {
-                    const data = DbTable.retrieveFormData(form);
-                    for (const f in _TABLE_FIELDS) {
-                        if (_TABLE_FIELDS[f].auto) {
-                            delete data[f];
-                        }
+            Tag.byId('-span-insert-new')?.find('a')?.event('click', (e) => {
+                const data = DbTable.retrieveFormData(form);
+                for (const f in _TABLE_FIELDS) {
+                    if (_TABLE_FIELDS[f].auto) {
+                        delete data[f];
                     }
-                    Ajax.post(
-                        callback,
-                        JSON.stringify(data),
-                        action,
-                        MimeType.JSON,
-                        MimeType.HTML
-                    );
-                    e.preventDefault();
-                });
-            }
+                }
+                Ajax.post(
+                    callback,
+                    JSON.stringify(data),
+                    action ? action : '',
+                    MimeType.JSON,
+                    MimeType.HTML
+                );
+                e.preventDefault();
+            });
             formUpdate.vanish().show().event('submit', (e) => {
                 const data = DbTable.retrieveFormData(form);
                 const keys: { [index: string]: any } = {};
@@ -238,7 +238,7 @@ export class DbTable {
                 Ajax.update(
                     callback,
                     JSON.stringify({ keys: keys, data: data }),
-                    action,
+                    action ? action : '',
                     MimeType.JSON,
                     MimeType.HTML
                 );
@@ -249,7 +249,7 @@ export class DbTable {
         return this;
     }
 
-    private static addContent(t: Tag<HTMLElement>, data: any[], fun: string | ContentFun, ci: ColumnIndices) {
+    private static addContent(t: Tag<HTMLElement>, data: any[], fun: string | ContentFun | undefined, ci: ColumnIndices) {
         let c: any;
         if (typeof fun === 'string') {
             c = data[ci[fun]];
@@ -334,7 +334,7 @@ export class DbTable {
             }
             const keys = Object.keys(grouped);
             if (group.sort) {
-                keys.sort(conf.group.sort);
+                keys.sort(group.sort);
             }
             if (group.nav) {
                 Tag.of('form').add(Tag.fieldset(group.nav).cls('links').add(
@@ -363,64 +363,68 @@ export class DbTable {
         const dataSet = this.dataSet;
         const ci = dataSet.columns;
         if (conf.sort) {
-            data.sort((a, b) => conf.sort((col) => a[ci[col]], (col) => b[ci[col]]));
+            const sort = conf.sort;
+            data.sort((a, b) => sort((col) => a[ci[col]], (col) => b[ci[col]]));
         }
-        let colCount = 0;
-        let alt = false;
-        let tr = null;
         const cols = this.conf.cols;
-        for (const dt of data) {
-            if (colCount == 0) {
-                tr = Tag.of('tr').cls(alt ? 'alt' : 'def');
-                alt = !alt;
-            }
-            for (const col of cols) {
-                const td = Tag.of('td');
-                DbTable.addContent(td, dt, typeof col === 'string' ? col : col.td, ci);
-                tr.add(td);
-            }
-            if (this.formUpdate) {
-                Tag.of('td').add(Tag.a(Tag.icon('pencil-square')).toolTip(() => {
-                    const d = dt;
-                    DbTable.setFormData(this.formUpdate.get(), (k) => d[ci[k]]);
-                    return {
-                        body: this.formUpdate,
-                        width: '70%',
-                    }
-                })).putInto(tr);
-            }
-            if (_TABLE_CAN_DELETE) {
-                Tag.of('td').add(Tag.a(Tag.icon('x-square')).event('click', () => {
-                    const r = confirm('Are you sure to delete item [' + dt + ']?');
-                    if (r) {
-                        const data: { [index: string]: any } = {};
-                        for (const f in _TABLE_FIELDS) {
-                            if (_TABLE_FIELDS[f].primary) {
-                                data[f] = dt[ci[f]];
-                            }
+        if (cols) {
+            let colCount = 0;
+            let alt = false;
+            let tr: Tag<HTMLElement> | null = null;
+            for (const dt of data) {
+                if (!tr) {
+                    tr = Tag.of('tr').cls(alt ? 'alt' : 'def');
+                    alt = !alt;
+                }
+                for (const col of cols) {
+                    const td = Tag.of('td');
+                    DbTable.addContent(td, dt, typeof col === 'string' ? col : col.td, ci);
+                    tr.add(td);
+                }
+                const formUpdate = this.formUpdate;
+                if (formUpdate) {
+                    Tag.of('td').add(Tag.a(Tag.icon('pencil-square')).toolTip(() => {
+                        const d = dt;
+                        DbTable.setFormData(formUpdate.get(), (k) => d[ci[k]]);
+                        return {
+                            body: formUpdate,
+                            width: '70%',
                         }
-                        Ajax.delete(
-                            (r) => {
-                                this.showMsg(r);
-                                this.loadData();
-                            },
-                            JSON.stringify(data),
-                            '',
-                            MimeType.JSON,
-                            MimeType.HTML
-                        );
-                    }
-                })).putInto(tr);
+                    })).putInto(tr);
+                }
+                if (_TABLE_CAN_DELETE) {
+                    Tag.of('td').add(Tag.a(Tag.icon('x-square')).event('click', () => {
+                        const r = confirm('Are you sure to delete item [' + dt + ']?');
+                        if (r) {
+                            const data: { [index: string]: any } = {};
+                            for (const f in _TABLE_FIELDS) {
+                                if (_TABLE_FIELDS[f].primary) {
+                                    data[f] = dt[ci[f]];
+                                }
+                            }
+                            Ajax.delete(
+                                (r) => {
+                                    this.showMsg(r);
+                                    this.loadData();
+                                },
+                                JSON.stringify(data),
+                                '',
+                                MimeType.JSON,
+                                MimeType.HTML
+                            );
+                        }
+                    })).putInto(tr);
+                }
+                colCount++;
+                if (colCount == columns) {
+                    tr.putInto(table);
+                    tr = null;
+                    colCount = 0;
+                }
             }
-            colCount++;
-            if (colCount == columns) {
+            if (tr) {
                 tr.putInto(table);
-                tr = null;
-                colCount = 0;
             }
-        }
-        if (tr) {
-            tr.putInto(table);
         }
     }
 
@@ -428,13 +432,11 @@ export class DbTable {
         Ajax.get((r, t) => {
             if (t === MimeType.JSON) {
                 const dataSet = JSON.parse(r);
-                if (this.conf.pre) {
-                    this.conf.pre(dataSet);
-                }
+                this.conf.pre?.(dataSet);
                 this.data(dataSet).refresh();
             } else {
                 this.divData.clear();
-                this.popupMsg.html(r).show();
+                this.popupMsg?.html(r).show();
             }
         });
     }

@@ -201,7 +201,7 @@ export class Tag<T extends HTMLElement> {
     }
 
     public vanish() {
-        this.element.parentNode.removeChild(this.element);
+        this.element.parentNode?.removeChild(this.element);
         return this;
     }
 }

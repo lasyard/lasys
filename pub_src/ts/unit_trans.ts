@@ -62,7 +62,7 @@ export class UnitTrans {
         const seriesCoef = UnitTrans.getCoef(UnitTrans.timeSeries);
         let d = 0;
         const reg = /(\d+)\s*([dhms])/g;
-        let matches: RegExpExecArray;
+        let matches: RegExpExecArray | null;
         while ((matches = reg.exec(str)) != null) {
             d += parseInt(matches[1]) * seriesCoef[matches[2]];
         }
@@ -73,7 +73,7 @@ export class UnitTrans {
         const seriesCoef = UnitTrans.getCoef(UnitTrans.sizeSeries);
         let d = 0;
         const reg = /(\d+(?:\.\d+)?)\s*([kMGTP]?)/;
-        let matches: RegExpExecArray;
+        let matches: RegExpExecArray | null;
         if ((matches = reg.exec(str)) != null) {
             d += parseFloat(matches[1]) * seriesCoef[matches[2]];
         }
