@@ -15,7 +15,7 @@
 </div>
 <div id="list">
     <?php if (!empty($buttons)) { ?>
-        <div class="ribbon">
+        <div class="buttons">
             <?php
             foreach ($buttons as $btn) {
                 echo $btn, ' ';

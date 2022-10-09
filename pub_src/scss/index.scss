@@ -32,8 +32,8 @@ $hotColor: #F55;
 $lineColor: #AAA;
 
 $normalFont: serif;
-$headerFont: sans sans-serif;
-$titleFont: fantasy;
+$headerFont: sans-serif;
+$titleFont: auto;
 $letterSpacing: 0.1em;
 
 $barHeight: 31px;
@@ -71,6 +71,18 @@ body {
 
 .center {
     text-align: center;
+}
+
+.badge {
+    border: 1px solid $lineColor;
+    border-radius: 5px;
+    font-family: $titleFont;
+    font-size: 0.8em;
+    color: $highColor;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .centered {
