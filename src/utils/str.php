@@ -55,4 +55,28 @@ final class Str
     {
         return date('Y.m.d H:i:s', $timestamp);
     }
+
+    public static function fileInfo($info)
+    {
+        $msg = '';
+        if (isset($info['time'])) {
+            $msg .= Icon::TIME . '<em>' . Str::timeStr($info['time']) . '</em> ';
+        }
+        if (isset($info['uname'])) {
+            $msg .= Icon::USER . $info['uname'];
+        }
+        return $msg;
+    }
+
+    public static function fileInfoText($info)
+    {
+        $msg = '';
+        if (isset($info['uname'])) {
+            $msg .= $info['uname'];
+        }
+        if (isset($info['time'])) {
+            $msg .= ' @ ' . Str::timeStr($info['time']);
+        }
+        return $msg;
+    }
 }

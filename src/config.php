@@ -19,6 +19,7 @@ final class Config
 
     // item config
     public const TITLE = 'title';
+    public const DESC = 'desc';
     public const BUTTON = 'button';
     public const HIDDEN = 'hidden';
 

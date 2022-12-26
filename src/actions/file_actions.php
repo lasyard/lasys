@@ -63,15 +63,8 @@ final class FileActions extends Actions
             ]);
         }
         $btnDelete = $this->hasPrivOf(Server::AJAX_DELETE) ? Icon::DELETE : null;
-        $msg = '';
-        if (isset($info['time'])) {
-            $msg .= Icon::TIME . '<em>' . Str::timeStr($info['time']) . '</em> ';
-        }
-        if (isset($info['uname'])) {
-            $msg .= Icon::USER . $info['uname'];
-        }
         return [
-            'msg' => $msg,
+            'msg' => Str::fileInfo($info),
             'btnUpdate' => $btnUpdate,
             'btnDelete' => $btnDelete,
             'formUpdate' => $formUpdate,

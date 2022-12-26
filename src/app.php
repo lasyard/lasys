@@ -132,14 +132,19 @@ final class App
 
     private function makeItem($name, $info)
     {
+        $isDir = $info['isDir'];
         $title = $info[Config::TITLE] ?? Str::captalize(pathinfo($name, PATHINFO_FILENAME));
+        $desc = $info[Config::DESC] ?? null;
+        if (!$isDir) {
+            $desc ??= Str::fileInfoText($info);
+        }
         $li = ($name === $this->_name) ? '<li class="highlighted">' : '<li>';
-        $li .= Html::link($title, $this->_base . $name . ($info['isDir'] ? '/' : ''));
-        $li .= $info['isDir'] ? Icon::FOLDER : '';
+        $li .= Html::link($title, $this->_base . $name . ($isDir ? '/' : ''), $desc);
+        $li .= $isDir ? Icon::FOLDER : '';
         $li .= '</li>';
         return [
             'title' => $title,
-            'time' => $info['time'] ?? 0,
+            'time' =>  $info['time'] ?? 0,
             'li' => $li,
         ];
     }
