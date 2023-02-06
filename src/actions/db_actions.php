@@ -95,10 +95,13 @@ class DbActions extends Actions
         return ['msg' => $msg, 'btnInsert' => $btnInsert, 'formInsert' => $formInsert];
     }
 
-    public function actionGet($fields = null, $pre = null)
+    public function actionGet($alterFields = null, $pre = null)
     {
-        $fields ??= $this->buildFields();
         $this->configScriptsAndStyles();
+        $fields = $this->buildFields();
+        if ($alterFields) {
+            $alterFields($fields);
+        }
         Sys::app()->addScript('js' . DS . 'db');
         Sys::app()->addData('_TABLE_FIELDS', array_map(function ($v) {
             return [
