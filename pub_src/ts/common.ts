@@ -38,7 +38,8 @@ export function timeStr(time: string | number) {
 export function html(str: string) {
     return str
         .replace(/[<>&]/gm, (s: String) => "&#" + s.charCodeAt(0) + ";")
-        .replace(/\r\n/gm, '<br />');
+        .replace(/\r\n/gm, '<br />')
+        .replace(/\n/gm, '<br />');
 }
 
 export function textBuilder() {
