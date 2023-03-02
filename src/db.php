@@ -10,17 +10,38 @@ final class Db extends PDO
         ]);
     }
 
-    public function run($sql, ...$paras)
+    private static function bindParas($st, $paras)
+    {
+        for ($i = 1; $i <= sizeof($paras); ++$i) {
+            $p = $paras[$i - 1];
+            if (is_int($p)) {
+                $st->bindValue($i, $p, PDO::PARAM_INT);
+            } else if (is_bool($p)) {
+                $st->bindValue($i, $p, PDO::PARAM_BOOL);
+            } else {
+                $st->bindValue($i, $p, PDO::PARAM_STR);
+            }
+        }
+    }
+
+    private function runSql($sql, $paras)
     {
         $st = $this->prepare($sql);
-        $st->execute($paras);
+        self::bindParas($st, $paras);
+        $st->execute();
+        return $st;
+    }
+
+    public function run($sql, ...$paras)
+    {
+
+        $st = $this->runSql($sql, $paras);
         return $st->rowCount();
     }
 
     public function getOne($sql, ...$paras)
     {
-        $st = $this->prepare($sql);
-        $st->execute($paras);
+        $st = $this->runSql($sql, $paras);
         return $st->fetch();
     }
 
@@ -32,15 +53,13 @@ final class Db extends PDO
 
     public function getAll($sql, ...$paras)
     {
-        $st = $this->prepare($sql);
-        $st->execute($paras);
+        $st = $this->runSql($sql, $paras);
         return $st->fetchAll();
     }
 
     public function getDataSet($sql, ...$paras)
     {
-        $st = $this->prepare($sql);
-        $st->execute($paras);
+        $st = $this->runSql($sql, $paras);
         $columns = [];
         for ($i = 0; $i < $st->columnCount(); ++$i) {
             $columns[$st->getColumnMeta($i)['name']] = $i;
@@ -70,7 +89,8 @@ final class Db extends PDO
         $st = $this->prepare($sql);
         $row = 0;
         foreach ($vs as $v) {
-            $st->execute($v);
+            self::bindParas($st, $v);
+            $st->execute();
             $row += $st->rowCount();
         }
         return $row;
@@ -86,8 +106,7 @@ final class Db extends PDO
         }, array_keys($kv))) . ' where ' . join(' and ', array_map(function ($k) {
             return '`' . $k . '` = ?';
         }, array_keys($kvPrimary)));
-        $st = $this->prepare($sql);
-        $st->execute(array_merge(array_values($kv), array_values($kvPrimary)));
+        $st = $this->runSql($sql, array_merge(array_values($kv), array_values($kvPrimary)));
         return $st->rowCount();
     }
 
@@ -97,8 +116,7 @@ final class Db extends PDO
             . join(' and ', array_map(function ($k) {
                 return '`' . $k . '` = ?';
             }, array_keys($kv)));
-        $st = $this->prepare($sql);
-        $st->execute(array_values($kv));
+        $st = $this->runSql($sql, array_values($kv));
         return $st->rowCount();
     }
 

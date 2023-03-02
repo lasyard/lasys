@@ -12,6 +12,10 @@ export function numCmp(a: string, b: string) {
     return objCmp(parseInt(a), parseInt(b));
 }
 
+export function zhCmp(a: string, b: string) {
+    return a.localeCompare(b, 'zh');
+}
+
 export function dateCmp(a: string, b: string) {
     return objCmp(Date.parse(a), Date.parse(b));
 }
