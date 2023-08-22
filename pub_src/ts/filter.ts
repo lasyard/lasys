@@ -1,6 +1,7 @@
 import { capitalize, objCmp, SortFun } from "./common";
 import { ColumnIndices } from "./db";
 import { Tag } from "./tag";
+import { storageAvailable } from "./utils";
 
 export abstract class Filter {
     protected static readonly FORM_NAME = '-form-filter';
@@ -41,16 +42,82 @@ export abstract class Filter {
     public render(data: any[][], ci: ColumnIndices, handler: (e: Event) => any): Tag<HTMLFormElement> {
         this.formName = Filter.FORM_NAME + '-' + this.key;
         this.itemName = this.formName + '-item';
-        this.handler = handler;
+        if (storageAvailable('sessionStorage')) {
+            this.handler = (e: Event) => {
+                handler(e);
+                const cb = e.target as HTMLInputElement;
+                Filter.saveState(cb);
+            }
+        } else {
+            this.handler = handler;
+        }
         this.index = ci[this.key];
         const fieldSet = Tag.fieldset(this.title).cls('checkbox');
         const values = this.getValuesCount(data);
         const keys = Object.keys(values).sort(this.sortFun);
         const checks = this.createChecks(values, keys);
+
+        // Load states of checks
+        if (storageAvailable('sessionStorage')) {
+            const storage = sessionStorage;
+            var loaded = true;
+            for (const check of checks) {
+                const e = check.get().firstChild as HTMLInputElement;
+                const key = location.pathname + e.name;
+                if (loaded) {
+                    var v = sessionStorage.getItem(key);
+                    if (v != null) {
+                        if (e.type === 'radio') {
+                            e.checked = (e.value === v);
+                        } else if (e.type === 'checkbox') {
+                            var vs: Set<string> = (v != null ? new Set(v.split(',')) : new Set());
+                            e.checked = vs.has(e.value);
+                        }
+                    } else {
+                        loaded = false;
+                        Filter.saveState(e);
+                    }
+                } else {
+                    Filter.saveState(e);
+                }
+            }
+        }
         for (const check of checks) {
             check.putInto(fieldSet);
         }
         return Tag.of<HTMLFormElement>('form').name(this.formName).add(fieldSet);
+    }
+
+    private static saveState(e: HTMLInputElement) {
+        const storage = sessionStorage;
+        const key = location.pathname + e.name;
+        if (e.type === 'radio') {
+            if (e.checked) {
+                storage.setItem(key, e.value);
+            }
+        } else if (e.type === 'checkbox') {
+            const v = storage.getItem(key);
+            var values: Set<string> = (v != null ? new Set(v.split(',')) : new Set());
+            var modified = false;
+            if (!values.has(e.value)) {
+                if (e.checked) {
+                    values.add(e.value);
+                    modified = true;
+                }
+            } else {
+                if (!e.checked) {
+                    values.delete(e.value);
+                    modified = true;
+                }
+            }
+            if (modified) {
+                if (values.size == 0) {
+                    storage.removeItem(key);
+                } else {
+                    storage.setItem(key, Array.from(values).join(','));
+                }
+            }
+        }
     }
 
     protected checkbox(
@@ -60,6 +127,7 @@ export abstract class Filter {
         count: number,
         checked = false
     ) {
+        const self = this;
         const input = Tag.of('input')
             .name(name)
             .attr({ value: value, type: type })
