@@ -36,11 +36,11 @@ final class HtmlTest extends TestCase
     public function testInputText()
     {
         $this->assertSame(
-            '<input name="name" type="text"></input>',
+            '<input name="name" type="text"></input>' . PHP_EOL,
             Html::input('name', 'text')
         );
         $this->assertSame(
-            '<textarea name="text" required class="sys"></textarea>',
+            '<textarea name="text" required class="sys"></textarea>' . PHP_EOL,
             Html::input('text', 'textarea', true, ['class' => 'sys'])
         );
     }
