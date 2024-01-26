@@ -57,7 +57,7 @@ final class Html
                 $html .= '</select>';
                 break;
             case 'textarea':
-                $html = '<textarea name="' . $name . '"' . self::inlineAttrs($required, $attrs) . '></textarea>';
+                $html = '<textarea name="' . $name . '"' . self::inlineAttrs($required, $attrs) . '></textarea>' . PHP_EOL;
                 break;
             case 'checkboxes':
                 $items = $attrs['items'];
@@ -69,7 +69,21 @@ final class Html
                 $html .= '</div>';
                 break;
             default:
-                $html = '<input name="' . $name . '" type="' . $type . '"' . self::inlineAttrs($required, $attrs) . '></input>';
+                if (isset($attrs['dataList'])) {
+                    $dataListId = uniqid("dl_");
+                    $dataList = $attrs['dataList'];
+                    unset($attrs['dataList']);
+                    $attrs['list'] = $dataListId;
+                }
+                $html = '<input name="' . $name . '" type="' . $type . '"'
+                    . self::inlineAttrs($required, $attrs) . '></input>' . PHP_EOL;
+                if (isset($dataListId)) {
+                    $html .= '<datalist id="' . $dataListId . '">' . PHP_EOL;
+                    foreach ($dataList as $v => $title) {
+                        $html .= '<option value="' . $v . '">' . $title . '</option>' . PHP_EOL;
+                    }
+                    $html .= '</datalist>' . PHP_EOL;
+                }
         }
         return $html;
     }

@@ -39,8 +39,9 @@ class DbActions extends Actions
                     $attrs['rows'] = 4;
                     break;
                 case 'year':
-                    $type = 'select';
-                    $attrs['options'] = range(date('Y'), 1970, -1);
+                    $type = 'text';
+                    $range = range(date('Y'), 1978, -1);
+                    $attrs['dataList'] = array_combine($range, $range);
                     break;
                 case 'date':
                     $type = 'date';
