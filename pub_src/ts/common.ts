@@ -42,7 +42,7 @@ export function zhToNum(str: string) {
 let collator: Intl.Collator | null = null;
 
 export function zhCmp(a: string, b: string) {
-    const regex = /[一二三四五六七八九十]/g;
+    const regex = /[一二三四五六七八九十壹贰叁肆伍陆柒捌玖拾]/g;
     const a1 = a.replaceAll(regex, (m: string) => String(zhToNum(m)));
     const b1 = b.replaceAll(regex, (m: string) => String(zhToNum(m)));
     if (collator == null) {

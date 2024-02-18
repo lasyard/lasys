@@ -43,6 +43,7 @@ test('zhCmp', () => {
     expect(zhCmp('2', '10')).toBe(-1);
     expect(zhCmp('一', '二')).toBe(-1);
     expect(zhCmp('甲十一', '甲二十')).toBe(-1);
+    expect(zhCmp('甲拾壹', '甲二十')).toBe(-1);
 });
 
 test('dateCmp', () => {
