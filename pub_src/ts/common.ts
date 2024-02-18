@@ -12,8 +12,42 @@ export function numCmp(a: string, b: string) {
     return objCmp(parseInt(a), parseInt(b));
 }
 
+/**
+ * Convert a zh string to an integer, limit to < 100.
+ *
+ * @param str the string.
+ */
+export function zhToNum(str: string) {
+    const map: { [key: string]: number } = {
+        '零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10
+    };
+    let result: number | null = null;
+    for (let i = 0; i < str.length; ++i) {
+        let n = map[str[i]];
+        if (result == null) {
+            result = n;
+            if (result == 0) {
+                break;
+            }
+        } else if (n == 10) {
+            result *= n;
+        } else if (n != undefined) {
+            result += n;
+        }
+    }
+    return result;
+}
+
+let collator: Intl.Collator | null = null;
+
 export function zhCmp(a: string, b: string) {
-    return a.localeCompare(b, 'zh');
+    const regex = /[一二三四五六七八九十]/g;
+    const a1 = a.replaceAll(regex, (m: string) => String(zhToNum(m)));
+    const b1 = b.replaceAll(regex, (m: string) => String(zhToNum(m)));
+    if (collator == null) {
+        collator = new Intl.Collator('zh', { numeric: true });
+    }
+    return collator.compare(a1, b1);
 }
 
 export function dateCmp(a: string, b: string) {

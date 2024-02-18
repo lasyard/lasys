@@ -277,4 +277,9 @@ final class App
         header('Location: ' . $url);
         exit;
     }
+
+    public function home()
+    {
+        return $this->_home;
+    }
 }
