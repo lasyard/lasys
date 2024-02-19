@@ -60,6 +60,17 @@ final class GalleryActions extends Actions
     {
         $this->configScriptsAndStyles();
         Sys::app()->addScript('js' . DS . 'gallery');
+        $padSize = $this->default(self::THUMB_SIZE);
+        if ($padSize > 0) {
+            $padSize += 100;
+            Sys::app()->addCss(<<<EOS
+        div#main div.gallery div.thumbs a.thumb {
+            width: {$padSize}px;
+            height: {$padSize}px;
+            line-height: {$padSize}px;
+        }
+        EOS);
+        }
         $ribbon = $this->buildRibbon();
         View::render('gallery_ribbon', $ribbon);
     }
