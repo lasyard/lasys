@@ -7,41 +7,39 @@
 
 ## Usage
 
-### Put `lasys` in your project
+Put `lasys` in your project:
 
 ```sh
 cd "dir_of_your_project"
 git clone "git@github.com:lasyard/lasys.git"
 ```
 
-or as a submodule
+or as a submodule if your project is also managed by git:
 
 ```sh
 git submodule add "git@github.com:lasyard/lasys.git"
 ```
 
-### Build the public resources
+Build the public resources:
 
 ```sh
 npm install
 npm run release-build
 ```
 
-### Create a directory to put the public resources
+Create a directory to put the public resources:
 
 ```sh
 mkdir "pub"
 ```
 
-then make a symlink from `lasys/pub` to `pub/sys`
+then make a symlink from `lasys/pub` to `pub/sys`:
 
 ```sh
 ln -snf "lasys/pub" "pub/sys"
 ```
 
-### Create app entry `entry.php`
-
-The contents of the file can be
+Create app entry `entry.php`. The contents of the file is like:
 
 ```php
 <?php
@@ -52,7 +50,7 @@ Sys::app()->run();
 
 It is crucial to put the file at the root of project, so that `ROOT_PATH` can be defined properly.
 
-### Rewrite all to `entry.php` except `/pub`. for example, in `.htaccess`
+Rewrite all to `entry.php` except `/pub`. for example, in `.htaccess`:
 
 ```apache
 DirectoryIndex disabled
