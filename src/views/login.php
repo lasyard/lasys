@@ -2,12 +2,16 @@
     <fieldset>
         <legend>登录</legend>
         <div class="field">
-            <label for="name">User</label>
-            <input type="text" name="name" required />
+            <label>
+                <span class="label">User</span>
+                <input type="text" name="name" required autocomplete="username" />
+            </label>
         </div>
         <div class="field">
-            <label for="password">Password</label>
-            <input type="password" name="password" required />
+            <label>
+                <span class="label">Password</span>
+                <input type="password" name="password" required autocomplete="current-password" />
+            </label>
         </div>
     </fieldset>
     <div class="buttons">

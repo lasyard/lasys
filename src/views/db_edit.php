@@ -17,10 +17,10 @@
             }
         ?>
             <div class="field">
-                <label for="<?php echo $name; ?>"><?php echo $label; ?></label>
-                <?php
-                echo Html::input($name, $type, $required, $attrs);
-                ?>
+                <label>
+                    <span class="label"><?php echo $label; ?></span>
+                    <?php echo Html::input($name, $type, $required, $attrs); ?>
+                </label>
             </div>
         <?php } ?>
     </fieldset>
