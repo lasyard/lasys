@@ -5,21 +5,22 @@ export enum MimeType {
     JS = 'text/javascript',
 }
 
-enum HttpMethod {
+export enum HttpMethod {
     GET = 'GET',
     POST = 'POST',
     PUT = 'PUT',
     DELETE = 'DELETE',
 }
 
-const TYPE_KEY = 'requestType';
+export const TYPE_KEY = 'requestType';
+
 const UPDATE = 'update';
 const DELETE = 'delete';
 
 export type AjaxCallback = (response: any, type: MimeType) => any;
 
 export class Ajax {
-    private static call(
+    public static call(
         onload: AjaxCallback,
         method: HttpMethod,
         data: any,

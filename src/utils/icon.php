@@ -16,6 +16,7 @@ final class Icon
     public const WARN = '<i class="bi bi-exclamation-triangle-fill"></i>';
     public const IMAGES = '<i class="bi bi-images"></i>';
     public const SEARCH = '<i class="bi bi-search"></i>';
+    public const DB_CHECK = '<i class="bi bi-database-check"></i>';
 
     private function __construct()
     {

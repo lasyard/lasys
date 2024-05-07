@@ -1,5 +1,5 @@
 import { onLoad } from './html';
-import { Ajax, MimeType } from './ajax';
+import { Ajax, MimeType, HttpMethod, TYPE_KEY } from './ajax';
 import { Tag } from './tag';
 import { Tooltip } from './tooltip';
 import { numCmp, timeStr } from './common';
@@ -83,6 +83,21 @@ export class Gallery {
         if (btnUpload && divForm) {
             btnUpload.clickShow(divForm);
             divForm.outClickHide();
+        }
+        const btnCheck = Tag.byId('-btn-check');
+        if (btnCheck) {
+            btnCheck.event('click', (e) => {
+                const url = new URL('', window.location.href);
+                url.searchParams.set(TYPE_KEY, 'check');
+                Ajax.call(
+                    this.ajaxResponse.bind(this),
+                    HttpMethod.POST,
+                    null,
+                    url,
+                    MimeType.TEXT,
+                    MimeType.HTML
+                );
+            });
         }
         return this;
     }

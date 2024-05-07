@@ -55,12 +55,7 @@ final class Server
         return [$home, explode('/', $path), $type];
     }
 
-    public static function isAjax($type)
-    {
-        return in_array($type, [self::AJAX_GET, self::AJAX_POST, self::AJAX_UPDATE, self::AJAX_DELETE]);
-    }
-
-    private static function isAjaxRequest()
+    public static function isAjax()
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strcasecmp($_SERVER['HTTP_X_REQUESTED_WITH'], 'xmlhttprequest') == 0;
@@ -75,23 +70,24 @@ final class Server
                 if (isset($_GET[self::TYPE_KEY]) && $_GET[self::TYPE_KEY] == self::GET_RAW) {
                     return self::GET_RAW;
                 }
-                return self::isAjaxRequest() ? self::AJAX_GET : self::GET;
+                return self::isAjax() ? self::AJAX_GET : self::GET;
             case 'POST':
                 if (isset($_GET[self::TYPE_KEY])) {
                     switch ($_GET[self::TYPE_KEY]) {
                         case self::UPDATE:
-                            return self::isAjaxRequest() ? self::AJAX_UPDATE : self::UPDATE;
+                            return self::isAjax() ? self::AJAX_UPDATE : self::UPDATE;
                         case self::DELETE:
-                            return self::isAjaxRequest() ? self::AJAX_DELETE : self::DELETE;
+                            return self::isAjax() ? self::AJAX_DELETE : self::DELETE;
                         default:
-                            return  self::INVALID;
+                            // enable custom request types
+                            return  $_GET[self::TYPE_KEY];
                     }
                 }
-                return self::isAjaxRequest() ? self::AJAX_POST : self::POST;
+                return self::isAjax() ? self::AJAX_POST : self::POST;
             case 'PUT':
-                return self::isAjaxRequest() ? self::AJAX_UPDATE : self::UPDATE;
+                return self::isAjax() ? self::AJAX_UPDATE : self::UPDATE;
             case 'DELETE':
-                return self::isAjaxRequest() ? self::AJAX_DELETE : self::DELETE;
+                return self::isAjax() ? self::AJAX_DELETE : self::DELETE;
             case 'HEAD':
                 return self::HEAD;
             default:

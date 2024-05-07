@@ -50,7 +50,7 @@ final class App
             $this->_base .= $name . '/';
             $title = $this->_conf->title($name);
             if ($this->hasPriv($name, $action[Actions::PRIV])) {
-                $this->_conf = $this->_conf->read($name);
+                $this->_conf = $this->readConf($name);
             } else {
                 $action = Actions::error('You do not have privilege to access "' . $name . '".')->priv();
                 break;
@@ -90,7 +90,7 @@ final class App
             exit;
         }
         $content = $actionDo->content;
-        if (Server::isAjax($type)) {
+        if (Server::isAjax()) {
             echo $content;
             exit;
         }

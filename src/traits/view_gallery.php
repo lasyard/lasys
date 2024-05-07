@@ -28,6 +28,7 @@ final class ViewGallery extends Traits
         // Set this to pass down ajax delete & update.
         $item[Server::AJAX_DELETE] ??= Actions::noop();
         $item[Server::AJAX_UPDATE] ??= Actions::noop();
+        $item['check'] = GalleryActions::check()->priv(User::ADMIN);
         $this->_wPriv = $wPriv;
     }
 }

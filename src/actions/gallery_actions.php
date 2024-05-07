@@ -27,6 +27,13 @@ final class GalleryActions extends Actions
         return PUB_PATH . DS . self::THUMB_DIR . self::relPath($file);
     }
 
+    private static function fileName($file, $time)
+    {
+        return date('Ymd', $time)
+            . '_' . substr(md5_file($file), 0, 8)
+            . '.' . pathinfo($file, PATHINFO_EXTENSION);
+    }
+
     protected function default($confName)
     {
         return parent::default($confName) ?? self::DEFAULT[$confName] ?? null;
@@ -46,6 +53,7 @@ final class GalleryActions extends Actions
             ]);
         }
         return [
+            'btnCheck' => Sys::user()->hasPriv(User::ADMIN) ? Icon::DB_CHECK : null,
             'btnUpload' => $btnUpload,
             'formUpload' => $formUpload,
         ];
@@ -119,8 +127,7 @@ final class GalleryActions extends Actions
     {
         $path = $this->path . DS . $this->name;
         $origName = null;
-        $ext = null;
-        $tempName = File::upload($path, function ($file) use (&$origName, &$ext) {
+        $tempName = File::upload($path, function ($file) use (&$origName) {
             $origName = $file['name'];
             $ext = pathinfo($origName, PATHINFO_EXTENSION);
             return bin2hex(random_bytes(8)) . '.' . $ext;
@@ -144,7 +151,7 @@ final class GalleryActions extends Actions
         }
         unlink($tempFile);
         if (!$this->default(self::KEEP_NAME)) {
-            $newName =  date('Ymd', $time) . '_' . substr(md5_file($file), 0, 8) . '.' . $ext;
+            $newName = self::fileName($file, $time);
             $newFile = $path . DS . $newName;
             if (file_exists($newFile)) {
                 unlink($file);
@@ -207,6 +214,46 @@ final class GalleryActions extends Actions
             Msg::info('Set the title of image "' . $name . '" to "' . $title . '".');
         } else {
             Msg::warn('The title of image "' . $name . '" is not set.');
+        }
+    }
+
+    public function actionCheck()
+    {
+        $galleryPath = $this->path . DS . $this->name;
+        $files = Meta::loadFileList($galleryPath);
+        if ($this->conf(self::KEEP_NAME)) {
+            Msg::info("Keep name is enabled, so the file name will not be checked.");
+            return;
+        }
+        $count = 0;
+        $thumbCount = 0;
+        $meta = Meta::load($galleryPath);
+        foreach ($files as $name => &$info) {
+            $file = $galleryPath . DS . $name;
+            $time = $info['time'] ?? time();
+            $rightName = self::fileName($file, $time);
+            if ($name !== $rightName) {
+                ++$count;
+                $rightFile = $galleryPath . DS . $rightName;
+                rename($galleryPath . DS . $name, $rightFile);
+                $meta[$rightName] = [
+                    'title' => $info['title'] ?? 'untitled',
+                    'time' => $time,
+                    'uid' => $info['uid'] ?? User::ADMIN,
+                    'uname' => $info['uname'] ?? 'Anonymous',
+                ];
+                if ($this->hasThumbnail()) {
+                    ++$thumbCount;
+                    $rightThumb = self::thumbFile($rightFile);
+                    rename(self::thumbFile($file), $rightThumb);
+                }
+            }
+        }
+        if ($count > 0) {
+            Meta::save($galleryPath, $meta);
+            Msg::warn("There are $count images and $thumbCount thumbnails with wrong name, which have been renamed.");
+        } else {
+            Msg::info("All images have correct name.");
         }
     }
 }
