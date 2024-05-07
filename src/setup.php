@@ -24,6 +24,9 @@ if (!function_exists('str_ends_with')) {
 }
 
 define('DS', DIRECTORY_SEPARATOR);
+if (!defined('VERSION')) {
+    define('VERSION', '0');
+}
 if (!defined('SITE')) {
     define('SITE', 'unknown');
 }

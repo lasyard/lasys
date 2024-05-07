@@ -49,7 +49,15 @@ final class File
         if (!is_uploaded_file($file['tmp_name'])) {
             throw new RuntimeException('Uploaded file error!');
         }
-        $name = $fileName ?? $file['name'];
+        if ($fileName === null) {
+            $name = $file['name'];
+        } elseif (is_string($fileName)) {
+            $name = $fileName;
+        } else if (is_callable($fileName)) {
+            $name = $fileName($file);
+        } else {
+            throw new RuntimeException('Internal error: invalid $fileName.');
+        }
         $newFile = $path . DS . $name;
         if (!$overwrite && file_exists($newFile)) {
             throw new RuntimeException('File "' . $name . '" exists.');

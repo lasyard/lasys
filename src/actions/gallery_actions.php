@@ -118,26 +118,39 @@ final class GalleryActions extends Actions
     public function actionPost()
     {
         $path = $this->path . DS . $this->name;
-        $origName = File::upload($path, null, false, $this->default(FileActions::SIZE_LIMIT));
-        $origFile = $path . DS . $origName;
+        $origName = null;
+        $ext = null;
+        $tempName = File::upload($path, function ($file) use (&$origName, &$ext) {
+            $origName = $file['name'];
+            $ext = pathinfo($origName, PATHINFO_EXTENSION);
+            return bin2hex(random_bytes(8)) . '.' . $ext;
+        }, false, $this->default(FileActions::SIZE_LIMIT));
+        $tempFile = $path . DS . $tempName;
         if ($this->default(self::KEEP_NAME)) {
-            $tempFile = $path . DS . '_temp';
-            rename($origFile, $tempFile);
-            $origFile = $tempFile;
             $name = $origName;
+            $file = $path . DS . $name;
+            if (file_exists($file)) {
+                unlink($tempFile);
+                throw new RuntimeException('Image "' . $name . '" exists.');
+            }
         } else {
-            $name =  sha1_file($origFile) . '.' . pathinfo($origName, PATHINFO_EXTENSION);
+            $name = 'temp_' . $tempName;
+            $file = $path . DS . $name;
         }
-        $file = $path . DS . $name;
-        if (file_exists($file)) {
-            unlink($origFile);
-            throw new RuntimeException('Image "' . $name . '" exists.');
-        }
-        Image::optimizeJpegFile($origFile, $file);
-        $time = Image::getExifDate($origFile);
-        unlink($origFile);
+        Image::optimizeJpegFile($tempFile, $file);
+        $time = Image::getExifDate($tempFile);
         if (!$time) {
             $time = $_SERVER['REQUEST_TIME'];
+        }
+        unlink($tempFile);
+        if (!$this->default(self::KEEP_NAME)) {
+            $newName =  date('Ymd', $time) . '_' . substr(md5_file($file), 0, 8) . '.' . $ext;
+            $newFile = $path . DS . $newName;
+            if (file_exists($newFile)) {
+                unlink($file);
+                throw new RuntimeException('Image "' . $newName . '" exists.');
+            }
+            rename($file, $newFile);
         }
         $user = Sys::user();
         $info = [
