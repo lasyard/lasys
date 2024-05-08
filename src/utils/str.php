@@ -79,4 +79,16 @@ final class Str
         }
         return $msg;
     }
+
+    public static function bytesXor($a, $b)
+    {
+        $la = strlen($a);
+        $lb = strlen($b);
+        $size = max($la, $lb);
+        $r = str_pad($a, $size, chr(0));
+        for ($i = 0; $i < $lb; ++$i) {
+            $r[$i] = chr(ord($r[$i]) ^ ord($b[$i]));
+        }
+        return $r;
+    }
 }

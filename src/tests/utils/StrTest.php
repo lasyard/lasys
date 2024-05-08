@@ -43,4 +43,13 @@ final class StrTest extends TestCase
         $this->assertFalse(Str::isValidFileName('home/link.txt'));
         $this->assertFalse(Str::isValidFileName('_list.json'));
     }
+
+    public function testBytesXor()
+    {
+        $this->assertSame("\0", Str::bytesXor('a', 'a'));
+        $this->assertSame("\xff", Str::bytesXor("\xff", "\x00"));
+        $this->assertSame("\x01", Str::bytesXor("\xff", "\xfe"));
+        $this->assertSame("\xfe\x02", Str::bytesXor("\x01\x02", "\xff"));
+        $this->assertSame("\x01\x23", Str::bytesXor("\x00", "\x01\x23"));
+    }
 }

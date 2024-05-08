@@ -31,7 +31,7 @@ final class GalleryActions extends Actions
     {
         return date('Ymd', $time)
             . '_' . substr(md5_file($file), 0, 8)
-            . '.' . pathinfo($file, PATHINFO_EXTENSION);
+            . '.' . strtolower(pathinfo($file, PATHINFO_EXTENSION));
     }
 
     protected function default($confName)
