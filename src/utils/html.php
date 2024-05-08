@@ -7,12 +7,12 @@ final class Html
 
     public static function cssLink($css)
     {
-        return '<link rel="stylesheet" href="' . $css . '?v=' . VERSION . '" type="text/css" />' . PHP_EOL;
+        return '<link rel="stylesheet" href="' . $css . '?v=' . ASSET_SUM . '" type="text/css" />' . PHP_EOL;
     }
 
     public static function scriptLink($script)
     {
-        return '<script type="text/javascript" src="' . $script . '?v=' . VERSION . '"></script>' . PHP_EOL;
+        return '<script type="text/javascript" src="' . $script . '?v=' . ASSET_SUM . '"></script>' . PHP_EOL;
     }
 
     public static function link($text, $url, $title = null, $target = null)
