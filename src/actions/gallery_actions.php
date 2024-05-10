@@ -158,6 +158,8 @@ final class GalleryActions extends Actions
                 throw new RuntimeException('Image "' . $newName . '" exists.');
             }
             rename($file, $newFile);
+            $name = $newName;
+            $file = $newFile;
         }
         $user = Sys::user();
         $info = [
