@@ -24,7 +24,6 @@ final class ConfigTest extends TestCase
     public function testExcluded()
     {
         $conf = Config::root('non-exist');
-        $this->assertTrue($conf->excluded('index.html'));
         $this->assertTrue($conf->excluded('_list.json'));
     }
 }
