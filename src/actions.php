@@ -68,14 +68,15 @@ class Actions
         $this->_base = $base;
         $this->_path = $path;
         $this->_name = $name;
+        $db = Sys::db();
         try {
             $this->_content = Common::getOutput([$this, $this->_method], $this->_args);
-            if (Sys::db()->inTransaction()) {
-                Sys::db()->commit();
+            if ($db && $db->inTransaction()) {
+                $db->commit();
             }
         } catch (Exception $e) {
-            if (Sys::db()->inTransaction()) {
-                Sys::db()->rollBack();
+            if ($db && $db->inTransaction()) {
+                $db()->rollBack();
             }
             $this->doError($e->getMessage());
         }

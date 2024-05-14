@@ -15,9 +15,6 @@ final class App
 
     public function __construct()
     {
-        define('CONF_PATH', ROOT_PATH . DIRECTORY_SEPARATOR . 'configs');
-        require_once CONF_PATH . DIRECTORY_SEPARATOR . 'defs.php';
-        // DS is not define till here.
         require_once 'setup.php';
     }
 

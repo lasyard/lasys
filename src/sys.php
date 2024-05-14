@@ -19,8 +19,11 @@ final class Sys
 
     public static function db()
     {
-        self::$_db ??= new Db;
-        return self::$_db;
+        if (defined('PDO_DSN')) {
+            self::$_db ??= new Db;
+            return self::$_db;
+        }
+        return false;
     }
 
     public static function user()

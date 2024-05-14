@@ -30,6 +30,9 @@ if (!defined('ASSET_SUM')) {
 if (!defined('SITE')) {
     define('SITE', 'unknown');
 }
+if (!defined('CONF_DIR')) {
+    define('CONF_DIR', 'configs');
+}
 if (!defined('DATA_DIR')) {
     define('DATA_DIR', 'data');
 }
@@ -48,6 +51,7 @@ if (!defined('APP_TITLE')) {
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(__DIR__));
 }
+define('CONF_PATH', ROOT_PATH . DS . CONF_DIR);
 define('DATA_PATH', ROOT_PATH . DS . DATA_DIR);
 define('PUB_PATH', ROOT_PATH . DS . PUB_DIR);
 define('VIEWS_PATH', ROOT_PATH . DS . VIEWS_DIR);

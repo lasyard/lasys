@@ -30,7 +30,7 @@ final class Config
         self::TRAITS => [],
         self::READ_ONLY => true,
         self::DEFAULT_ITEM => 'index',
-        self::EXCLUDES => ['index.*', '_*'],
+        self::EXCLUDES => ['_*'],
         self::LIST => [],
         self::PRIV_READ => [],
         self::PRIV_EDIT => [User::OWNER, User::EDIT],

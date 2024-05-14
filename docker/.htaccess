@@ -1,0 +1,5 @@
+DirectoryIndex disabled
+Options -Indexes -Multiviews
+RewriteEngine On
+
+RewriteRule !^pub entry.php [L,NS]
