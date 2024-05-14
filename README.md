@@ -62,15 +62,12 @@ RewriteRule !^pub index.php [L,NS]
 
 ## Config
 
-There must be a directory named `configs` in the root of your project to put your config files. Config files are `.php` files.
-
-### `defs.php`
-
-In this file, constants are defined. If one is not defined, it will be set to a default value.
+Constants can be defined in `entry.php`. If one is not defined, it will be set to a default value.
 
 ```php
 date_default_timezone_set('Asia/Shanghai');
 define('APP_TITLE', 'Lasys');     // The title of app.
+define('CONFIG_DIR', 'configs');  // The dir of config files.
 define('DATA_DIR', 'data');       // The root dir of website contents.
 define('PUB_DIR', 'pub');         // The dir of public assets.
 define('VIEW_DIR', 'views');      // The dir of view files.
@@ -78,4 +75,6 @@ define('ACTIONS_DIR', 'actions'); // The dir of actions.
 define('SITE', 'unknown');        // For multi-site deployment.
 ```
 
-The values defined above are also the default values.
+The values defined above are default values.
+
+There must be a directory named `configs` in the root of your project to put your config files. Config files are `.php` files.
