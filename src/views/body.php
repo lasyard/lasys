@@ -37,3 +37,6 @@
 <div id="main">
     <?php echo $content; ?>
 </div>
+<div id="footer">
+    <p class="center">&copy; <?php echo date('Y'); ?> Lasy. All rights reserved.</p>
+</div>

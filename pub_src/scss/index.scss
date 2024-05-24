@@ -146,6 +146,14 @@ div#bar {
     }
 }
 
+div#footer {
+    width: 100%;
+    height: $barHeight;
+    background: $blackColor;
+    color: $whiteColor;
+    clear: both;
+}
+
 @media screen and (min-width: 54rem) {
     div#list {
         position: sticky;
