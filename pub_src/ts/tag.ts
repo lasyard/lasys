@@ -61,6 +61,13 @@ export class Tag<T extends HTMLElement> {
         return form ? new Tag(form) : null;
     }
 
+    public static linkify(text: string) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return Tag.span().html(text.replace(urlRegex, (url) => {
+            return Tag.a(url).attr({ href: url, target: '_blank' }).getHtml();
+        }));
+    }
+
     public get() {
         return this.element;
     }
