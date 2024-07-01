@@ -151,7 +151,7 @@ final class Config
         } else if (isset($this->_conf[Config::ETC][$type])) {
             $action = $this->_conf[Config::ETC][$type];
         } else {
-            throw new RuntimeException("No action for $type request on $name");
+            return false;
         }
         if ($action instanceof Actions) {
             return $action->priv();
