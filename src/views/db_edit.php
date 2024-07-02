@@ -12,10 +12,9 @@
             if ($purpose === 'insert' && $auto) {
                 continue;
             }
-            if ($readOnly || $purpose === 'update' && ($primary || $auto)) {
+            if ($readOnly || $purpose === 'update' && $auto) {
                 $attrs['disabled'] = 1;
-            }
-        ?>
+            } ?>
             <div class="field">
                 <label>
                     <span class="label"><?php echo $label; ?></span>
