@@ -2,6 +2,7 @@ export * from './ajax';
 export * from './blink';
 export * from './common';
 export * from './filter';
+export * from './stat';
 export * from './html';
 export * from './tag';
 export * from './tooltip';

@@ -4,6 +4,7 @@ import { Tooltip } from './tooltip';
 import { onLoad } from './html';
 import { MimeType, Ajax } from './ajax';
 import { Filter } from './filter';
+import { ValueCallback, StatObject } from './stat';
 
 export type ColumnIndices = { [index: string]: number };
 
@@ -13,21 +14,13 @@ interface DataSet {
     data: any[][];
 }
 
-type ValueCallback = (col: string) => any;
 type ContentFun = (d: ValueCallback) => TagContent;
-type StatFun = (data: ValueCallback, context: any) => void;
-type ResultFun = (context: any) => TagContent;
 
 interface ColumnDefinition {
     th?: string | ContentFun;
     td: string | ContentFun;
     width?: string;
-}
-
-interface StatObject {
-    init: () => any;
-    fun: StatFun,
-    result: ResultFun,
+    align?: string;
 }
 
 interface DbTableConfig {
@@ -271,6 +264,9 @@ export class DbTable {
             for (const d of data) {
                 stat.fun((col) => d[ci[col]], ctx);
             }
+            if (ctx instanceof Map) {
+                ctx.set('__cnt__', data.length);
+            }
             result = stat.result(ctx);
         }
         return result;
@@ -301,6 +297,7 @@ export class DbTable {
                 } else {
                     DbTable.addContent(th, labels, col.th, ci);
                     colTag.style({ width: col.width });
+                    th.style({ 'text-align': col.align });
                 }
                 th.putInto(headers);
             }
@@ -378,7 +375,12 @@ export class DbTable {
                 }
                 for (const col of cols) {
                     const td = Tag.of('td');
-                    DbTable.addContent(td, dt, typeof col === 'string' ? col : col.td, ci);
+                    if (typeof col === 'string') {
+                        DbTable.addContent(td, dt, col, ci);
+                    } else {
+                        td.style({ 'text-align': col.align })
+                        DbTable.addContent(td, dt, col.td, ci);
+                    }
                     tr.add(td);
                 }
                 const formUpdate = this.formUpdate;
