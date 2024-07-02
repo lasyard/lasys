@@ -55,19 +55,26 @@ export class DbTable {
 
     private data(dataSet: DataSet) {
         this.dataSet = dataSet;
+        const conf = this.conf;
         if (this.divFilters) {
             const div = this.divFilters;
             div.clear();
-            if (this.conf.filters) {
-                for (const filter of this.conf.filters) {
+            if (conf.filters) {
+                for (const filter of conf.filters) {
                     div.add(filter.render(dataSet.data, dataSet.columns, this.refresh.bind(this)));
                 }
             }
         }
-        if (!this.conf.cols) {
-            this.conf.cols = Object.keys(dataSet.columns).map(
+        if (!conf.cols) {
+            conf.cols = Object.keys(dataSet.columns).map(
                 c => ({ th: c, td: c } as ColumnDefinition)
             );
+        }
+        for (const i in conf.cols) {
+            const v = conf.cols[i];
+            if (typeof v === 'string') {
+                conf.cols[i] = { th: v, td: v };
+            }
         }
         return this;
     }
@@ -75,6 +82,10 @@ export class DbTable {
     private static clearFormData(form: HTMLFormElement) {
         for (let i = 0; i < form.elements.length; ++i) {
             const f = form.elements[i];
+            // do not clear read only fields
+            if (f.attributes.getNamedItem('disabled')) {
+                continue;
+            }
             if (f instanceof HTMLInputElement) {
                 if (f.type === 'submit') {
                     continue;
@@ -290,15 +301,12 @@ export class DbTable {
         const headers = Tag.of('tr').cls('header');
         for (let i = 0; i < columns; ++i) {
             for (const col of cols) {
+                const c = col as ColumnDefinition;
                 const colTag = Tag.of('col').putInto(colgroup);
                 const th = Tag.of('th');
-                if (typeof col === 'string') {
-                    DbTable.addContent(th, labels, col, ci);
-                } else {
-                    DbTable.addContent(th, labels, col.th, ci);
-                    colTag.style({ width: col.width });
-                    th.style({ 'text-align': col.align });
-                }
+                DbTable.addContent(th, labels, c.th, ci);
+                colTag.style({ width: c.width });
+                th.style({ 'text-align': c.align });
                 th.putInto(headers);
             }
             if (this.formUpdate) {
@@ -374,13 +382,10 @@ export class DbTable {
                     alt = !alt;
                 }
                 for (const col of cols) {
+                    const c = col as ColumnDefinition;
                     const td = Tag.of('td');
-                    if (typeof col === 'string') {
-                        DbTable.addContent(td, dt, col, ci);
-                    } else {
-                        td.style({ 'text-align': col.align })
-                        DbTable.addContent(td, dt, col.td, ci);
-                    }
+                    td.style({ 'text-align': c.align })
+                    DbTable.addContent(td, dt, c.td, ci);
                     tr.add(td);
                 }
                 const formUpdate = this.formUpdate;

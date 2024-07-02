@@ -87,7 +87,7 @@ export class Gallery {
         const btnCheck = Tag.byId('-btn-check');
         if (btnCheck) {
             btnCheck.event('click', (e) => {
-                const url = new URL('', window.location.href);
+                const url = new URL('', location.href);
                 url.searchParams.set(TYPE_KEY, 'check');
                 Ajax.call(
                     this.ajaxResponse.bind(this),

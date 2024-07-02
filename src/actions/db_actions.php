@@ -165,9 +165,9 @@ class DbActions extends Actions
             $rows2 = Sys::db()->insertBatch($table, $cols, array_map(function ($v) use ($vKey) {
                 return array_merge(Arr::toArray($v), $vKey);
             }, $values));
-            Msg::info('Replaced ' . $rows1 . ' records with ' . $rows2 . ' records in table \"' . $table . '\".');
+            Msg::info('Replaced ' . $rows1 . ' records with ' . $rows2 . ' records in table "' . $table . '".');
         } else {
-            Msg::info('Deleted ' . $rows1 . ' records in table \"' . $table . '\".');
+            Msg::info('Deleted ' . $rows1 . ' records in table "' . $table . '".');
         }
     }
 

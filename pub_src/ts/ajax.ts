@@ -53,7 +53,7 @@ export class Ajax {
         urlStr = '',
         accept = MimeType.JSON,
     ) {
-        const url = new URL(urlStr, window.location.href);
+        const url = new URL(urlStr, location.href);
         Ajax.call(onload, HttpMethod.GET, null, url, MimeType.JSON, accept);
     }
 
@@ -64,7 +64,7 @@ export class Ajax {
         type = MimeType.JSON,
         accept = MimeType.JSON,
     ) {
-        const url = new URL(urlStr, window.location.href);
+        const url = new URL(urlStr, location.href);
         Ajax.call(onload, HttpMethod.POST, data, url, type, accept);
     }
 
@@ -75,7 +75,7 @@ export class Ajax {
         type = MimeType.JSON,
         accept = MimeType.JSON,
     ) {
-        const url = new URL(urlStr, window.location.href);
+        const url = new URL(urlStr, location.href);
         url.searchParams.set(TYPE_KEY, UPDATE);
         Ajax.call(onload, HttpMethod.POST, data, url, type, accept);
     }
@@ -87,7 +87,7 @@ export class Ajax {
         type = MimeType.JSON,
         accept = MimeType.JSON,
     ) {
-        const url = new URL(urlStr, window.location.href);
+        const url = new URL(urlStr, location.href);
         url.searchParams.set(TYPE_KEY, DELETE);
         Ajax.call(onload, HttpMethod.POST, data, url, type, accept);
     }

@@ -12,7 +12,7 @@
             if ($purpose === 'insert' && $auto) {
                 continue;
             }
-            if ($purpose === 'update' && ($primary || $readOnly || $auto)) {
+            if ($readOnly || $purpose === 'update' && ($primary || $auto)) {
                 $attrs['disabled'] = 1;
             }
         ?>

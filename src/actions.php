@@ -76,7 +76,7 @@ class Actions
             }
         } catch (Exception $e) {
             if ($db && $db->inTransaction()) {
-                $db()->rollBack();
+                $db->rollBack();
             }
             $this->doError($e->getMessage());
         }
