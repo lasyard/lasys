@@ -52,7 +52,7 @@ final class User
                 $_SESSION['user'] = array(
                     'id' => $id,
                     'name' => $user['name'],
-                    'priv' => explode(',', $user['priv']),
+                    'priv' => $user['priv'] ? explode(',', $user['priv']) : [],
                 );
                 $options = [
                     'expires' => time() + 60 * 60 * 24 * 30,
