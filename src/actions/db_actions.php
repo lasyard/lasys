@@ -28,7 +28,7 @@ class DbActions extends Actions
             $primary = ($c['Key'] == 'PRI');
             $auto = ($c['Extra'] == 'auto_increment') || in_array('auto', $comments);
             $required = ($c['Null'] !== 'YES' && !isset($c['Default']));
-            $readOnly = in_array('readOnly', $comments);
+            $readOnly = false;
             $label = $this->getLabel($name);
             $attrs = [];
             $i = strpos($c['Type'], '(');

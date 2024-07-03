@@ -82,22 +82,18 @@ export class DbTable {
     private static clearFormData(form: HTMLFormElement) {
         for (let i = 0; i < form.elements.length; ++i) {
             const f = form.elements[i];
-            // do not clear read only fields
-            if (f.attributes.getNamedItem('disabled')) {
-                continue;
-            }
             if (f instanceof HTMLInputElement) {
                 if (f.type === 'submit') {
                     continue;
                 } else if (f.type === 'checkbox') {
-                    f.checked = false;
+                    f.checked = f.dataset.default?.toLowerCase() === 'true';
                 } else {
-                    f.value = '';
+                    f.value = f.dataset.default ?? '';
                 }
             } else if (f instanceof HTMLTextAreaElement) {
-                (f as HTMLTextAreaElement).value = '';
+                (f as HTMLTextAreaElement).value = f.dataset.default ?? '';
             } else if (f instanceof HTMLSelectElement) {
-                (f as HTMLSelectElement).value = '';
+                (f as HTMLSelectElement).value = f.dataset.default ?? '';
             }
         }
     }
@@ -202,6 +198,8 @@ export class DbTable {
                 );
                 e.preventDefault();
             });
+            // set default value
+            DbTable.clearFormData(form);
         }
         const formUpdate = Tag.form('-form-update');
         if (formUpdate) {
