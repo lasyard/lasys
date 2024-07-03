@@ -146,10 +146,10 @@ export class DbTable {
                         data[f.name] = (f as HTMLInputElement).checked ? 1 : 0;
                     }
                 } else {
-                    data[f.name] = f.value;
+                    data[f.name] = (f.value !== '' ? f.value : null);
                 }
             } else if (f instanceof HTMLTextAreaElement || f instanceof HTMLSelectElement) {
-                data[f.name] = f.value;
+                data[f.name] = (f.value !== '' ? f.value : null);
             }
         }
         return data;
