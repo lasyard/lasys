@@ -183,14 +183,6 @@ class DbActions extends Actions
         }
     }
 
-    // This is not used because of ajaxfy.
-    public function actionUpdate()
-    {
-        Sys::db()->insert($this->getTable(), $_POST);
-        // Do redirect to remove the 'update' query key.
-        Sys::app()->redirect($this->name);
-    }
-
     public function actionAjaxPost($pre = null, $post = null, $trans = null)
     {
         $data = json_decode(file_get_contents('php://input'), true);
