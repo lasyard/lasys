@@ -233,7 +233,7 @@ final class App
     private function tryAddScript($file)
     {
         if (is_file(PUB_PATH . DS . $file)) {
-            $this->_scripts[] = PUB_URL . Str::pathUrl($file);
+            $this->_scripts[] = PUB_URL . Str::pathUrl($file) . '?v=' . ASSET_SUM;
             return true;
         }
         return false;
@@ -252,7 +252,7 @@ final class App
     private function tryAddStyle($file)
     {
         if (is_file(PUB_PATH . DS . $file)) {
-            $this->_styles[] = PUB_URL . Str::pathUrl($file);
+            $this->_styles[] = PUB_URL . Str::pathUrl($file) . '?v=' . ASSET_SUM;
             return true;
         }
         return false;

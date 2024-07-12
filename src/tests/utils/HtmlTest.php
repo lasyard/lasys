@@ -12,7 +12,7 @@ final class HtmlTest extends TestCase
     public function testScriptLink()
     {
         $this->assertSame(
-            '<script type="text/javascript" src="jquery?v=0"></script>' . PHP_EOL,
+            '<script type="text/javascript" src="jquery"></script>' . PHP_EOL,
             Html::scriptLink('jquery')
         );
     }
@@ -20,7 +20,7 @@ final class HtmlTest extends TestCase
     public function testCssLink()
     {
         $this->assertSame(
-            '<link rel="stylesheet" href="jquery?v=0" type="text/css" />' . PHP_EOL,
+            '<link rel="stylesheet" href="jquery" type="text/css" />' . PHP_EOL,
             Html::cssLink('jquery')
         );
     }
