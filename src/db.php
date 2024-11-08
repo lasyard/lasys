@@ -236,7 +236,6 @@ final class Db extends PDO
                 case 'DOUBLE':
                 case 'INT24':
                 case 'LONGLONG':
-                case 'TIMESTAMP':
                     $fields[$name] = 'number';
                     break;
                 case 'GEOMETRY':
