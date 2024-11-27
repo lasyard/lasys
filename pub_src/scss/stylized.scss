@@ -1,9 +1,10 @@
+@use 'defs' as *;
+
 table.stylized {
-    @extend .border;
+    @include border;
     width: 100%;
 
     @mixin cell {
-        @extend .border;
         padding: 0.3em;
     }
 
@@ -18,22 +19,22 @@ table.stylized {
     }
 
     tr.def {
-        background: $bgColor;
+        background: var(--bg-color);
     }
 
     tr.alt {
-        background: $bgColor1;
+        background: var(--bg-color1);
     }
 
     th {
         @include cell;
-        font-family: $headerFont;
-        background: $bgColor3;
+        font-family: var(--header-font);
+        background: var(--bg-color2);
     }
 
     td {
         @include cell;
-        font-family: $normalFont;
+        font-family: var(--font);
 
         i.bi {
             font-size: 0.8em;
@@ -41,8 +42,8 @@ table.stylized {
     }
 
     td.group {
-        font-family: $headerFont;
-        background: $highColor;
+        font-family: var(--header-font);
+        background: var(--high-bg-color);
 
         >:first-child {
             margin-right: 2em;
@@ -52,5 +53,5 @@ table.stylized {
 
 span.stat {
     font-size: 0.8em;
-    color: $visitedColor;
+    color: $hotColor;
 }

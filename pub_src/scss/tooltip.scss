@@ -1,8 +1,10 @@
+@use 'defs' as *;
+
 div.tooltip {
-    @extend .border;
+    @include border;
     border-radius: 0.8em;
     font-size: 0.8em;
-    background: $bgColor1;
+    background: var(--bg-color1);
     display: none;
     position: absolute;
     max-width: 80%;
@@ -10,12 +12,13 @@ div.tooltip {
 
     >div:first-child {
         border-radius: 0.3em 0.3em 0 0;
-        color: $highColor;
-        background: $bgColor5;
+        color: var(--dark-text-color);
+        background: var(--dark-bg-color);
         width: 100%;
 
         >span:first-child {
-            @extend .nobr;
+            @include nobr;
+            margin-left: 0.5em;
             margin-right: 3em;
         }
 

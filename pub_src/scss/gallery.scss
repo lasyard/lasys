@@ -1,7 +1,9 @@
+@use 'defs' as *;
+
 div#main {
     div.gallery {
         p.image-ctrl {
-            color: $bgColor3;
+            color: var(--line-color);
             font-size: 1.5em;
             letter-spacing: 0.3em;
             text-align: center;
@@ -13,7 +15,7 @@ div#main {
 
             div.image,
             a.thumb {
-                @extend .border;
+                @include border;
                 position: relative;
                 display: inline-block;
                 vertical-align: bottom;
@@ -34,16 +36,10 @@ div#main {
                 }
 
                 span.title {
-                    font-family: $headerFont;
+                    font-family: var(--header-font);
                     font-size: 0.8em;
                 }
             }
-
-            // a.thumb {
-            //     width: 200px;
-            //     height: 200px;
-            //     line-height: 200px;
-            // }
         }
     }
 }

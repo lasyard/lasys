@@ -1,9 +1,11 @@
+@use 'defs' as *;
+
 div#main {
     div.text {
         $charWidth: 1em + $letterSpacing;
         $indent: $charWidth * 2;
 
-        @extend .centered;
+        @include centered;
         margin-top: 1em;
         max-width: $charWidth * 40;
 
@@ -28,7 +30,7 @@ div#main {
             }
 
             td:first-child {
-                @extend .nobr;
+                @include nobr;
                 vertical-align: top;
             }
 

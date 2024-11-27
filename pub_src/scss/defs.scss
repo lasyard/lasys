@@ -1,0 +1,23 @@
+$barHeight: 31px;
+$listWidth: 18rem;
+
+$letterSpacing: 0.1em;
+
+$sysColor: #0A0;
+$hotColor: #F55;
+$linkColor: #55F;
+$visitedColor: #A0A;
+
+@mixin border {
+    border: 1px solid var(--line-color);
+}
+
+@mixin nobr {
+    white-space: nowrap;
+}
+
+@mixin centered {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

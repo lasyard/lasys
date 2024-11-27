@@ -1,5 +1,7 @@
+@use 'defs' as *;
+
 @mixin fixed-width {
-    @extend .nobr;
+    @include nobr;
     display: inline-block;
     min-width: 18%;
     font-size: 0.8em;
@@ -7,12 +9,12 @@
 
 form {
     fieldset {
-        @extend .border;
+        @include border;
         margin: 0.5em 0;
         padding: 0;
 
         legend {
-            font-family: $headerFont;
+            font-family: var(--header-font);
             font-size: 0.8em;
         }
     }
@@ -31,7 +33,7 @@ form {
 
         span.label {
             display: inline-block;
-            font-family: $headerFont;
+            font-family: var(--header-font);
             text-align: right;
             width: 15%;
             vertical-align: top;
@@ -48,7 +50,7 @@ form {
         }
 
         div.checkbox {
-            @extend .border;
+            @include border;
             display: inline-block;
             width: 80%;
 
@@ -66,7 +68,7 @@ form {
 
     fieldset.links {
         span {
-            @extend .nobr;
+            @include nobr;
             display: inline-block;
             font-size: 0.8em;
             margin-left: 1ex;

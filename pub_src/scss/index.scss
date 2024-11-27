@@ -1,43 +1,56 @@
+@use 'defs' as *;
+
+@use 'form';
+@use 'gallery';
+@use 'image';
+@use 'stylized';
+@use 'text';
+@use 'tooltip';
+
 * {
     box-sizing: border-box;
 }
 
+// do not use variables here
+:root {
+    --bg-color: #DEF;
+    --bg-color1: #BDF;
+    --bg-color2: #9CF;
+    --text-color: #111;
+    --dark-bg-color: #111;
+    --dark-text-color: #EEE;
+    --high-bg-color: #EEA;
+    --trans-bg-color: rgba(119, 187, 255, 0.5);
+    --line-color: #AAA;
+    --font: serif;
+    --header-font: sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #121212;
+        --bg-color1: #1E1E1E;
+        --bg-color2: #080808;
+        --text-color: #EEE;
+        --dark-bg-color: #000;
+        --dark-text-color: #EEE;
+        --high-bg-color: #333;
+        --trans-bg-color: rgba(68, 68, 17, 0.5);
+        --line-color: #441;
+    }
+}
+
 @media screen and (max-resolution: 96dpi) {
-    html {
+    :root {
         font-size: 16px;
     }
 }
 
 @media screen and (min-resolution: 96dpi) {
-    html {
+    :root {
         font-size: 18px;
     }
 }
-
-$whiteColor: #FFF;
-$blackColor: #000;
-$bgColor: #DEF;
-$bgColor1: #BDF;
-// This is the same as selection color.
-$bgColor2: #7BF;
-$bgColor3: #5AF;
-$bgColor4: #39F;
-$bgColor5: #18F;
-$transBgColor: rgba(85, 170, 255, 0.5);
-$linkColor: #55F;
-$visitedColor: #A0A;
-$sysColor: #0A0;
-$highColor: #FFA;
-$hotColor: #F55;
-$lineColor: #AAA;
-
-$normalFont: serif;
-$headerFont: sans-serif;
-$titleFont: auto;
-$letterSpacing: 0.1em;
-
-$barHeight: 31px;
-$listWidth: 18rem;
 
 @mixin ribbon {
     position: sticky;
@@ -48,9 +61,9 @@ $listWidth: 18rem;
 
 body {
     margin: 0 !important;
-    background-color: $bgColor !important;
-    color: $blackColor;
-    font-family: $normalFont;
+    background-color: var(--bg-color) !important;
+    color: var(--text-color);
+    font-family: var(--font);
     font-weight: normal;
     line-height: 1.5;
     letter-spacing: $letterSpacing;
@@ -58,7 +71,19 @@ body {
 }
 
 .border {
-    border: 1px solid $lineColor;
+    @include border;
+}
+
+.nobr {
+    @include nobr;
+}
+
+.centered {
+    @include centered;
+}
+
+.center {
+    text-align: center;
 }
 
 .hot {
@@ -69,13 +94,9 @@ body {
     color: $sysColor !important;
 }
 
-.center {
-    text-align: center;
-}
-
-@mixin badge-base {
+@mixin badge {
     border-radius: 5px;
-    font-family: $titleFont;
+    font-family: var(--header-font);
     font-size: 0.8em;
     margin-left: 4px;
     margin-right: 4px;
@@ -84,23 +105,13 @@ body {
 }
 
 .badge {
-    border: 1px solid $lineColor;
-    @include badge-base;
+    border: 1px solid var(--line-color);
+    @include badge;
 }
 
 .badge2 {
-    border: 1px dashed $lineColor;
-    @include badge-base;
-}
-
-.centered {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.nobr {
-    white-space: nowrap;
+    border: 1px dashed var(--line-color);
+    @include badge;
 }
 
 a {
@@ -116,7 +127,7 @@ a {
     }
 
     &:hover {
-        background: $whiteColor;
+        background: var(--high-bg-color);
         color: $hotColor;
     }
 }
@@ -132,8 +143,8 @@ div#bar {
     top: 0;
     width: 100%;
     height: $barHeight;
-    background: $blackColor;
-    color: $whiteColor;
+    background: var(--dark-bg-color);
+    color: var(--dark-text-color);
     clear: both;
     z-index: 1000;
 
@@ -146,7 +157,7 @@ div#bar {
     }
 
     a {
-        color: $whiteColor;
+        color: var(--dark-text-color);
     }
 
     span#user {
@@ -157,8 +168,8 @@ div#bar {
 div#footer {
     width: 100%;
     height: $barHeight;
-    background: $blackColor;
-    color: $whiteColor;
+    background: var(--dark-bg-color);
+    color: var(--dark-text-color);
     clear: both;
 }
 
@@ -188,7 +199,7 @@ div#footer {
     }
 
     span#breadcrumbs {
-        font-family: $headerFont;
+        font-family: var(--header-font);
     }
 }
 
@@ -209,18 +220,18 @@ div#footer {
 }
 
 @mixin list-box {
-    @extend .border;
+    @include border;
     margin: 0.5rem;
     padding: 0;
 }
 
 div#list {
-    font-family: $headerFont;
+    font-family: var(--header-font);
 
     div.buttons {
         @include list-box;
         margin-top: 0;
-        background-color: $transBgColor;
+        background-color: var(--trans-bg-color);
         font-size: 0.8em;
         text-align: right;
     }
@@ -229,7 +240,7 @@ div#list {
         @include list-box;
 
         legend {
-            font-family: $headerFont;
+            font-family: var(--header-font);
             font-size: 0.8em;
         }
     }
@@ -249,44 +260,44 @@ div#list {
 
         li.highlighted,
         li.highlighted a {
-            background-color: $highColor;
+            background-color: var(--high-bg-color);
         }
     }
 }
 
 div#main {
     div.ribbon {
-        background-color: $transBgColor;
+        background-color: var(--trans-bg-color);
         font-size: 0.8em;
-        font-family: $headerFont;
+        font-family: var(--header-font);
 
         span.buttons {
-            @extend .nobr;
+            @include nobr;
             float: right;
         }
 
         div#-popup-msg {
-            background-color: $whiteColor;
+            background-color: var(--high-bg-color);
         }
     }
 }
 
+h1,
 h2,
 h3,
 h4,
 h5 {
-    font-family: $headerFont;
+    font-family: var(--header-font);
 }
 
 h1 {
-    font-family: $titleFont;
     font-size: 2em;
     text-align: center;
 }
 
 h2 {
     font-size: 1.5em;
-    border-bottom: 1px ridge $bgColor;
+    border-bottom: 1px ridge var(--bg-color);
 }
 
 h3 {
@@ -304,13 +315,15 @@ div.error {
 }
 
 table {
-    @extend .border;
+    @include border;
     border-collapse: collapse;
+
+    th {
+        @include border;
+    }
 
     th,
     td {
-        @extend .border;
-
         p {
             margin: 0;
         }
@@ -327,7 +340,7 @@ ul.icon {
     li {
         >i.bi:first-child {
             margin-right: 0.8em;
-            color: $bgColor5;
+            color: var(--line-color);
         }
     }
 }
@@ -337,7 +350,7 @@ img {
 }
 
 strong {
-    background-color: $bgColor2;
+    background-color: var(--bg-color2);
 }
 
 code {
@@ -345,14 +358,7 @@ code {
 }
 
 blockquote {
-    border-left: 3px solid $lineColor;
+    border-left: 3px solid var(--line-color);
     padding-left: 3px;
-    background-color: $bgColor1;
+    background-color: var(--bg-color1);
 }
-
-@import 'form';
-@import 'gallery';
-@import 'image';
-@import 'stylized';
-@import 'text';
-@import 'tooltip';
