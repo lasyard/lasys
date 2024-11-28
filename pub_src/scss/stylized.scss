@@ -2,10 +2,13 @@
 
 table.stylized {
     @include border;
+    border-collapse: collapse;
     width: 100%;
 
     @mixin cell {
         padding: 0.3em;
+        border-left: 1px solid var(--line-color);
+        border-right: 1px solid var(--line-color);
     }
 
     tr.header {
@@ -28,13 +31,11 @@ table.stylized {
 
     th {
         @include cell;
-        font-family: var(--header-font);
         background: var(--bg-color2);
     }
 
     td {
         @include cell;
-        font-family: var(--font);
 
         i.bi {
             font-size: 0.8em;

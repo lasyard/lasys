@@ -242,6 +242,10 @@ div#list {
         legend {
             font-family: var(--header-font);
             font-size: 0.8em;
+
+            i.bi {
+                color: var(--line-color)
+            }
         }
     }
 
@@ -254,6 +258,7 @@ div#list {
             padding: 0;
 
             >i.bi {
+                color: var(--line-color);
                 float: right;
             }
         }
@@ -270,6 +275,10 @@ div#main {
         background-color: var(--trans-bg-color);
         font-size: 0.8em;
         font-family: var(--header-font);
+
+        i.bi {
+            color: var(--line-color);
+        }
 
         span.buttons {
             @include nobr;
@@ -314,19 +323,18 @@ div.error {
     border: 1px solid $hotColor;
 }
 
-table {
-    @include border;
-    border-collapse: collapse;
+th {
+    font-family: var(--header-font);
+}
 
-    th {
-        @include border;
-    }
+td {
+    font-family: var(--font);
+}
 
-    th,
-    td {
-        p {
-            margin: 0;
-        }
+th,
+td {
+    p {
+        margin: 0;
     }
 }
 
