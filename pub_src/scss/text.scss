@@ -1,24 +1,37 @@
 @use 'defs' as *;
 
+$charWidth: 1em + $letterSpacing;
+$indent: $charWidth * 2;
+
+@mixin text {
+    @include centered;
+    margin-top: 1em;
+    max-width: $charWidth * 40;
+
+    p:not(.center) {
+        text-indent: $indent;
+    }
+
+    ul,
+    ol {
+        margin-left: $indent - 0.5em;
+    }
+
+    pre {
+        margin-left: $indent;
+    }
+}
+
 div#main {
+    div#html-body {
+        @include text;
+    }
+
     div.text {
-        $charWidth: 1em + $letterSpacing;
-        $indent: $charWidth * 2;
-
-        @include centered;
-        margin-top: 1em;
-        max-width: $charWidth * 40;
-
-        p:not(.center) {
-            text-indent: $indent;
-        }
+        @include text;
 
         ul {
             list-style: none;
-        }
-
-        ol {
-            margin-left: $indent - 0.5em;
         }
 
         table {
