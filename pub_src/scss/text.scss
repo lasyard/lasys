@@ -25,6 +25,17 @@ $indent: $charWidth * 2;
 div#main {
     div#html-body {
         @include text;
+
+        table {
+            @include border;
+            margin-left: $indent;
+            border-collapse: collapse;
+
+            th,
+            td {
+                @include border;
+            }
+        }
     }
 
     div.text {
