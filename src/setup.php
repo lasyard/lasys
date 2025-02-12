@@ -39,11 +39,14 @@ if (!defined('DATA_DIR')) {
 if (!defined('PUB_DIR')) {
     define('PUB_DIR', 'pub');
 }
+if (!defined('ACTIONS_DIR')) {
+    define('ACTIONS_DIR', 'actions');
+}
 if (!defined('VIEWS_DIR')) {
     define('VIEWS_DIR', 'views');
 }
-if (!defined('ACTIONS_DIR')) {
-    define('ACTIONS_DIR', 'actions');
+if (!defined('UTILS_DIR')) {
+    define('UTILS_DIR', 'utils');
 }
 if (!defined('APP_TITLE')) {
     define('APP_TITLE', 'Lasys');
@@ -54,16 +57,18 @@ if (!defined('ROOT_PATH')) {
 define('CONF_PATH', ROOT_PATH . DS . CONF_DIR);
 define('DATA_PATH', ROOT_PATH . DS . DATA_DIR);
 define('PUB_PATH', ROOT_PATH . DS . PUB_DIR);
-define('VIEWS_PATH', ROOT_PATH . DS . VIEWS_DIR);
 define('ACTIONS_PATH', ROOT_PATH . DS . ACTIONS_DIR);
+define('VIEWS_PATH', ROOT_PATH . DS . VIEWS_DIR);
+define('UTILS_PATH', ROOT_PATH . DS . UTILS_DIR);
 set_include_path(
     get_include_path()
         . PATH_SEPARATOR . dirname(__DIR__) . DS . 'vendor'
         . PATH_SEPARATOR . __DIR__
-        . PATH_SEPARATOR . __DIR__ . DS . 'utils'
-        . PATH_SEPARATOR . __DIR__ . DS . 'parsers'
         . PATH_SEPARATOR .  ACTIONS_PATH
         . PATH_SEPARATOR . __DIR__ . DS . 'actions'
+        . PATH_SEPARATOR . __DIR__ . DS . 'parsers'
+        . PATH_SEPARATOR . __DIR__ . DS . 'utils'
+        . PATH_SEPARATOR . UTILS_PATH
 );
 // Load it for autoload has not been enabled.
 require_once 'str.php';
