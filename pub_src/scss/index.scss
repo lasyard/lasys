@@ -283,6 +283,10 @@ div#main {
         span.buttons {
             @include nobr;
             float: right;
+
+            i.bi {
+                color: var(--text-color);
+            }
         }
 
         div#-popup-msg {
