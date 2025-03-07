@@ -19,12 +19,10 @@ final class ViewGallery extends Traits
 
     public function forItem(&$item, $conf)
     {
-        $rPriv = $item[Config::PRIV_READ] ?? $conf[Config::PRIV_READ];
         $wPriv = $item[Config::PRIV_EDIT] ?? $conf[Config::PRIV_EDIT];
-        $pPriv = $item[Config::PRIV_POST] ?? $conf[Config::PRIV_POST];
-        $item[Server::GET] ??= GalleryActions::get()->priv(...$rPriv);
-        $item[Server::AJAX_GET] ??= GalleryActions::ajaxGet()->priv(...$rPriv);
-        $item[Server::POST] ??= GalleryActions::post()->priv(...$pPriv);
+        $item[Server::GET] ??= GalleryActions::get();
+        $item[Server::AJAX_GET] ??= GalleryActions::ajaxGet();
+        $item[Server::POST] ??= GalleryActions::post();
         // Set this to pass down ajax delete & update.
         $item[Server::AJAX_DELETE] ??= Actions::noop();
         $item[Server::AJAX_UPDATE] ??= Actions::noop();

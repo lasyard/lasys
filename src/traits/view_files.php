@@ -3,7 +3,7 @@ final class ViewFiles extends Traits
 {
     public function forSelf(&$conf, $oldConf)
     {
-        $conf[Config::ETC][Server::GET] ??= FileActions::get()->priv(...$conf[Config::PRIV_READ]);
+        $conf[Config::ETC][Server::GET] ??= FileActions::get();
     }
 
     public function forEachItem(&$item, $conf)

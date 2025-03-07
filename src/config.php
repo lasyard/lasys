@@ -71,12 +71,12 @@ final class Config
             if (is_string($item)) {
                 $item = [self::TITLE => $item];
             } else if ($item instanceof Actions) {
-                $item = [Server::GET => $item->priv($conf[self::PRIV_READ])];
+                $item = [Server::GET => $item];
             } else if (is_array($item) && isset($item[Actions::ACTION])) {
                 $item = [Server::GET => $item];
             }
             self::applyTraits($item, $conf[self::TRAITS], 'forEachItem', $conf);
-            if (isset($item[Config::TRAITS])) {
+            if (isset($item[self::TRAITS])) {
                 self::applyTraits($item, $item[self::TRAITS], 'forItem', $conf);
             }
         }
@@ -85,7 +85,7 @@ final class Config
 
     public function get($name)
     {
-        return array_key_exists($name, $this->_conf) ? $this->_conf[$name] : null;
+        return $this->_conf[$name] ?? null;
     }
 
     private static function setDefault(&$conf, $opt, $oldConf = null)
@@ -141,19 +141,42 @@ final class Config
             ?? ($name === $this->_conf[self::DEFAULT_ITEM] ? '' : Str::captalize($name));
     }
 
+    public function attr($name, $key)
+    {
+        $conf = $this->_conf;
+        $list = $conf[self::LIST];
+        return $list[$name][$key] ?? $conf[self::ETC][$key] ?? $conf[$key];
+    }
+
     public function action($name, $type)
     {
-        $list = $this->_conf[self::LIST];
+        $conf = $this->_conf;
+        $list = $conf[self::LIST];
         if (isset($list[$name][$type])) {
             $action = $list[$name][$type];
         } else if (is_dir($this->_path . DS . $name)) {
             $action = Actions::noop();
-        } else if (isset($this->_conf[Config::ETC][$type])) {
-            $action = $this->_conf[Config::ETC][$type];
+        } else if (isset($conf[self::ETC][$type])) {
+            $action = $conf[self::ETC][$type];
         } else {
             return false;
         }
         if ($action instanceof Actions) {
+            switch ($type) {
+                case Server::GET:
+                case Server::AJAX_GET:
+                    return $action->priv(...$this->attr($name, self::PRIV_READ));
+                case Server::POST:
+                    return $action->priv(...$this->attr($name, self::PRIV_POST));
+                case Server::AJAX_POST:
+                case Server::UPDATE:
+                case Server::AJAX_UPDATE:
+                case Server::DELETE:
+                case Server::AJAX_DELETE:
+                    return $action->priv(...$this->attr($name, self::PRIV_EDIT));
+                default:
+                    break;
+            }
             return $action->priv();
         }
         return $action;
