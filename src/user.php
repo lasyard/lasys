@@ -95,6 +95,11 @@ final class User
         return $this->_user == null;
     }
 
+    public function isAdmin()
+    {
+        return isset($this->_user['id']) && $this->_user['id'] == User::ADMIN;
+    }
+
     public function hasPriv($priv)
     {
         if (empty($priv)) {
@@ -115,7 +120,7 @@ final class User
     {
         foreach ($privs as $priv) {
             if ($priv === User::OWNER) {
-                if (isset($uid) && $this->hasPriv($uid)) {
+                if (isset($uid) && $this->hasPriv($uid) || $this->isAdmin()) {
                     continue;
                 }
                 return false;
