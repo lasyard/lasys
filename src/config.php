@@ -159,7 +159,7 @@ final class Config
         } else if (isset($conf[self::ETC][$type])) {
             $action = $conf[self::ETC][$type];
         } else {
-            return false;
+            return Actions::error("Cannot find $name.")->priv();
         }
         if ($action instanceof Actions) {
             switch ($type) {

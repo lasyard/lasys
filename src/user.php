@@ -17,10 +17,15 @@ final class User
     {
         if (isset($_SESSION['user'])) {
             $this->_user = $_SESSION['user'];
-        } else if (isset($_COOKIE['id']) && isset($_COOKIE['password'])) {
-            $this->check($_COOKIE['id'], $_COOKIE['password']);
-        } else {
-            $this->_user = null;
+        }
+        if ($this->_user == null) {
+            if (isset($_COOKIE['id']) && isset($_COOKIE['password'])) {
+                if (!$this->check($_COOKIE['id'], $_COOKIE['password'])) {
+                    throw new RuntimeException('Wrong user name or password!');
+                }
+            } else if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
+                $this->check($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'], false);
+            }
         }
     }
 
@@ -32,8 +37,8 @@ final class User
 
     public function logout()
     {
+        $this->_user = null;
         if (isset($_SESSION['user'])) {
-            $this->_user = null;
             session_unset();
             // Cause 'Segmentation fault' in Apache 2.4/PHP 8.1 using Chrome cached, don't know why.
             // setcookie('PHPSESSID', '', 0, '/');
@@ -42,30 +47,37 @@ final class User
         }
     }
 
-    private function check($id, $password)
+    private function check($id, $password, $session = true)
     {
         $db = Sys::db();
         $user = $db->getOne('select * from `users` where `id` = ?', $id);
         if ($user) {
             $hash = $user['password_hash'];
             if (hash_equals($hash, crypt($password, $hash))) {
-                $_SESSION['user'] = array(
+                $userInfo = [
                     'id' => $id,
                     'name' => $user['name'],
                     'priv' => $user['priv'] ? explode(',', $user['priv']) : [],
-                );
-                $options = [
-                    'expires' => time() + 60 * 60 * 24 * 30,
-                    'path' => '/',
-                    'samesite' => 'Strict',
                 ];
-                setcookie('id', $id, $options);
-                setcookie('password', $password, $options);
-                $this->_user = $_SESSION['user'];
-                return;
+                $this->_user = $userInfo;
+                if ($session) {
+                    $_SESSION['user'] = array(
+                        'id' => $id,
+                        'name' => $user['name'],
+                        'priv' => $user['priv'] ? explode(',', $user['priv']) : [],
+                    );
+                    $options = [
+                        'expires' => time() + 60 * 60 * 24 * 30,
+                        'path' => '/',
+                        'samesite' => 'Strict',
+                    ];
+                    setcookie('id', $id, $options);
+                    setcookie('password', $password, $options);
+                }
+                return true;
             }
         }
-        throw new RuntimeException('Wrong user name or password!');
+        return false;
     }
 
     public function id()
