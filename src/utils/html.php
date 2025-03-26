@@ -1,9 +1,7 @@
 <?php
 final class Html
 {
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function cssLink($css)
     {
@@ -64,7 +62,8 @@ final class Html
                 unset($attrs['items']);
                 $html = '<div class="checkbox">' . PHP_EOL;
                 foreach ($items as $index => $label) {
-                    $html .= '<span><input type="checkbox" name="' . $name . '[' . $index . ']" />' . $label . '</span>' . PHP_EOL;
+                    $html .= '<span><label><input type="checkbox" name="' . $name . '[' . $index . ']" />'
+                        . $label . '</label></span>' . PHP_EOL;
                 }
                 $html .= '</div>';
                 break;

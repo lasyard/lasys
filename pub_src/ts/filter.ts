@@ -136,8 +136,7 @@ export abstract class Filter {
             input.attr({ checked: 'checked' });
         }
         return Tag.span(
-            input,
-            Tag.of('label').add(this.toLabel(value)),
+            Tag.of('label').addAll(input, this.toLabel(value)),
             Tag.span('(' + count + ')').cls('hot'),
         );
     }
