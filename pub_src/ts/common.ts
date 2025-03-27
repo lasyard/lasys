@@ -51,6 +51,15 @@ export function zhCmp(a: string, b: string) {
     return collator.compare(a1, b1);
 }
 
+let collatorNumLess: Intl.Collator | null = null;
+
+export function zhCmpNumLess(a: string, b: string) {
+    if (collatorNumLess == null) {
+        collatorNumLess = new Intl.Collator('zh', { numeric: false });
+    }
+    return collatorNumLess.compare(a, b);
+}
+
 export function dateCmp(a: string, b: string) {
     return objCmp(Date.parse(a), Date.parse(b));
 }
