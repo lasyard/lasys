@@ -13,14 +13,14 @@
 
 // do not use variables here
 :root {
-    --bg-color: #EFD;
-    --bg-color1: #DFB;
-    --bg-color2: #CF9;
+    --bg-color: #EEE;
+    --bg-color1: #FFF;
+    --bg-color2: #DEF;
     --text-color: #111;
     --dark-bg-color: #111;
     --dark-text-color: #EEE;
-    --high-bg-color: #EEA;
-    --trans-bg-color: rgba(187, 255, 119, 0.5);
+    --high-bg-color: #FFB;
+    --trans-bg-color: rgba(255, 255, 170, 0.5);
     --line-color: #AAA;
     --font: serif;
     --header-font: sans-serif;
@@ -28,15 +28,15 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-color: #121212;
-        --bg-color1: #1E1E1E;
-        --bg-color2: #080808;
+        --bg-color: #111;
+        --bg-color1: #222;
+        --bg-color2: #123;
         --text-color: #EEE;
         --dark-bg-color: #000;
         --dark-text-color: #EEE;
-        --high-bg-color: #333;
-        --trans-bg-color: rgba(68, 68, 17, 0.5);
-        --line-color: #441;
+        --high-bg-color: #444;
+        --trans-bg-color: rgba(85, 85, 85, 0.5);
+        --line-color: #551;
     }
 }
 
