@@ -20,9 +20,7 @@ final class User
         }
         if ($this->_user == null) {
             if (isset($_COOKIE['id']) && isset($_COOKIE['password'])) {
-                if (!$this->check($_COOKIE['id'], $_COOKIE['password'])) {
-                    throw new RuntimeException('Wrong user name or password!');
-                }
+                $this->check($_COOKIE['id'], $_COOKIE['password']);
             } else if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
                 $this->check($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'], false);
             }
@@ -32,7 +30,9 @@ final class User
     public function login($name, $password)
     {
         $this->logout();
-        $this->check($name, $password);
+        if (!$this->check($name, $password)) {
+            throw new RuntimeException('Wrong user name or password!');
+        }
     }
 
     public function logout()
