@@ -94,7 +94,8 @@ body {
     color: $sysColor !important;
 }
 
-@mixin badge {
+.badge {
+    border: 1px solid var(--line-color);
     border-radius: 5px;
     font-family: var(--header-font);
     font-size: 0.8em;
@@ -102,16 +103,6 @@ body {
     margin-right: 4px;
     padding-left: 2px;
     padding-right: 2px;
-}
-
-.badge {
-    border: 1px solid var(--line-color);
-    @include badge;
-}
-
-.badge2 {
-    border: 1px dashed var(--line-color);
-    @include badge;
 }
 
 a {
