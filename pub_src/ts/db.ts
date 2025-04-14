@@ -304,7 +304,6 @@ export class DbTable {
                 const th = Tag.of('th');
                 DbTable.addContent(th, labels, c.th, ci);
                 colTag.style({ width: c.width });
-                th.style({ 'text-align': c.align });
                 th.putInto(headers);
             }
             if (this.formUpdate) {
