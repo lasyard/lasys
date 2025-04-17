@@ -62,7 +62,8 @@ export abstract class Filter {
             const storage = sessionStorage;
             var loaded = true;
             for (const check of checks) {
-                const e = check.get().firstChild as HTMLInputElement;
+                // span.label.input
+                const e = check.get().firstChild?.firstChild as HTMLInputElement;
                 const key = location.pathname + e.name;
                 if (loaded) {
                     var v = sessionStorage.getItem(key);
@@ -188,7 +189,7 @@ export class CheckFilter extends Filter {
             return (data: any[]) => {
                 for (let i = 0; i < items.length; ++i) {
                     const c = items.item(i) as HTMLInputElement;
-                    if (c.value == data[this.index] && c.checked) {
+                    if (c.value == String(data[this.index]) && c.checked) {
                         return true;
                     }
                 }
