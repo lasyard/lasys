@@ -188,7 +188,7 @@ final class App
     public function hasPrivOf($name, $type, $uid = null)
     {
         $actions = $this->_conf->action($name, $type);
-        if ($actions) {
+        if (is_array($actions) && $actions[Actions::PRIV] !== null) {
             return $this->hasPriv($name, $actions[Actions::PRIV], $uid);
         }
         return false;

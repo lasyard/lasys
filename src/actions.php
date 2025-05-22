@@ -44,6 +44,15 @@ class Actions
         ];
     }
 
+    // As a stub to set priv of forbidden.
+    public static function nil()
+    {
+        return [
+            self::ACTION => null,
+            self::PRIV => null,
+        ];
+    }
+
     public function priv(...$priv)
     {
         return [
