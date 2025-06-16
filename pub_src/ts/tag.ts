@@ -35,6 +35,10 @@ export class Tag<T extends HTMLElement> {
         return Tag.of('b').add(tags);
     }
 
+    public static i(...tags: TagList) {
+        return Tag.of('i').add(tags);
+    }
+
     public static br() {
         return Tag.of<HTMLBRElement>('br');
     }

@@ -171,7 +171,10 @@ export class DbTable {
         if (this.conf.filters) {
             this.divFilters = Tag.div().putInto(panel);
         }
-        this.divData = Tag.div().putInto(panel);
+        this.divData = Tag.div(
+            Tag.div().cls('spin-logo center'),
+            Tag.p(Tag.i(Tag.b('Loading...'))).cls('center')
+        ).putInto(panel);
         const btnInsert = Tag.byId('-btn-insert');
         const divForm = Tag.byId('-div-form-insert');
         if (btnInsert && divForm) {
