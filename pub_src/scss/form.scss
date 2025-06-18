@@ -7,6 +7,12 @@
     font-size: 0.8em;
 }
 
+@mixin for-input {
+    border-color: var(--line-color);
+    border-style: solid;
+    background-color: transparent;
+}
+
 form {
     fieldset {
         @include border;
@@ -40,17 +46,23 @@ form {
         }
 
         input[type=text],
+        input[type=number],
+        input[type=date],
         input[type=password] {
+            @include for-input;
             width: 80%;
+            border-width: 0 0 1px;
         }
 
         textarea {
+            @include for-input;
             width: 80%;
             margin-top: 0.3em;
         }
 
         div.checkbox {
             @include border;
+            @include for-input;
             display: inline-block;
             width: 80%;
 
