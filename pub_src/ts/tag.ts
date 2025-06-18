@@ -72,6 +72,13 @@ export class Tag<T extends HTMLElement> {
         }));
     }
 
+    public static divLoading() {
+        return Tag.div(
+            Tag.div().cls('spin-logo center'),
+            Tag.p(Tag.i(Tag.b('Loading...'))).cls('center')
+        );
+    }
+
     public get() {
         return this.element;
     }

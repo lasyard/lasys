@@ -61,7 +61,7 @@ export class Gallery {
         this.popupMsg = Tag.byId('-popup-msg');
         this.popupMsg?.outClickHide();
         const div = Tag.div().cls('gallery').putInto(panel);
-        this.divThumbs = Tag.div().cls('thumbs').putInto(div);
+        this.divThumbs = Tag.divLoading().cls('thumbs').putInto(div);
         this.divImage = Tag.div().hide().putInto(div);
         Tag.p(
             Tag.icon('escape').event('click', (e) => {
