@@ -114,6 +114,12 @@ class Actions
         echo '</p>';
     }
 
+    public function actionView($view, $vars = [])
+    {
+        $this->configScriptsAndStyles();
+        View::render($view, $vars);
+    }
+
     public function actionError(...$args)
     {
         throw new RuntimeException(...$args);

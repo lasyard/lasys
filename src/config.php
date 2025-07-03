@@ -6,6 +6,7 @@ final class Config
     // config
     public const TRAITS = 'traits';
     public const READ_ONLY = 'readOnly';
+    public const RAW_PAGE = 'rawPage';
     public const DEFAULT_ITEM = 'defaultItem';
     public const EXCLUDES = 'excludes';
     public const LIST = 'list';
@@ -133,6 +134,12 @@ final class Config
     {
         $item = $this->_conf[self::LIST][$name];
         return $item[self::HIDDEN] ?? false;
+    }
+
+    public function raw($name)
+    {
+        $item = $this->_conf[self::LIST][$name];
+        return $item[self::RAW_PAGE] ?? false;
     }
 
     public function title($name)

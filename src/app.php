@@ -91,6 +91,21 @@ final class App
             echo $content;
             exit;
         }
+        if ($this->_conf->raw($this->_name)) {
+            $title = $actionDo->title ?? $this->_conf->title($this->_name);
+            $this->_vars = [
+                'home' => $this->_home,
+                'title' => $title,
+                'datum' => $this->_datum,
+                'scripts' => $this->_scripts,
+                'styles' => $this->_styles,
+                'css' => $this->_css,
+                'base' => $this->_base,
+                'content' => $content,
+            ];
+            $this->view('raw');
+            exit;
+        }
         $title = APP_TITLE;
         $subTitle = $actionDo->title ?? $this->_conf->title($this->_name);
         if ($subTitle) {
