@@ -79,6 +79,6 @@ The values defined above are default values.
 
 There must be a directory named `configs` in the root of your project to put your config files. Config files are `.php` files.
 
-## License
+## MIT License
 
-<http://lasy.great-site.net/mit_license>
+<http://lasy.great-site.net/mit_license>.
