@@ -132,14 +132,12 @@ final class Config
 
     public function hidden($name)
     {
-        $item = $this->_conf[self::LIST][$name];
-        return $item[self::HIDDEN] ?? false;
+        return $this->_conf[self::LIST][$name][self::HIDDEN] ?? false;
     }
 
     public function raw($name)
     {
-        $item = $this->_conf[self::LIST][$name];
-        return $item[self::RAW_PAGE] ?? false;
+        return $this->_conf[self::LIST][$name][self::RAW_PAGE] ?? false;
     }
 
     public function title($name)
