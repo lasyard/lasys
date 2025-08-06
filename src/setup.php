@@ -76,3 +76,10 @@ spl_autoload_register(function ($class) {
     $file = Str::classToFile($class) . '.php';
     require_once $file;
 });
+define('COMMON_SCRIPTS', [
+    'js' . DS . 'main',
+]);
+define('COMMON_STYLES', [
+    'css' . DS . 'main',
+    'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css',
+]);

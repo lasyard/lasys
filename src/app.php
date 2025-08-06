@@ -70,9 +70,12 @@ final class App
                 return $this->_conf->excluded($file);
             });
         }
-        $this->addScript('js' . DS . 'main');
-        $this->addStyle('css' . DS . 'main');
-        $this->addStyle('lib' . DS . 'bootstrap-icons');
+        foreach (COMMON_SCRIPTS as $script) {
+            $this->addScript($script);
+        }
+        foreach (COMMON_STYLES as $style) {
+            $this->addStyle($style);
+        }
         $actionDo = $action[Actions::ACTION];
         if ($this->hasPriv($this->_name, $action[Actions::PRIV])) {
             $actionDo->do($args, $this->_base, $this->_path, $this->_name);

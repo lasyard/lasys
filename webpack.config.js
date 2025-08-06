@@ -3,12 +3,16 @@ const {
     CleanWebpackPlugin
 } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
+// const CopyPlugin = require("copy-webpack-plugin");
 
 const SRC_DIR = './pub_src/';
 
 module.exports = {
     mode: 'production',
+    externals: {
+        'katex': 'katex',
+        'katex/contrib/auto-render': 'renderMathInElement',
+    },
     entry: {
         'js/main.js': {
             import: SRC_DIR + 'ts/index.ts',
@@ -65,29 +69,29 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: '[name].css',
         }),
-        new CopyPlugin({
-            patterns: [{
-                from: 'node_modules/bootstrap-icons/font/bootstrap-icons.css',
-                to: 'lib/',
-            }, {
-                from: 'node_modules/bootstrap-icons/font/fonts/*.woff2',
-                to: 'lib/fonts/[name][ext]',
-            }, {
-                from: 'node_modules/bootstrap-icons/font/fonts/*.woff',
-                to: 'lib/fonts/[name][ext]',
-            }, {
-                from: 'node_modules/katex/dist/katex.min.css',
-                to: 'lib/',
-            }, {
-                from: 'node_modules/katex/dist/fonts/*.woff2',
-                to: 'lib/fonts/[name][ext]',
-            }, {
-                from: 'node_modules/katex/dist/fonts/*.woff',
-                to: 'lib/fonts/[name][ext]',
-            }, {
-                from: 'node_modules/katex/dist/fonts/*.ttf',
-                to: 'lib/fonts/[name][ext]',
-            }],
-        }),
+        // new CopyPlugin({
+        //     patterns: [{
+        //         from: 'node_modules/bootstrap-icons/font/bootstrap-icons.css',
+        //         to: 'lib/',
+        //     }, {
+        //         from: 'node_modules/bootstrap-icons/font/fonts/*.woff2',
+        //         to: 'lib/fonts/[name][ext]',
+        //     }, {
+        //         from: 'node_modules/bootstrap-icons/font/fonts/*.woff',
+        //         to: 'lib/fonts/[name][ext]',
+        //     }, {
+        //         from: 'node_modules/katex/dist/katex.min.css',
+        //         to: 'lib/',
+        //     }, {
+        //         from: 'node_modules/katex/dist/fonts/*.woff2',
+        //         to: 'lib/fonts/[name][ext]',
+        //     }, {
+        //         from: 'node_modules/katex/dist/fonts/*.woff',
+        //         to: 'lib/fonts/[name][ext]',
+        //     }, {
+        //         from: 'node_modules/katex/dist/fonts/*.ttf',
+        //         to: 'lib/fonts/[name][ext]',
+        //     }],
+        // }),
     ],
 };
