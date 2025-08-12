@@ -4,7 +4,7 @@ final class Db extends PDO
     public function __construct()
     {
         parent::__construct(PDO_DSN, DB_USER, DB_PASSWORD, [
-            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION SQL_BIG_SELECTS=1',
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION SQL_BIG_SELECTS=1; SET TIME_ZONE = "+08:00";',
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ]);

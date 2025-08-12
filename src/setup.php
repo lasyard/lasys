@@ -54,6 +54,12 @@ if (!defined('APP_TITLE')) {
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', dirname(__DIR__));
 }
+if (!defined('SCRIPTS')) {
+    define('SCRIPTS', []);
+}
+if (!defined('STYLES')) {
+    define('STYLES', []);
+}
 define('CONF_PATH', ROOT_PATH . DS . CONF_DIR);
 define('DATA_PATH', ROOT_PATH . DS . DATA_DIR);
 define('PUB_PATH', ROOT_PATH . DS . PUB_DIR);
@@ -76,10 +82,10 @@ spl_autoload_register(function ($class) {
     $file = Str::classToFile($class) . '.php';
     require_once $file;
 });
-define('COMMON_SCRIPTS', [
+define('COMMON_SCRIPTS', array_merge([
     'js' . DS . 'main',
-]);
-define('COMMON_STYLES', [
+], SCRIPTS));
+define('COMMON_STYLES', array_merge([
     'css' . DS . 'main',
     'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css',
-]);
+], STYLES));
