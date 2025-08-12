@@ -18,7 +18,7 @@ final class App
         require_once 'setup.php';
     }
 
-    public function run()
+    public function run($extraVars = [])
     {
         list($this->_home, $args, $type) = Server::getHomeAndPath();
         define('PUB_URL', $this->_home . Str::pathUrl(PUB_DIR) . '/');
@@ -105,7 +105,7 @@ final class App
                 'css' => $this->_css,
                 'base' => $this->_base,
                 'content' => $content,
-            ];
+            ] + $extraVars;
             $this->view('raw');
             exit;
         }
@@ -127,7 +127,7 @@ final class App
             'buttons' => $list['buttons'],
             'files' => $list['files'],
             'content' => $content,
-        ];
+        ] + $extraVars;
         $this->view('main');
     }
 
@@ -233,9 +233,9 @@ final class App
         Meta::save($this->_path, $this->_files);
     }
 
-    public function view($view, $extraVars = [])
+    public function view($view)
     {
-        View::render($view, array_merge($this->_vars, $extraVars));
+        View::render($view, $this->_vars);
     }
 
     public function addScript($file)
