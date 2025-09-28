@@ -109,7 +109,11 @@ final class App
             $this->view('raw');
             exit;
         }
-        $title = APP_TITLE;
+        if (is_array(APP_TITLE)) {
+            $title = APP_TITLE[Server::lang()] ?? APP_TITLE['en'] ?? 'Lasys';
+        } else {
+            $title = APP_TITLE;
+        }
         $subTitle = $actionDo->title ?? $this->_conf->title($this->_name);
         if ($subTitle) {
             $title .= ' - ' . $subTitle;

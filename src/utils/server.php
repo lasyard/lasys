@@ -18,9 +18,7 @@ final class Server
     public const QUERY_UPDATE = self::TYPE_KEY . '=' . self::UPDATE;
     public const QUERY_DELETE = self::TYPE_KEY . '=' . self::DELETE;
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function getHomeAndPath()
     {
@@ -122,5 +120,17 @@ final class Server
             return $url . '?' . self::QUERY_GET_RAW;
         }
         return $url;
+    }
+
+    public static function lang()
+    {
+        $lang = 'en';
+        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            $langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+            if (count($langs) > 0) {
+                $lang = strtolower(substr($langs[0], 0, 2));
+            }
+        }
+        return $lang;
     }
 }
