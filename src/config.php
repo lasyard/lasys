@@ -160,7 +160,7 @@ final class Config
         if (isset($list[$name][$type])) {
             $action = $list[$name][$type];
         } else if (is_dir($this->_path . DS . $name)) {
-            $action = Actions::noop();
+            $action = Actions::noop(...$this->attr($name, self::PRIV_READ));
         } else if (isset($conf[self::ETC][$type])) {
             $action = $conf[self::ETC][$type];
         } else {
