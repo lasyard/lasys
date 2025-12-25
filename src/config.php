@@ -5,7 +5,6 @@ final class Config
 
     // config
     public const TRAITS = 'traits';
-    public const READ_ONLY = 'readOnly';
     public const RAW_PAGE = 'rawPage';
     public const DEFAULT_ITEM = 'defaultItem';
     public const EXCLUDES = 'excludes';
@@ -113,6 +112,11 @@ final class Config
             }
         }
         return false;
+    }
+
+    public function etc()
+    {
+        return isset($this->_conf[self::ETC][Server::GET]);
     }
 
     public function hidden($name)

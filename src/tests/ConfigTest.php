@@ -11,9 +11,8 @@ final class ConfigTest extends TestCase
 
     public function testDefault()
     {
-        $conf = Config::root('non-exist');
+        $conf = Config::root('conf_path', 'data_path');
         $this->assertSame([], $conf->get(Config::TRAITS));
-        $this->assertTrue($conf->get(Config::READ_ONLY));
         $this->assertSame('index', $conf->get(Config::DEFAULT_ITEM));
         $this->assertSame([], $conf->get(Config::PRIV_READ));
         $this->assertSame([User::OWNER, User::EDIT], $conf->get(Config::PRIV_EDIT));
@@ -23,7 +22,7 @@ final class ConfigTest extends TestCase
 
     public function testExcluded()
     {
-        $conf = Config::root('non-exist');
+        $conf = Config::root('conf_path', 'data_path');
         $this->assertTrue($conf->excluded('_list.json'));
     }
 }

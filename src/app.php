@@ -58,15 +58,15 @@ final class App
         }
         if ($action[Actions::ACTION] === null) {
             // try default item
-            $this->_name = $this->_conf->get(Config::DEFAULT_ITEM);
+            $this->_name = $this->conf(Config::DEFAULT_ITEM);
             $action = $this->_conf->action($this->_name, $type);
         } else {
             $this->_name = $name;
         }
-        if ($this->_conf->get(Config::READ_ONLY)) {
+        if (!$this->_conf->etc()) { // do not show additional files
             $this->_files = [];
         } else {
-            // This is needed when calling action->do, e.g., for file uploading.
+            // this is needed when calling action->do, e.g., for file uploading.
             $this->_files = Meta::loadFileList($this->_path, function ($file) {
                 return $this->_conf->excluded($file);
             });
@@ -170,7 +170,6 @@ final class App
     private function createItemList()
     {
         $conf = $this->_conf;
-        $files = $this->_files;
         $list0 = [];
         $buttons = [];
         if ($this->_base != $this->_home) {
@@ -188,6 +187,7 @@ final class App
             }
         }
         $list1 = [];
+        $files = $this->_files;
         foreach ($files as $name => $file) {
             $list1[] = $this->makeItem($name, $file);
         }

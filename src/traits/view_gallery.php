@@ -5,7 +5,6 @@ final class ViewGallery extends Traits
 
     public function forMe(&$conf, $oldConf)
     {
-        $conf[Config::READ_ONLY] = false;
         $conf[Config::ETC][Server::AJAX_DELETE] ??= GalleryActions::ajaxDelete()->priv(...$this->_wPriv);
         $conf[Config::ETC][Server::AJAX_UPDATE] ??= GalleryActions::ajaxUpdate()->priv(...$this->_wPriv);
     }
