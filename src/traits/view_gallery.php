@@ -9,6 +9,11 @@ final class ViewGallery extends Traits
         $conf[Config::ETC][Server::AJAX_UPDATE] ??= GalleryActions::ajaxUpdate()->priv(...$this->_wPriv);
     }
 
+    public function forEachItem(&$item, $conf)
+    {
+        $this->addTo($item);
+    }
+
     public function forItem(&$item, $conf)
     {
         $wPriv = $item[Config::PRIV_EDIT] ?? $conf[Config::PRIV_EDIT];

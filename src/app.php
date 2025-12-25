@@ -178,6 +178,7 @@ final class App
         }
         foreach ($conf->list() as $name => $info) {
             if ($conf->hidden($name) || !$this->hasPrivOf($name, Server::GET)) {
+                unset($files[$name]); // don't show even the file exists
                 continue;
             }
             if (isset($info[Config::BUTTON])) {
