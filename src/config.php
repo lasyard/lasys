@@ -103,9 +103,6 @@ final class Config
 
     public function excluded($file)
     {
-        if (array_key_exists($file, $this->list())) {
-            return true;
-        }
         foreach ($this->_conf[self::EXCLUDES] as $p) {
             if (fnmatch($p, $file)) {
                 return true;

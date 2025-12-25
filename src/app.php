@@ -170,6 +170,7 @@ final class App
     private function createItemList()
     {
         $conf = $this->_conf;
+        $files = $this->_files;
         $list0 = [];
         $buttons = [];
         if ($this->_base != $this->_home) {
@@ -183,11 +184,16 @@ final class App
                 $buttons[] = $this->makeButton($name, $info);
             } else {
                 $info['isDir'] = ($conf->action($name, Server::GET)[Actions::ACTION] === null);
+                if (isset($files[$name])) {
+                    $info[Config::TITLE] ??= $files[$name]['title'];
+                    $info[Config::DESC] ??= $files[$name]['desc'];
+                    $info['time'] = $files[$name]['time'];
+                    unset($files[$name]);
+                }
                 $list0[] = $this->makeItem($name, $info);
             }
         }
         $list1 = [];
-        $files = $this->_files;
         foreach ($files as $name => $file) {
             $list1[] = $this->makeItem($name, $file);
         }
