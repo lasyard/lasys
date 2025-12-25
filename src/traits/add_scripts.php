@@ -1,5 +1,5 @@
 <?php
-final class AddScripts extends Traits
+final class AddScripts extends RecursiveTraits
 {
     private $_scripts;
 
@@ -21,10 +21,5 @@ final class AddScripts extends Traits
     public function forItem(&$item, $conf)
     {
         $item[Config::SCRIPTS] = Arr::uniqueMerge($item[Config::SCRIPTS], $this->_scripts);
-    }
-
-    public function forChild(&$conf, $oldConf)
-    {
-        $this->addTo($conf);
     }
 }

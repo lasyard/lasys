@@ -36,7 +36,7 @@ class Actions
     }
 
     // As a stub to set priv of directory.
-    public static function noop(...$priv)
+    public static function dir(...$priv)
     {
         return [
             self::ACTION => null,
@@ -123,6 +123,11 @@ class Actions
     public function actionError(...$args)
     {
         throw new RuntimeException(...$args);
+    }
+
+    public function actionPrivError($name)
+    {
+        return self::actionError('You do not have privilege to access "' . $name . '".');
     }
 
     protected function hasPrivOf($type, $uid = null)

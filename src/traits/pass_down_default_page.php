@@ -1,11 +1,6 @@
 <?php
-final class PassDownDefaultPage extends Traits
+final class PassDownDefaultPage extends RecursiveTraits
 {
-    public function forEachItem(&$item, $conf)
-    {
-        $this->addTo($item);
-    }
-
     public function forChild(&$conf, $oldConf)
     {
         if (!isset($conf[Config::LIST][$conf[Config::DEFAULT_ITEM]][Server::GET])) {
@@ -16,7 +11,7 @@ final class PassDownDefaultPage extends Traits
                 Config::HIDDEN,
                 Config::TITLE,
             );
-            $this->addTo($conf);
         }
+        parent::forChild($conf, $oldConf);
     }
 }

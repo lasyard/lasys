@@ -1,26 +1,7 @@
 <?php
-class DoUpload extends Traits
+class DoUpload extends RecursiveTraits
 {
     public function forSelf(&$conf, $oldConf)
-    {
-        if (!$conf[Config::READ_ONLY]) {
-            $upload = &$conf[Config::LIST][FileActions::UPLOAD_ITEM];
-            $upload[Config::TITLE] ??= $conf[FileActions::UPLOAD_TITLE]
-                ?? FileActions::DEFAULT[FileActions::UPLOAD_TITLE];
-            $upload[Config::BUTTON] ??= Icon::UPLOAD;
-            $upload[Server::GET] ??= FileActions::uploadForm()->priv(...$conf[Config::PRIV_POST]);
-            $upload[Server::POST] ??= FileActions::post()->priv(...$conf[Config::PRIV_POST]);
-            $conf[Config::ETC][Server::UPDATE] ??= FileActions::update();
-            $conf[Config::ETC][Server::AJAX_DELETE] ??= FileActions::ajaxDelete();
-        }
-    }
-
-    public function forEachItem(&$item, $conf)
-    {
-        $this->addTo($item);
-    }
-
-    public function forChild(&$conf, $oldConf)
     {
         Arr::copyNonExistingKeys(
             $conf,
@@ -30,6 +11,13 @@ class DoUpload extends Traits
             FileActions::SIZE_LIMIT,
             Config::ORDER,
         );
-        $this->addTo($conf);
+        $upload = &$conf[Config::LIST][FileActions::UPLOAD_ITEM];
+        $upload[Config::TITLE] ??= $conf[FileActions::UPLOAD_TITLE]
+            ?? FileActions::DEFAULT[FileActions::UPLOAD_TITLE];
+        $upload[Config::BUTTON] ??= Icon::UPLOAD;
+        $upload[Server::GET] ??= FileActions::uploadForm()->priv(...$conf[Config::PRIV_POST]);
+        $upload[Server::POST] ??= FileActions::post()->priv(...$conf[Config::PRIV_POST]);
+        $conf[Config::ETC][Server::UPDATE] ??= FileActions::update();
+        $conf[Config::ETC][Server::AJAX_DELETE] ??= FileActions::ajaxDelete();
     }
 }

@@ -3,9 +3,7 @@ abstract class Traits
 {
     private static $_cache = [];
 
-    protected function __construct()
-    {
-    }
+    protected function __construct() {}
 
     protected function addTo(&$target)
     {
@@ -16,26 +14,6 @@ abstract class Traits
             }
         }
         $target[Config::TRAITS][] = $this;
-    }
-
-    // Apply to the conf if traits is configured in the conf.
-    public function forSelf(&$conf, $oldConf)
-    {
-    }
-
-    // Apply to each item if traits is configured in the conf.
-    public function forEachItem(&$item, $conf)
-    {
-    }
-
-    // Apply to the item if traits is configured on the item.
-    public function forItem(&$item, $conf)
-    {
-    }
-
-    // Apply to the new conf got by read the item if traits is configured on the item.
-    public function forChild(&$conf, $oldConf)
-    {
     }
 
     public static function __callStatic($method, $args)
@@ -50,4 +28,19 @@ abstract class Traits
         }
         return new $class(...$args);
     }
+
+    // apply to the new conf if traits is configured on the old conf
+    public function forChild(&$conf, $oldConf) {}
+
+    // apply to the conf if traints is configured on the item which the conf is created from
+    public function forMe(&$conf, $oldConf) {}
+
+    // apply to the conf if traits is configured in the conf
+    public function forSelf(&$conf, $oldConf) {}
+
+    // apply to each item if traits is configured in the conf
+    public function forEachItem(&$item, $conf) {}
+
+    // apply to the item if traits is configured on the item
+    public function forItem(&$item, $conf) {}
 }

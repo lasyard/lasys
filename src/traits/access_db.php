@@ -1,11 +1,6 @@
 <?php
 final class AccessDb extends Traits
 {
-    public function forEachItem(&$item, $conf)
-    {
-        $this->addTo($item);
-    }
-
     public function forItem(&$item, $conf)
     {
         $item[Server::GET] ??= DbActions::get();

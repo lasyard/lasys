@@ -6,16 +6,14 @@ final class DoUploadImaged extends DoUpload
     public function forSelf(&$conf, $oldConf)
     {
         parent::forSelf($conf, $oldConf);
-        if (!$conf[Config::READ_ONLY]) {
-            $conf[Config::LIST][FileActions::IMAGES_ITEM] = [
-                Config::TRAITS => [Traits::viewGallery()],
-                FileActions::UPLOAD_TITLE => 'Attachment Image',
-                FileActions::ACCEPT => 'image/*',
-                GalleryActions::THUMB_SIZE => -1,
-                GalleryActions::KEEP_NAME => true,
-                Config::BUTTON => Icon::IMAGES,
-                Config::PRIV_READ => $conf[Config::PRIV_POST],
-            ];
-        }
+        $conf[Config::LIST][FileActions::IMAGES_ITEM] = [
+            Config::TRAITS => [Traits::viewGallery()],
+            FileActions::UPLOAD_TITLE => 'Attachment Image',
+            FileActions::ACCEPT => 'image/*',
+            GalleryActions::THUMB_SIZE => -1,
+            GalleryActions::KEEP_NAME => true,
+            Config::BUTTON => Icon::IMAGES,
+            Config::PRIV_READ => $conf[Config::PRIV_POST],
+        ];
     }
 }

@@ -27,47 +27,43 @@ final class Config
     // common config
     public const ORDER = 'order';
 
-    private const DEFAULT = [
-        self::TRAITS => [],
-        self::READ_ONLY => true,
-        self::DEFAULT_ITEM => 'index',
-        self::EXCLUDES => ['_*'],
-        self::LIST => [],
-        self::PRIV_READ => [],
-        self::PRIV_EDIT => [User::OWNER, User::EDIT],
-        self::PRIV_POST => [User::EDIT],
-    ];
-
-    private const RECURSIVE_CONF = [
-        self::READ_ONLY,
-        self::DEFAULT_ITEM,
-        self::PRIV_READ,
-        self::PRIV_EDIT,
-        self::PRIV_POST,
-    ];
-
     private $_path;
+    private $_data;
     private $_conf;
 
-    public static function root($path)
+    public static function root($path, $data)
     {
-        return new Config($path, self::DEFAULT);
+        return new Config($path, $data, [
+            self::TRAITS => [],
+            self::DEFAULT_ITEM => 'index',
+            self::EXCLUDES => ['_*'],
+            self::LIST => [],
+            self::PRIV_READ => [],
+            self::PRIV_EDIT => [User::OWNER, User::EDIT],
+            self::PRIV_POST => [User::EDIT],
+        ]);
     }
 
-    private function __construct($path, $oldConf, $traits = [])
+    private function __construct($path, $data, $oldConf, $name = null)
     {
         $this->_path = $path;
+        $this->_data = $data;
         $file = $this->_path . DS . self::CONFIG_FILE;
         $conf = is_file($file) ? include $file : [];
-        foreach (self::RECURSIVE_CONF as $c) {
-            self::setDefault($conf, $c, $oldConf);
-        }
-        self::setDefault($conf, self::TRAITS);
-        self::setDefault($conf, self::LIST);
+        Arr::copyNonExistingKeys(
+            $conf,
+            $oldConf,
+            self::DEFAULT_ITEM,
+            self::PRIV_READ,
+            self::PRIV_EDIT,
+            self::PRIV_POST,
+        );
         $conf[self::EXCLUDES] = Arr::uniqueMerge($conf[self::EXCLUDES], $oldConf[self::EXCLUDES]);
-        // Call `forChid` first to allow mangling of new conf.
-        self::applyTraits($conf, $traits, 'forChild', $oldConf);
+        // call `forChid` first to allow mangling of new conf.
+        self::applyTraits($conf, $oldConf[self::TRAITS], 'forChild', $oldConf);
+        self::applyTraits($conf, $oldConf[self::LIST][$name][self::TRAITS] ?? [], 'forMe', $oldConf);
         self::applyTraits($conf, $conf[self::TRAITS], 'forSelf', $oldConf);
+        $conf[self::LIST] ??= [];
         foreach ($conf[self::LIST] as &$item) {
             if (is_string($item)) {
                 $item = [self::TITLE => $item];
@@ -89,13 +85,6 @@ final class Config
         return $this->_conf[$name] ?? null;
     }
 
-    private static function setDefault(&$conf, $opt, $oldConf = null)
-    {
-        if (!isset($conf[$opt])) {
-            $conf[$opt] = $oldConf ? $oldConf[$opt] : self::DEFAULT[$opt];
-        }
-    }
-
     private static function applyTraits(&$target, $traits, $method, $conf)
     {
         Arr::forOneOrMany($traits, function ($trait) use ($method, &$target, $conf) {
@@ -105,11 +94,7 @@ final class Config
 
     public function read($name)
     {
-        return new Config(
-            $this->_path . DS . $name,
-            $this->_conf,
-            $this->_conf[self::LIST][$name][self::TRAITS] ?? []
-        );
+        return new Config($this->_path . DS . $name, $this->_data . DS . $name, $this->_conf, $name);
     }
 
     public function list()
@@ -159,8 +144,8 @@ final class Config
         $list = $conf[self::LIST];
         if (isset($list[$name][$type])) {
             $action = $list[$name][$type];
-        } else if (is_dir($this->_path . DS . $name)) {
-            $action = Actions::noop(...$this->attr($name, self::PRIV_READ));
+        } else if (is_dir($this->_path . DS . $name) || is_dir($this->_data . DS . $name)) {
+            $action = Actions::dir(...$this->attr($name, self::PRIV_READ));
         } else if (isset($conf[self::ETC][$type])) {
             $action = $conf[self::ETC][$type];
         } else {

@@ -26,9 +26,9 @@ final class App
         session_start();
         $this->_base = $this->_home;
         $this->_path = DATA_PATH;
-        $this->_conf = Config::root(CONF_PATH);
+        $this->_conf = Config::root(CONF_PATH, DATA_PATH);
         $title = null;
-        $action = Actions::noop();
+        $action = Actions::dir();
         $breadcrumbs = [];
         while (!empty($args)) {
             $name = array_shift($args);
@@ -47,9 +47,9 @@ final class App
             $this->_base .= $name . '/';
             $title = $this->_conf->title($name);
             if ($this->hasPriv($name, $action[Actions::PRIV])) {
-                $this->_conf = $this->readConf($name);
+                $this->_conf = $this->_conf->read($name);
             } else {
-                $action = Actions::error('You do not have privilege to access "' . $name . '".')->priv();
+                $action = Actions::privError($name);
                 break;
             }
         }
@@ -57,6 +57,7 @@ final class App
             $breadcrumbs[] = $title;
         }
         if ($action[Actions::ACTION] === null) {
+            // try default item
             $this->_name = $this->_conf->get(Config::DEFAULT_ITEM);
             $action = $this->_conf->action($this->_name, $type);
         } else {
@@ -76,12 +77,10 @@ final class App
         foreach (COMMON_STYLES as $style) {
             $this->addStyle($style);
         }
-        $actionDo = $action[Actions::ACTION];
-        if ($this->hasPriv($this->_name, $action[Actions::PRIV])) {
-            $actionDo->do($args, $this->_base, $this->_path, $this->_name);
-        } else {
-            $actionDo->doError('You do not have privilege to do this.');
+        if (!$this->hasPriv($this->_name, $action[Actions::PRIV])) {
+            $action = Actions::privError($this->_name)->priv();
         }
+        $action[Actions::ACTION]->do($args, $this->_base, $this->_path, $this->_name);
         // This is set after `do`.
         $httpHeaders = $action[Actions::ACTION]->httpHeaders;
         $this->header($httpHeaders);
@@ -89,13 +88,13 @@ final class App
             // Seems never run to this.
             exit;
         }
-        $content = $actionDo->content;
+        $content = $action[Actions::ACTION]->content;
         if (Server::isAjax()) {
             echo $content;
             exit;
         }
         if ($this->_conf->raw($this->_name)) {
-            $title = $actionDo->title ?? $this->_conf->title($this->_name);
+            $title = $action[Actions::ACTION]->title ?? $this->_conf->title($this->_name);
             $this->_vars = [
                 'home' => $this->_home,
                 'title' => $title,
@@ -201,6 +200,9 @@ final class App
 
     public function hasPriv($name, $privs, $uid = null)
     {
+        if ($privs === null) {
+            return false;
+        }
         if ($uid == null) {
             $uid = $this->info($name)['uid'] ?? null;
         }

@@ -1,5 +1,5 @@
 <?php
-final class AddStyles extends Traits
+final class AddStyles extends RecursiveTraits
 {
     private $_styles;
 
@@ -21,10 +21,5 @@ final class AddStyles extends Traits
     public function forItem(&$item, $conf)
     {
         $item[Config::STYLES] = Arr::uniqueMerge($item[Config::STYLES], $this->_styles);
-    }
-
-    public function forChild(&$conf, $oldConf)
-    {
-        $this->addTo($conf);
     }
 }
