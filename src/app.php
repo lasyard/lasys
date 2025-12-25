@@ -186,9 +186,9 @@ final class App
             } else {
                 $info['isDir'] = ($conf->action($name, Server::GET)[Actions::ACTION] === null);
                 if (isset($files[$name])) {
-                    $info[Config::TITLE] ??= $files[$name]['title'];
-                    $info[Config::DESC] ??= $files[$name]['desc'];
-                    $info['time'] = $files[$name]['time'];
+                    $info[Config::TITLE] ??= $files[$name]['title'] ?? Str::captalize($name);
+                    $info[Config::DESC] ??= $files[$name]['desc'] ?? null;
+                    $info['time'] = $files[$name]['time'] ?? null;
                     unset($files[$name]);
                 }
                 $list0[] = $this->makeItem($name, $info);
