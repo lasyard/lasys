@@ -17,6 +17,7 @@ final class FileActions extends Actions
 
     public const UPLOAD_ITEM = '_upload';
     public const IMAGES_ITEM = '_images';
+    public const DIR_ITEM = '_dir';
 
     protected function default($confName)
     {
@@ -213,5 +214,51 @@ final class FileActions extends Actions
             'accept' => '.jpg,.jpeg,.png,images/*',
             'sizeLimit' => $this->default(self::IMAGE_SIZE_LIMIT),
         ]);
+    }
+
+    public function actionInfoChange()
+    {
+        foreach (Sys::app()->files() as $fileName => $fileInfo) {
+            $nameList[$fileName] = $fileInfo['title'] ?? Str::captalize($fileName);
+        }
+        View::render('info_change', [
+            'title' => Icon::FOLDER . ' Change Info',
+            'nameList' => $nameList,
+        ]);
+    }
+
+    public function actionInfoPost()
+    {
+        $name = $_POST['name'] ?? '';
+        $title = $_POST['title'] ?? '';
+        $desc = $_POST['desc'] ?? '';
+        if ($name === '') {
+            throw new RuntimeException('"name" cannot be empty.');
+        }
+        $info = Sys::app()->info($name);
+        $msg = null;
+        if ($info === null) {
+            File::mkdir($this->path . DS . $name);
+            $info = [
+                'title'  => !empty($title) ? $title : Str::captalize($name),
+                'desc' => $desc,
+                'time' => $_SERVER['REQUEST_TIME'],
+            ];
+            $msg = 'Directory "' . $name . '" created.';
+        } else {
+            if (!empty($title)) {
+                $info['title'] = $title;
+                $msg = 'Title of "' . $name . '" updated to "' . $title . '".';
+            }
+            if (!empty($desc)) {
+                $info['desc'] = $desc;
+                $msg = (empty($msg) ? '' : $msg . ' ') . 'Description of "' . $name . '" updated to "' . $desc . '".';
+            }
+        }
+        if (!$msg) {
+            throw new RuntimeException('Nothing changed.');
+        }
+        Sys::app()->setInfo($name, $info);
+        echo '<p class="center sys">' . $msg . '</p>';
     }
 }

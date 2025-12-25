@@ -3,9 +3,7 @@ final class Meta
 {
     public const META_FILE = 'list.json';
 
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function loadFileList($path, $exclude = null)
     {
@@ -45,7 +43,7 @@ final class Meta
     {
         $json = [];
         foreach ($files as $name => $file) {
-            $res = Arr::transKeys($file, 'title', 'time', 'uid', 'uname');
+            $res = Arr::transKeys($file, 'title', 'desc', 'time', 'uid', 'uname');
             if (!empty($res)) {
                 $json[$name] = $res;
             }

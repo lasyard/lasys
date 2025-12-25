@@ -12,8 +12,7 @@ class DoUpload extends RecursiveTraits
             Config::ORDER,
         );
         $upload = &$conf[Config::LIST][FileActions::UPLOAD_ITEM];
-        $upload[Config::TITLE] ??= $conf[FileActions::UPLOAD_TITLE]
-            ?? FileActions::DEFAULT[FileActions::UPLOAD_TITLE];
+        $upload[Config::TITLE] ??= $conf[FileActions::UPLOAD_TITLE] ?? FileActions::DEFAULT[FileActions::UPLOAD_TITLE];
         $upload[Config::BUTTON] ??= Icon::UPLOAD;
         $upload[Server::GET] ??= FileActions::uploadForm()->priv(...$conf[Config::PRIV_POST]);
         $upload[Server::POST] ??= FileActions::post()->priv(...$conf[Config::PRIV_POST]);

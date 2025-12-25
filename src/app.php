@@ -49,7 +49,7 @@ final class App
             if ($this->hasPriv($name, $action[Actions::PRIV])) {
                 $this->_conf = $this->_conf->read($name);
             } else {
-                $action = Actions::privError($name);
+                $action = Actions::privError($name)->priv();
                 break;
             }
         }
@@ -85,7 +85,7 @@ final class App
         $httpHeaders = $action[Actions::ACTION]->httpHeaders;
         $this->header($httpHeaders);
         if ($type == Server::HEAD) {
-            // Seems never run to this.
+            // seems never run to this.
             exit;
         }
         $content = $action[Actions::ACTION]->content;
@@ -226,6 +226,11 @@ final class App
     public function readConf($name)
     {
         return $this->_conf->read($name);
+    }
+
+    public function files()
+    {
+        return $this->_files;
     }
 
     public function info($name)
