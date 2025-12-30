@@ -2,11 +2,6 @@
     <span id="-msg"></span>
     <span class="buttons">
         <?php
-        if (isset($btnCheck)) {
-        ?>
-            <span id="-btn-check"><?php echo $btnCheck; ?></span>
-        <?php
-        }
         if (isset($btnUpload)) {
         ?>
             <span id="-btn-upload"><?php echo $btnUpload; ?></span>

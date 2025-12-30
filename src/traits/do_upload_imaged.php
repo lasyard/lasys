@@ -7,12 +7,13 @@ final class DoUploadImaged extends DoUpload
     {
         parent::forSelf($conf, $oldConf);
         $conf[Config::LIST][FileActions::IMAGES_ITEM] = [
+            Config::TYPE => Config::BTN,
             Config::TRAITS => [Traits::viewGallery()],
             FileActions::UPLOAD_TITLE => 'Attachment Image',
             FileActions::ACCEPT => 'image/*',
             GalleryActions::THUMB_SIZE => -1,
             GalleryActions::KEEP_NAME => true,
-            Config::BUTTON => Icon::IMAGES,
+            Config::ICON => Icon::IMAGES,
             Config::PRIV_READ => $conf[Config::PRIV_POST],
         ];
     }

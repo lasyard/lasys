@@ -10,7 +10,6 @@ final class App
     private $_path;
     private $_conf;
     private $_name;
-    private $_files;
     private $_vars;
 
     public function __construct()
@@ -28,7 +27,7 @@ final class App
         $this->_path = DATA_PATH;
         $this->_conf = Config::root(CONF_PATH, DATA_PATH);
         $title = null;
-        $action = Actions::dir();
+        $action = Actions::dir(User::NONE);
         $breadcrumbs = [];
         while (!empty($args)) {
             $name = array_shift($args);
@@ -58,18 +57,10 @@ final class App
         }
         if ($action[Actions::ACTION] === null) {
             // try default item
-            $this->_name = $this->conf(Config::DEFAULT_ITEM);
+            $this->_name = $this->_conf->get(Config::DEFAULT_ITEM);
             $action = $this->_conf->action($this->_name, $type);
         } else {
             $this->_name = $name;
-        }
-        if (!$this->_conf->etc()) { // do not show additional files
-            $this->_files = [];
-        } else {
-            // this is needed when calling action->do, e.g., for file uploading.
-            $this->_files = Meta::loadFileList($this->_path, function ($file) {
-                return $this->_conf->excluded($file);
-            });
         }
         foreach (COMMON_SCRIPTS as $script) {
             $this->addScript($script);
@@ -145,22 +136,31 @@ final class App
 
     private function makeButton($name, $info)
     {
-        return Html::link($info[Config::BUTTON], $this->_base . $name, $info[Config::TITLE] ?? Str::captalize($name));
+        $conf = $this->_conf;
+        $icon = $conf->meta($name, Config::ICON);
+        $title = $conf->meta($name, Config::TITLE);
+        return Html::link($icon, $this->_base . $name, $title);
     }
 
-    private function makeItem($name, $info)
+    private function makeItem($name)
     {
-        $isDir = $info['isDir'];
-        $title = $info[Config::TITLE] ?? Str::captalize(pathinfo($name, PATHINFO_FILENAME));
-        $desc = $info[Config::DESC] ?? null;
-        if (!$isDir) {
-            $desc ??= Str::fileInfoText($info);
+        $conf = $this->_conf;
+        $isDir = $conf->isDir($name);
+        $title = $conf->title($name);
+        $desc = $conf->meta($name, Config::DESC);
+        if (!$isDir && !isset($desc)) {
+            $desc = $conf->meta($name, 'uname') ?? '';
+            $time = $conf->meta($name, 'time');
+            if (isset($time)) {
+                $desc .= ' @ ' . Str::timeStr($time);
+            }
         }
         $li = ($name === $this->_name) ? '<li class="highlighted">' : '<li>';
         $li .= Html::link($title, $this->_base . $name . ($isDir ? '/' : ''), $desc);
         $li .= $isDir ? Icon::FOLDER : '';
         $li .= '</li>';
         return [
+            'isDir' => $isDir,
             'title' => $title,
             'time' =>  $info['time'] ?? 0,
             'li' => $li,
@@ -170,85 +170,51 @@ final class App
     private function createItemList()
     {
         $conf = $this->_conf;
-        $files = $this->_files;
-        $list0 = [];
         $buttons = [];
+        $list = [];
         if ($this->_base != $this->_home) {
             $buttons[] = Html::link(Icon::UPPER_LEVEL, dirname($this->_base), 'Upper Level');
         }
         foreach ($conf->list() as $name => $info) {
             if ($conf->hidden($name) || !$this->hasPrivOf($name, Server::GET)) {
-                unset($files[$name]); // don't show even the file exists
                 continue;
             }
-            if (isset($info[Config::BUTTON])) {
+            if (isset($info[Config::TYPE]) && $info[Config::TYPE] == Config::BTN) {
                 $buttons[] = $this->makeButton($name, $info);
             } else {
-                $info['isDir'] = ($conf->action($name, Server::GET)[Actions::ACTION] === null);
-                if (isset($files[$name])) {
-                    $info[Config::TITLE] ??= $files[$name]['title'] ?? Str::captalize($name);
-                    $info[Config::DESC] ??= $files[$name]['desc'] ?? null;
-                    $info['time'] = $files[$name]['time'] ?? null;
-                    unset($files[$name]);
-                }
-                $list0[] = $this->makeItem($name, $info);
+                $list[] = $this->makeItem($name);
             }
-        }
-        $list1 = [];
-        foreach ($files as $name => $file) {
-            $list1[] = $this->makeItem($name, $file);
         }
         $order = $conf->get(Config::ORDER);
         if ($order) {
-            usort($list1, $order);
+            usort($list, $order);
         }
-        return ['buttons' => $buttons, 'files' => array_column(array_merge($list0, $list1), 'li')];
+        return ['buttons' => $buttons, 'files' => array_column($list, 'li')];
     }
 
-    public function hasPriv($name, $privs, $uid = null)
+    public function hasPriv($name, $priv, $uid = null)
     {
-        if ($privs === null) {
+        if ($priv === null) {
             return false;
         }
         if ($uid == null) {
-            $uid = $this->info($name)['uid'] ?? null;
+            $uid = $this->_conf->info($name)['uid'] ?? null;
         }
-        return Sys::user()->hasPrivs($privs, $uid);
+        return Sys::user()->hasPriv($priv, $uid);
     }
 
     public function hasPrivOf($name, $type, $uid = null)
     {
         $actions = $this->_conf->action($name, $type);
-        if (is_array($actions) && $actions[Actions::PRIV] !== null) {
+        if (isset($actions[Actions::PRIV])) {
             return $this->hasPriv($name, $actions[Actions::PRIV], $uid);
         }
         return false;
     }
 
-    public function conf($name)
+    public function conf()
     {
-        return $this->_conf->get($name);
-    }
-
-    public function readConf($name)
-    {
-        return $this->_conf->read($name);
-    }
-
-    public function files()
-    {
-        return $this->_files;
-    }
-
-    public function info($name)
-    {
-        return $this->_files[$name] ?? null;
-    }
-
-    public function setInfo($name, $info)
-    {
-        $this->_files[$name] = $info;
-        Meta::save($this->_path, $this->_files);
+        return $this->_conf;
     }
 
     public function view($view)

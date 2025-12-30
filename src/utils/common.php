@@ -1,9 +1,7 @@
 <?php
 final class Common
 {
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function getOutput($fun, $params = [])
     {
@@ -21,15 +19,43 @@ final class Common
         return $buffer;
     }
 
-    public static function funCmpBy($index, $descend = true)
+    public static function cmp($a, $b)
     {
-        if ($descend) {
-            return function ($b, $a) use ($index) {
-                return $a[$index] <=> $b[$index];
-            };
-        }
-        return function ($a, $b) use ($index) {
-            return $a[$index] <=> $b[$index];
+        return $a <=> $b;
+    }
+
+    public static function chainCmps($aFunc, $bFunc)
+    {
+        return function ($a, $b) use ($aFunc, $bFunc) {
+            $r = $aFunc($a, $b);
+            if ($r != 0) {
+                return $r;
+            }
+            return $bFunc($a, $b);
+        };
+    }
+
+    public static function invertCmp($func)
+    {
+        return function ($a, $b) use ($func) {
+            return $func($b, $a);
+        };
+    }
+
+    public static function cmpIndex($index, $func)
+    {
+        return function ($a, $b) use ($index, $func) {
+            if ($a[$index] ?? false) {
+                if ($b[$index] ?? false) {
+                    return $func($a[$index], $b[$index]);
+                } else {
+                    return -1;
+                }
+            }
+            if ($b[$index] ?? false) {
+                return 1;
+            }
+            return 0;
         };
     }
 }

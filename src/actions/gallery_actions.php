@@ -53,7 +53,6 @@ final class GalleryActions extends Actions
             ]);
         }
         return [
-            'btnCheck' => Sys::user()->hasPriv(User::ADMIN) ? Icon::DB_CHECK : null,
             'btnUpload' => $btnUpload,
             'formUpload' => $formUpload,
         ];
@@ -85,20 +84,20 @@ final class GalleryActions extends Actions
 
     public function actionAjaxGet()
     {
-        $files = Meta::loadFileList($this->path . DS . $this->name);
         $images = [];
-        $conf = Sys::app()->readConf($this->name);
+        $conf = Sys::app()->conf()->read($this->name);
+        $files = $conf->files();
         foreach ($files as $name => $info) {
             $deleteAction = $conf->action($name, Server::AJAX_DELETE);
             $updateAction = $conf->action($name, Server::AJAX_UPDATE);
             $uid = $info['uid'] ?? User::ADMIN;
             $images[] = [
                 'name' => $name,
-                'title' => $info['title'] ?? ($this->conf(self::KEEP_NAME) ? $name : ''),
-                'time' => $info['time'] ?? 0,
-                'user' => $info['uname'] ?? 'Anonymous',
-                'delete' => $deleteAction != null && Sys::user()->hasPrivs($deleteAction[Actions::PRIV], $uid),
-                'update' => $updateAction != null && Sys::user()->hasPrivs($updateAction[Actions::PRIV], $uid),
+                'title' => $info[Config::TITLE] ?? $info[Config::META][Config::TITLE] ?? '',
+                'time' => $info[Config::META]['time'] ?? 0,
+                'user' => $info[Config::META]['uname'] ?? 'Anonymous',
+                'delete' => $deleteAction != null && Sys::user()->hasPriv($deleteAction[Actions::PRIV], $uid),
+                'update' => $updateAction != null && Sys::user()->hasPriv($updateAction[Actions::PRIV], $uid),
             ];
         }
         $order = $this->conf(Config::ORDER);
@@ -170,9 +169,8 @@ final class GalleryActions extends Actions
         if (!empty($_POST['title'])) {
             $info['title'] = $_POST['title'];
         }
-        $meta = Meta::load($path);
-        $meta[$name] = $info;
-        Meta::save($path, $meta);
+        $conf = Sys::app()->conf()->read($this->name);
+        $conf->setInfo($name, $info);
         if ($this->hasThumbnail()) {
             $thumb = self::thumbFile($file);
             if ($thumb) {
@@ -210,52 +208,13 @@ final class GalleryActions extends Actions
         $title = trim($title);
         $name = $this->name;
         if (!empty($title)) {
-            $meta = Meta::load($this->path);
-            $meta[$name]['title'] = $title;
-            Meta::save($this->path, $meta);
+            $conf = Sys::app()->conf();
+            $info = $conf->info($name);
+            $info['title'] = $title;
+            $conf->setInfo($name, $info);
             Msg::info('Set the title of image "' . $name . '" to "' . $title . '".');
         } else {
             Msg::warn('The title of image "' . $name . '" is not set.');
-        }
-    }
-
-    public function actionCheck()
-    {
-        $galleryPath = $this->path . DS . $this->name;
-        $files = Meta::loadFileList($galleryPath);
-        if ($this->conf(self::KEEP_NAME)) {
-            Msg::info("Keep name is enabled, so the file name will not be checked.");
-            return;
-        }
-        $count = 0;
-        $thumbCount = 0;
-        $meta = Meta::load($galleryPath);
-        foreach ($files as $name => &$info) {
-            $file = $galleryPath . DS . $name;
-            $time = $info['time'] ?? time();
-            $rightName = self::fileName($file, $time);
-            if ($name !== $rightName) {
-                ++$count;
-                $rightFile = $galleryPath . DS . $rightName;
-                rename($galleryPath . DS . $name, $rightFile);
-                $meta[$rightName] = [
-                    'title' => $info['title'] ?? 'untitled',
-                    'time' => $time,
-                    'uid' => $info['uid'] ?? User::ADMIN,
-                    'uname' => $info['uname'] ?? 'Anonymous',
-                ];
-                if ($this->hasThumbnail()) {
-                    ++$thumbCount;
-                    $rightThumb = self::thumbFile($rightFile);
-                    rename(self::thumbFile($file), $rightThumb);
-                }
-            }
-        }
-        if ($count > 0) {
-            Meta::save($galleryPath, $meta);
-            Msg::warn("There are $count images and $thumbCount thumbnails with wrong name, which have been renamed.");
-        } else {
-            Msg::info("All images have correct name.");
         }
     }
 }

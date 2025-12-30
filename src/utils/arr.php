@@ -1,9 +1,7 @@
 <?php
 final class Arr
 {
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function transKeys($arr, ...$keys)
     {
@@ -23,15 +21,16 @@ final class Arr
 
     public static function copyNonExistingKeys(&$target, $arr, ...$keys)
     {
-        foreach ($keys as $key) {
-            if (array_key_exists($key, $arr) && !array_key_exists($key, $target)) {
-                $target[$key] = $arr[$key];
+        if (is_array($arr)) {
+            foreach ($keys as $key) {
+                if (array_key_exists($key, $arr) && !array_key_exists($key, $target)) {
+                    $target[$key] = $arr[$key];
+                }
             }
         }
     }
 
-    // Pass in by ref to check existence though it is not to be modified.
-    public static function toArray(&$obj)
+    public static function toArray($obj)
     {
         if (!isset($obj)) {
             return [];
@@ -46,18 +45,7 @@ final class Arr
         $obj = self::toArray($obj);
     }
 
-    public static function forOneOrMany(&$objs, $fun)
-    {
-        if (is_array($objs)) {
-            foreach ($objs as &$obj) {
-                $fun($obj);
-            }
-        } else {
-            $fun($objs);
-        }
-    }
-
-    public static function uniqueMerge(&$a1, &$a2)
+    public static function uniqueMerge($a1, $a2)
     {
         return array_unique(array_merge(self::toArray($a1), self::toArray($a2)));
     }

@@ -14,9 +14,9 @@ final class ConfigTest extends TestCase
         $conf = Config::root('conf_path', 'data_path');
         $this->assertSame([], $conf->get(Config::TRAITS));
         $this->assertSame('index', $conf->get(Config::DEFAULT_ITEM));
-        $this->assertSame([], $conf->get(Config::PRIV_READ));
-        $this->assertSame([User::OWNER, User::EDIT], $conf->get(Config::PRIV_EDIT));
-        $this->assertSame([User::EDIT], $conf->get(Config::PRIV_POST));
+        $this->assertSame(User::NONE, $conf->get(Config::PRIV_READ));
+        $this->assertSame(User::OWNER_EDIT, $conf->get(Config::PRIV_EDIT));
+        $this->assertSame(User::EDIT, $conf->get(Config::PRIV_POST));
         $this->assertEmpty($conf->list());
     }
 

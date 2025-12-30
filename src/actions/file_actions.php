@@ -48,7 +48,7 @@ final class FileActions extends Actions
 
     private function buildRibbon()
     {
-        $info = Sys::app()->info($this->name);
+        $info = Sys::app()->conf()->info($this->name);
         if (!$info) {
             return null;
         }
@@ -161,7 +161,7 @@ final class FileActions extends Actions
         if ($title) {
             $info['title'] = $title;
         }
-        Sys::app()->setInfo($name, $info);
+        Sys::app()->conf()->setInfo($name, $info);
         Sys::app()->redirect($name);
     }
 
@@ -188,11 +188,11 @@ final class FileActions extends Actions
                 throw $e;
             }
         }
-        $info = Sys::app()->info($name);
+        $info = Sys::app()->conf()->info($name);
         if ($title) {
             $info['title'] = $title;
         }
-        Sys::app()->setInfo($name, $info);
+        Sys::app()->conf()->setInfo($name, $info);
         Sys::app()->redirect($name);
     }
 
@@ -218,8 +218,8 @@ final class FileActions extends Actions
 
     public function actionInfoChange()
     {
-        foreach (Sys::app()->files() as $fileName => $fileInfo) {
-            $nameList[$fileName] = $fileInfo['title'] ?? Str::captalize($fileName);
+        foreach (Sys::app()->conf()->files() as $fileName => $fileInfo) {
+            $nameList[$fileName] = $fileInfo[Config::META][Config::TITLE] ?? Str::captalize($fileName);
         }
         View::render('info_change', [
             'title' => Icon::FOLDER . ' Change Info',
@@ -235,7 +235,7 @@ final class FileActions extends Actions
         if ($name === '') {
             throw new RuntimeException('"name" cannot be empty.');
         }
-        $info = Sys::app()->info($name);
+        $info = Sys::app()->conf()->info($name);
         $msg = null;
         if ($info === null) {
             File::mkdir($this->path . DS . $name);
@@ -258,7 +258,7 @@ final class FileActions extends Actions
         if (!$msg) {
             throw new RuntimeException('Nothing changed.');
         }
-        Sys::app()->setInfo($name, $info);
+        Sys::app()->conf()->setInfo($name, $info);
         echo '<p class="center sys">' . $msg . '</p>';
     }
 }

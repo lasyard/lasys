@@ -6,10 +6,14 @@ final class User
     const GUEST = 'Guest';
 
     public const ADMIN = 'admin';
-    public const OWNER = 'owner';
+
+    public const NONE = '';
     public const READ0 = 'read0';
     public const EDIT = 'edit';
     public const EDIT0 = 'edit0';
+
+    public const OWNER = 'owner';
+    public const OWNER_EDIT = 'ownerEdit';
 
     private $_user;
 
@@ -41,7 +45,7 @@ final class User
         if (isset($_SESSION['user'])) {
             session_unset();
             // Cause 'Segmentation fault' in Apache 2.4/PHP 8.1 using Chrome cached, don't know why.
-            // setcookie('PHPSESSID', '', 0, '/');
+            setcookie('PHPSESSID', '', 0, '/');
             setcookie('id', '', 0, '/');
             setcookie('password', '', 0, '/');
         }
@@ -100,35 +104,30 @@ final class User
         return isset($this->_user['id']) && $this->_user['id'] == User::ADMIN;
     }
 
-    public function hasPriv($priv)
+    public function hasPriv($priv, $uid)
     {
         if (empty($priv)) {
             return true;
         }
-        if ($this->_user == null) {
+        if ($this->isGuest()) {
             return false;
         }
-        $id = $this->user['id'];
-        if ($id === $priv || $id === User::ADMIN) {
+        if ($this->isAdmin()) {
             return true;
+        }
+        if ($priv == self::OWNER_EDIT || $priv == self::OWNER) {
+            $id = $this->user['id'];
+            if (!isset($uid) || $id != $uid) {
+                return false;
+            }
+        }
+        if ($priv == self::OWNER) {
+            return true;
+        }
+        if ($priv == self::OWNER_EDIT) {
+            $priv = self::EDIT;
         }
         $privs = $this->_user['priv'];
         return in_array($priv, $privs);
-    }
-
-    public function hasPrivs($privs, $uid)
-    {
-        foreach ($privs as $priv) {
-            if ($priv === User::OWNER) {
-                if (isset($uid) && $this->hasPriv($uid) || $this->isAdmin()) {
-                    continue;
-                }
-                return false;
-            }
-            if (!$this->hasPriv($priv)) {
-                return false;
-            }
-        }
-        return true;
     }
 }

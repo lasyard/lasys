@@ -1,9 +1,7 @@
 <?php
 final class Str
 {
-    private function __construct()
-    {
-    }
+    private function __construct() {}
 
     public static function captalize($str)
     {
@@ -64,18 +62,6 @@ final class Str
         }
         if (isset($info['uname'])) {
             $msg .= Icon::USER . $info['uname'];
-        }
-        return $msg;
-    }
-
-    public static function fileInfoText($info)
-    {
-        $msg = '';
-        if (isset($info['uname'])) {
-            $msg .= $info['uname'];
-        }
-        if (isset($info['time'])) {
-            $msg .= ' @ ' . Str::timeStr($info['time']);
         }
         return $msg;
     }

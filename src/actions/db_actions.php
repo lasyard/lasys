@@ -9,7 +9,7 @@ class DbActions extends Actions
     protected function getLabel($name)
     {
         $labels = $this->conf(self::LABELS);
-        $labels1 = Sys::app()->conf(self::LABELS);
+        $labels1 = Sys::app()->conf()->get(self::LABELS);
         return $labels[$name] ?? $labels1[$name] ?? ucfirst($name);
     }
 

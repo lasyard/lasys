@@ -35,8 +35,8 @@ class Actions
         return $actions;
     }
 
-    // As a stub to set priv of directory.
-    public static function dir(...$priv)
+    // stub to set priv of directory.
+    public static function dir($priv)
     {
         return [
             self::ACTION => null,
@@ -44,7 +44,7 @@ class Actions
         ];
     }
 
-    // As a stub to set priv of forbidden.
+    // stub to set priv of forbidden.
     public static function nil()
     {
         return [
@@ -53,7 +53,7 @@ class Actions
         ];
     }
 
-    public function priv(...$priv)
+    public function priv($priv = User::NONE)
     {
         return [
             self::ACTION => $this,
@@ -137,40 +137,37 @@ class Actions
 
     protected function default($confName)
     {
-        return $this->conf($confName) ?? Sys::app()->conf($confName);
+        return $this->conf($confName) ?? Sys::app()->conf()->get($confName);
     }
 
     protected function conf($name)
     {
-        $list = Sys::app()->conf(Config::LIST);
-        if ($list) {
-            $confs = array_key_exists($this->_name, $list) ? $list[$this->_name] : Sys::app()->conf(Config::ETC);
-            return $confs[$name] ?? null;
-        }
-        return null;
+        return Sys::app()->conf()->attr($this->_name, $name);
     }
 
     protected function addScripts($scripts)
     {
         if (!empty($scripts)) {
-            Arr::forOneOrMany($scripts, function ($s) {
+            foreach (Arr::toArray($scripts) as $s) {
                 Sys::app()->addScript($s);
-            });
+            }
         }
     }
 
     protected function addStyles($styles)
     {
         if (!empty($styles)) {
-            Arr::forOneOrMany($styles, function ($s) {
+            foreach (Arr::toArray($styles) as $s) {
                 Sys::app()->addStyle($s);
-            });
+            }
         }
     }
 
     protected function configScriptsAndStyles()
     {
-        $this->addScripts($this->conf(Config::SCRIPTS));
-        $this->addStyles($this->conf(Config::STYLES));
+        $scripts = Sys::app()->conf()->mergeAttr($this->_name, Config::SCRIPTS);
+        $this->addScripts($scripts);
+        $styles = Sys::app()->conf()->mergeAttr($this->_name, Config::STYLES);
+        $this->addStyles($styles);
     }
 }
