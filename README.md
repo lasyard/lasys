@@ -81,4 +81,4 @@ There must be a directory named `configs` in the root of your project to put you
 
 ## MIT License
 
-<http://lasy.great-site.net/mit_license>.
+<https://lasy.fwh.is/mit_license>
