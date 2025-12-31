@@ -237,21 +237,21 @@ final class FileActions extends Actions
         }
         $info = Sys::app()->conf()->info($name);
         $msg = null;
-        if ($info === null) {
+        if (empty($info)) {
             File::mkdir($this->path . DS . $name);
             $info = [
-                'title'  => !empty($title) ? $title : Str::captalize($name),
-                'desc' => $desc,
+                Config::TITLE  => !empty($title) ? $title : Str::captalize($name),
+                Config::DESC => $desc,
                 'time' => $_SERVER['REQUEST_TIME'],
             ];
             $msg = 'Directory "' . $name . '" created.';
         } else {
             if (!empty($title)) {
-                $info['title'] = $title;
+                $info[Config::TITLE] = $title;
                 $msg = 'Title of "' . $name . '" updated to "' . $title . '".';
             }
             if (!empty($desc)) {
-                $info['desc'] = $desc;
+                $info[Config::DESC] = $desc;
                 $msg = (empty($msg) ? '' : $msg . ' ') . 'Description of "' . $name . '" updated to "' . $desc . '".';
             }
         }
