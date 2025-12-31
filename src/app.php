@@ -145,10 +145,8 @@ final class App
     private function makeItem($name)
     {
         $conf = $this->_conf;
-        $isDir = $conf->isDir($name);
-        $title = $conf->title($name);
         $desc = $conf->meta($name, Config::DESC);
-        if (!$isDir && !isset($desc)) {
+        if (!isset($desc)) {
             $desc = $conf->meta($name, 'uname') ?? '';
             $time = $conf->meta($name, 'time');
             if (isset($time)) {
@@ -156,12 +154,17 @@ final class App
             }
         }
         $li = ($name === $this->_name) ? '<li class="highlighted">' : '<li>';
-        $li .= Html::link($title, $this->_base . $name . ($isDir ? '/' : ''), $desc);
-        $li .= $isDir ? Icon::FOLDER : '';
+        $type = $conf->meta($name, Config::TYPE);
+        $title = $conf->title($name);
+        if ($type === Config::DIR) {
+            $li .= Html::link($title, $this->_base . $name .  '/', $desc) . Icon::FOLDER;
+        } else {
+            $li .= Html::link($title, $this->_base . $name, $desc);
+        }
         $li .= '</li>';
         return [
-            'isDir' => $isDir,
-            'title' => $title,
+            Config::TYPE => $type,
+            Config::TITLE => $title,
             'time' =>  $info['time'] ?? 0,
             'li' => $li,
         ];

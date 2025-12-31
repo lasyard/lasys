@@ -222,7 +222,7 @@ final class Config
         $this->_conf[self::LIST][$name] = $item;
         if (isset($item[$type])) {
             $action = $item[$type];
-        } else if ($this->isDir($name)) {
+        } else if ($this->meta($name, self::TYPE) === self::DIR) {
             $action = Actions::dir($this->attr($name, self::PRIV_READ));
         } else if (isset($conf[self::ETC][$type])) {
             $action = $conf[self::ETC][$type];
@@ -267,11 +267,6 @@ final class Config
     {
         $list = $this->partialList();
         return self::_metaOf($list[$name], $key);
-    }
-
-    public function isDir($name)
-    {
-        return $this->meta($name, self::TYPE) == self::DIR;
     }
 
     public function get($name)
@@ -370,6 +365,21 @@ final class Config
         $this->saveMeta();
     }
 
+    private static function cmpType($a, $b)
+    {
+        if ($a[Config::TYPE] ?? false) {
+            if ($b[Config::TYPE] ?? false) {
+                return Common::cmpIndex(Config::TITLE, strnatcasecmp(...))($a, $b);
+            } else {
+                return -1;
+            }
+        }
+        if ($b[Config::TYPE] ?? false) {
+            return 1;
+        }
+        return 0;
+    }
+
     public static function orderBy($index, $descend = true)
     {
         $func = ($index == self::TITLE ? strnatcasecmp(...) : Common::cmp(...));
@@ -377,7 +387,7 @@ final class Config
         if ($descend) {
             $func = Common::invertCmp($func);
         }
-        $func = Common::chainCmps(Common::cmpIndex('isDir', Common::cmp(...)), $func);
+        $func = Common::chainCmps(self::cmpType(...), $func);
         return $func;
     }
 }
