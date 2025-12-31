@@ -369,6 +369,10 @@ final class Config
     {
         if ($a[Config::TYPE] ?? false) {
             if ($b[Config::TYPE] ?? false) {
+                $r = $a[Config::TYPE] <=> $b[Config::TYPE];
+                if ($r !== 0) {
+                    return $r;
+                }
                 return Common::cmpIndex(Config::TITLE, strnatcasecmp(...))($a, $b);
             } else {
                 return -1;
