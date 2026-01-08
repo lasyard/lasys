@@ -165,7 +165,7 @@ final class App
         return [
             Config::TYPE => $type,
             Config::TITLE => $title,
-            'time' =>  $info['time'] ?? 0,
+            'time' =>  $time ?? 0,
             'li' => $li,
         ];
     }
