@@ -90,7 +90,7 @@ final class GalleryActions extends Actions
         foreach ($files as $name => $info) {
             $deleteAction = $conf->action($name, Server::AJAX_DELETE);
             $updateAction = $conf->action($name, Server::AJAX_UPDATE);
-            $uid = $info['uid'] ?? User::ADMIN;
+            $uid = $info[Config::META]['uid'] ?? User::ADMIN;
             $images[] = [
                 'name' => $name,
                 'title' => $info[Config::TITLE] ?? $info[Config::META][Config::TITLE] ?? '',
