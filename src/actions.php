@@ -36,7 +36,7 @@ class Actions
     }
 
     // stub to set priv of directory.
-    public static function dir($priv)
+    public static function dir($priv = User::NONE)
     {
         return [
             self::ACTION => null,

@@ -125,9 +125,6 @@ final class Config
 
     private function _scanFile()
     {
-        if (!isset($this->_conf[self::ETC][Server::GET])) {
-            return;
-        }
         $data = $this->_data;
         $dh = @opendir($data);
         $list = &$this->_conf[self::LIST];
@@ -202,6 +199,25 @@ final class Config
         }
     }
 
+    private function _privOf($name, $type, $isDir = false)
+    {
+        switch ($type) {
+            case Server::GET:
+            case Server::AJAX_GET:
+                return $this->attr($name, self::PRIV_READ);
+            case Server::POST:
+                return $this->attr($name, self::PRIV_POST);
+            case Server::AJAX_POST:
+            case Server::UPDATE:
+            case Server::AJAX_UPDATE:
+            case Server::DELETE:
+            case Server::AJAX_DELETE:
+                return $this->attr($name, $isDir ? self::PRIV_POST : self::PRIV_EDIT);
+            default:
+                return User::NONE;
+        }
+    }
+
     public function action($name, $type)
     {
         $item = $this->_findItem($name);
@@ -223,29 +239,14 @@ final class Config
         if (isset($item[$type])) {
             $action = $item[$type];
         } else if ($this->meta($name, self::TYPE) === self::DIR) {
-            $action = Actions::dir($this->attr($name, self::PRIV_READ));
+            return Actions::dir($this->_privOf($name, $type, true));
         } else if (isset($conf[self::ETC][$type])) {
             $action = $conf[self::ETC][$type];
         } else {
             return Actions::nil();
         }
         if ($action instanceof Actions) {
-            switch ($type) {
-                case Server::GET:
-                case Server::AJAX_GET:
-                    return $action->priv($this->attr($name, self::PRIV_READ));
-                case Server::POST:
-                    return $action->priv($this->attr($name, self::PRIV_POST));
-                case Server::AJAX_POST:
-                case Server::UPDATE:
-                case Server::AJAX_UPDATE:
-                case Server::DELETE:
-                case Server::AJAX_DELETE:
-                    return $action->priv($this->attr($name, self::PRIV_EDIT));
-                default:
-                    break;
-            }
-            return $action->priv();
+            return $action->priv($this->_privOf($name, $type));
         }
         return $action;
     }
