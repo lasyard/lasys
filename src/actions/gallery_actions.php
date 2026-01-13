@@ -53,6 +53,7 @@ final class GalleryActions extends Actions
             ]);
         }
         return [
+            'btnCheck' => Sys::user()->hasPriv(User::ADMIN, null) ? Icon::DB_CHECK : null,
             'btnUpload' => $btnUpload,
             'formUpload' => $formUpload,
         ];
@@ -173,12 +174,8 @@ final class GalleryActions extends Actions
         $conf->setInfo($name, $info);
         if ($this->hasThumbnail()) {
             $thumb = self::thumbFile($file);
-            if ($thumb) {
-                $size = $this->default(self::THUMB_SIZE);
-                Image::createThumbnail($file, $thumb, $size, $size);
-            } else {
-                throw new RuntimeException("Cannot create thumb for this file.");
-            }
+            $size = $this->default(self::THUMB_SIZE);
+            Image::createThumbnail($file, $thumb, $size, $size);
         }
         Sys::app()->redirect($this->name);
     }
@@ -216,5 +213,38 @@ final class GalleryActions extends Actions
         } else {
             Msg::warn('The title of image "' . $name . '" is not set.');
         }
+    }
+
+    public function actionCheck()
+    {
+        if (!$this->hasThumbnail()) {
+            Msg::info("This gallery doesn't contain thumbnails.");
+            return;
+        }
+        $conf = Sys::app()->conf()->read($this->name);
+        $files = $conf->files();
+        $countCreated = 0;
+        $galleryPath = $this->path . DS . $this->name;
+        foreach ($files as $name => $info) {
+            $file = $galleryPath . DS . $name;
+            $thumb = self::thumbFile($file);
+            if (!is_file($thumb)) {
+                $size = $this->default(self::THUMB_SIZE);
+                Image::createThumbnail($file, $thumb, $size, $size);
+                ++$countCreated;
+            }
+        }
+        $countExtra = 0;
+        $countDeleted = 0;
+        $thumbDir = PUB_PATH . DS . self::THUMB_DIR . self::relPath($galleryPath);
+        foreach (glob($thumbDir . DS . '*') as $thumb) {
+            if (!key_exists(pathinfo($thumb, PATHINFO_BASENAME), $files)) {
+                ++$countExtra;
+                if (unlink($thumb)) {
+                    ++$countDeleted;
+                }
+            }
+        }
+        Msg::info("Created $countCreated missing thumbnails. $countExtra extra thumbnails exist and $countDeleted were deleted.");
     }
 }

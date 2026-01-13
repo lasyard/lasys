@@ -18,5 +18,6 @@ final class ViewGallery extends Traits
         $item[Server::GET] ??= GalleryActions::get();
         $item[Server::AJAX_GET] ??= GalleryActions::ajaxGet();
         $item[Server::POST] ??= GalleryActions::post();
+        $item['check'] = GalleryActions::check()->priv(User::ADMIN);
     }
 }
