@@ -258,7 +258,7 @@ export class DbTable {
         } else if (typeof fun === 'function') {
             c = fun((col) => data[ci[col]])
         }
-        if (typeof c !== 'undefined') {
+        if (c != null) {
             t.add(c);
         }
     }
