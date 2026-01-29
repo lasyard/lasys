@@ -4,7 +4,7 @@ import { onLoad } from './html';
 
 onLoad(() => {
     // Here `function` is used, for right `this` reference.
-    Tag.form('login')?.event('submit', function (e: Event) {
+    Tag.form('login')?.event('submit', function (this: HTMLFormElement, e: Event) {
         this.password.value = sha256(this.password.value);
     });
 });

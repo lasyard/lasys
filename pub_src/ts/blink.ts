@@ -3,13 +3,13 @@ type BlinkCallback = (nodes: HTMLElement[]) => void;
 export class Blink {
     private time: number;
     private times: number;
-    private color0: string[];
+    private color0!: string[];
     private color: string;
 
-    private nodes: HTMLElement[];
-    private blinkTimes: number;
-    private callback: BlinkCallback;
-    private timer: number | null;
+    private nodes!: HTMLElement[];
+    private blinkTimes!: number;
+    private callback!: BlinkCallback;
+    private timer!: number | null;
 
     public constructor(time = 200, times = 6, color = '#F00') {
         this.time = time;

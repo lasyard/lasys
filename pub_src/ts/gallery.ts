@@ -26,12 +26,12 @@ interface ImageSet {
 }
 
 export class Gallery {
-    private imageSet: ImageSet;
-    private divThumbs: Tag<HTMLDivElement>;
-    private divImage: Tag<HTMLDivElement>;
-    private divImageBox: Tag<HTMLDivElement>;
-    private msg: Tag<HTMLElement> | null;
-    private popupMsg: Tag<HTMLElement> | null;
+    private imageSet!: ImageSet;
+    private divThumbs!: Tag<HTMLDivElement>;
+    private divImage!: Tag<HTMLDivElement>;
+    private divImageBox!: Tag<HTMLDivElement>;
+    private msg!: Tag<HTMLElement> | null;
+    private popupMsg!: Tag<HTMLElement> | null;
     private current = -1;
     private readonly keyDownHandler = this.handleKeyDown.bind(this);
 

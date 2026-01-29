@@ -10,10 +10,10 @@ export abstract class Filter {
     protected title: string;
     protected toLabel: (v: string) => string;
     protected sortFun: SortFun<string>;
-    protected handler: (e: Event) => any;
-    protected formName: string;
-    protected itemName: string;
-    protected index: number;
+    protected handler!: (e: Event) => any;
+    protected formName!: string;
+    protected itemName!: string;
+    protected index!: number;
 
     public constructor(
         key: string,

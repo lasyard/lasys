@@ -42,10 +42,10 @@ declare const _TABLE_FIELDS: { [index: string]: { primary: boolean, auto: boolea
 declare const _TABLE_CAN_DELETE: boolean;
 
 export class DbTable {
-    private dataSet: DataSet;
+    private dataSet!: DataSet;
     private conf: DbTableConfig;
     private divFilters: Tag<HTMLDivElement> | null = null;
-    private divData: Tag<HTMLDivElement>;
+    private divData!: Tag<HTMLDivElement>;
     private formUpdate: Tag<HTMLFormElement> | null = null;
     private popupMsg: Tag<HTMLElement> | null = null;
 
@@ -258,7 +258,7 @@ export class DbTable {
         } else if (typeof fun === 'function') {
             c = fun((col) => data[ci[col]])
         }
-        if (c) {
+        if (typeof c !== 'undefined') {
             t.add(c);
         }
     }
