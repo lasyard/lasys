@@ -2,7 +2,7 @@ import { SortFun } from './common';
 import { Tag, TagContent } from './tag';
 import { Tooltip } from './tooltip';
 import { onLoad } from './html';
-import { MimeType, Ajax } from './ajax';
+import { Mime, Ajax } from './ajax';
 import { Filter } from './filter';
 import { ValueCallback, StatObject } from './stat';
 
@@ -193,8 +193,8 @@ export class DbTable {
                     },
                     JSON.stringify(data),
                     action ? action : '',
-                    MimeType.JSON,
-                    MimeType.HTML
+                    Mime.JSON,
+                    Mime.HTML
                 );
                 e.preventDefault();
             });
@@ -223,8 +223,8 @@ export class DbTable {
                     callback,
                     JSON.stringify(data),
                     action ? action : '',
-                    MimeType.JSON,
-                    MimeType.HTML
+                    Mime.JSON,
+                    Mime.HTML
                 );
                 e.preventDefault();
             });
@@ -241,8 +241,8 @@ export class DbTable {
                     callback,
                     JSON.stringify({ keys: keys, data: data }),
                     action ? action : '',
-                    MimeType.JSON,
-                    MimeType.HTML
+                    Mime.JSON,
+                    Mime.HTML
                 );
                 e.preventDefault();
             });
@@ -413,8 +413,8 @@ export class DbTable {
                                 },
                                 JSON.stringify(data),
                                 '',
-                                MimeType.JSON,
-                                MimeType.HTML
+                                Mime.JSON,
+                                Mime.HTML
                             );
                         }
                     })).putInto(tr);
@@ -434,7 +434,7 @@ export class DbTable {
 
     loadData() {
         Ajax.get((r, t) => {
-            if (t === MimeType.JSON) {
+            if (t === Mime.JSON) {
                 const dataSet = JSON.parse(r);
                 this.conf.pre?.(dataSet);
                 this.data(dataSet).refresh();

@@ -1,5 +1,5 @@
 import { onLoad } from './html';
-import { Ajax, MimeType } from "./ajax";
+import { Ajax, Mime } from "./ajax";
 import { Tag } from './tag';
 
 onLoad(() => {
@@ -20,8 +20,8 @@ onLoad(() => {
                     },
                     null,
                     '',
-                    MimeType.JSON,
-                    MimeType.HTML
+                    Mime.JSON,
+                    Mime.HTML
                 );
             }
         });

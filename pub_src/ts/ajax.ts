@@ -1,4 +1,4 @@
-export enum MimeType {
+export enum Mime {
     TEXT = 'text/plain',
     HTML = 'text/html',
     JSON = 'application/json',
@@ -17,7 +17,7 @@ export const TYPE_KEY = 'requestType';
 const UPDATE = 'update';
 const DELETE = 'delete';
 
-export type AjaxCallback = (response: any, type: MimeType) => any;
+export type AjaxCallback = (response: any, type: Mime) => any;
 
 export class Ajax {
     public static call(
@@ -25,14 +25,14 @@ export class Ajax {
         method: HttpMethod,
         data: any,
         url: URL,
-        type: MimeType,
-        accept: MimeType,
+        type: Mime,
+        accept: Mime,
     ) {
         const xhr = new XMLHttpRequest();
         xhr.onload = function () {
             if (this.status == 200) {
                 const t = this.getResponseHeader('Content-Type');
-                onload(this.response, t as MimeType);
+                onload(this.response, t as Mime);
             } else {
                 alert('Ajax request received status ' + this.status + '.');
             }
@@ -51,18 +51,18 @@ export class Ajax {
     public static get(
         onload: AjaxCallback,
         urlStr = '',
-        accept = MimeType.JSON,
+        accept = Mime.JSON,
     ) {
         const url = new URL(urlStr, location.href);
-        Ajax.call(onload, HttpMethod.GET, null, url, MimeType.JSON, accept);
+        Ajax.call(onload, HttpMethod.GET, null, url, Mime.JSON, accept);
     }
 
     public static post(
         onload: AjaxCallback,
         data: any,
         urlStr = '',
-        type = MimeType.JSON,
-        accept = MimeType.JSON,
+        type = Mime.JSON,
+        accept = Mime.JSON,
     ) {
         const url = new URL(urlStr, location.href);
         Ajax.call(onload, HttpMethod.POST, data, url, type, accept);
@@ -72,8 +72,8 @@ export class Ajax {
         onload: AjaxCallback,
         data: any,
         urlStr = '',
-        type = MimeType.JSON,
-        accept = MimeType.JSON,
+        type = Mime.JSON,
+        accept = Mime.JSON,
     ) {
         const url = new URL(urlStr, location.href);
         url.searchParams.set(TYPE_KEY, UPDATE);
@@ -84,8 +84,8 @@ export class Ajax {
         onload: AjaxCallback,
         data: any = null,
         urlStr = '',
-        type = MimeType.JSON,
-        accept = MimeType.JSON,
+        type = Mime.JSON,
+        accept = Mime.JSON,
     ) {
         const url = new URL(urlStr, location.href);
         url.searchParams.set(TYPE_KEY, DELETE);

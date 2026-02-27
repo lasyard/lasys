@@ -1,5 +1,5 @@
 import { onLoad } from './html';
-import { Ajax, MimeType, HttpMethod, TYPE_KEY } from './ajax';
+import { Ajax, Mime, HttpMethod, TYPE_KEY } from './ajax';
 import { Tag } from './tag';
 import { Tooltip } from './tooltip';
 import { numCmp, timeStr } from './common';
@@ -94,8 +94,8 @@ export class Gallery {
                     HttpMethod.POST,
                     null,
                     url,
-                    MimeType.TEXT,
-                    MimeType.HTML
+                    Mime.TEXT,
+                    Mime.HTML
                 );
             });
         }
@@ -149,8 +149,8 @@ export class Gallery {
                             this.ajaxResponse.bind(this),
                             newTitle,
                             imageUrl,
-                            MimeType.TEXT,
-                            MimeType.HTML
+                            Mime.TEXT,
+                            Mime.HTML
                         );
                     }
                 }));
@@ -164,8 +164,8 @@ export class Gallery {
                             this.ajaxResponse.bind(this),
                             null,
                             imageUrl,
-                            MimeType.JSON,
-                            MimeType.HTML
+                            Mime.JSON,
+                            Mime.HTML
                         );
                     }
                 }));
