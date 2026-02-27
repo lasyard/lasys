@@ -36,6 +36,7 @@ interface DbTableConfig {
     };
     sort?: SortFun<ValueCallback>;
     stat?: ((count: number) => TagContent) | StatObject;
+    post?: () => void;
 }
 
 declare const _TABLE_FIELDS: { [index: string]: { primary: boolean, auto: boolean } };
@@ -358,6 +359,9 @@ export class DbTable {
         const result = this.getStat(data, ci);
         Tag.div(Tag.of('span').cls('stat').add(result)).putInto(divData);
         table.putInto(divData);
+        if (typeof (conf.post) === 'function') {
+            conf.post();
+        }
     }
 
     private addToTable(table: Tag<HTMLTableElement>, data: any[][], columns: number) {
