@@ -36,7 +36,7 @@ mkdir "pub"
 then make a symlink from `lasys/pub` to `pub/sys`:
 
 ```sh
-ln -snf "lasys/pub" "pub/sys"
+ln -snf "../lasys/pub" "pub/sys"
 ```
 
 Create app entry `entry.php`. The contents of the file is like:

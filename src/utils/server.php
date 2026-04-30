@@ -103,10 +103,10 @@ final class Server
         header('Cache-Control: public, max-age=3456000');
         $mtime = filemtime($path);
         header('ETag: "' . md5($mtime) . '"');
-        header('Last-Modified: ' . gmdate(DATE_RFC7231, $mtime));
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s \G\M\T', $mtime));
         header('Content-Type: ' . $type);
         header('Accept-Ranges: none');
-        header('Accept-Length: ' . filesize($path));
+        header('Content-Length: ' . filesize($path));
         header('Content-Disposition: attachment; filename="' . basename($path) . '"');
         header('Content-Transfer-Encoding: binary');
         readfile($path);

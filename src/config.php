@@ -67,7 +67,7 @@ final class Config
         ]);
     }
 
-    private function __construct($path, $data, $oldConf, $name = null)
+    private function __construct($path, $data, $oldConf, $name = '')
     {
         $this->_path = $path;
         $this->_data = $data;
