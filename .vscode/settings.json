@@ -1,4 +1,7 @@
 {
+  "intelephense.diagnostics.exclude": {
+    "**/*.php": ["P1132"]
+  },
   "phpunit.args": [
     "--debug"
   ],
