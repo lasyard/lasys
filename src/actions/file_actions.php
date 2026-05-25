@@ -121,12 +121,25 @@ final class FileActions extends Actions
             uksort($words, function ($a, $b) {
                 return strlen($b) <=> strlen(($a));
             });
-            foreach ($words as $key => $value) {
-                $content = preg_replace(
-                    '/\s*\b' . preg_quote($key) . '\b\s*/',
-                    '<span style="color:magenta">' . $value . '</span>',
-                    $content
-                );
+            foreach ($words as $key => list('mode' => $mode, 'value' => $value)) {
+                switch ($mode) {
+                    case 'cn':
+                        $content = preg_replace(
+                            '/\s*\b' . preg_quote($key) . '\b\s*/',
+                            '<span style="color:magenta">' . $value . '</span>',
+                            $content
+                        );
+                        break;
+                    case 'en':
+                        $content = preg_replace(
+                            '/\b' . preg_quote($key) . '\b/',
+                            '<span style="color:magenta">' . $value . '</span>',
+                            $content
+                        );
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         echo $content;
