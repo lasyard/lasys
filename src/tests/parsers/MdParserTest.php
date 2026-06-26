@@ -26,8 +26,8 @@ final class MdParserTest extends TestCase
                 '<h2>T2</h2>',
                 '<ul>',
                 '<li>haha</li>',
-                '<li>hehe',
-                '<h3>T3</h3></li>',
+                '<li>hehe<h3>T3</h3>',
+                '</li>',
                 '</ul></div>',
             ]),
             $mdParser->content
