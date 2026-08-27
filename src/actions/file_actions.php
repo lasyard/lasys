@@ -113,27 +113,27 @@ final class FileActions extends Actions
             Arr::makeArray($dicts);
             $words = [];
             foreach ($dicts as $dict) {
-                $dictFile = $this->path . DS . $dict . '.dict';
+                $dictFile = DICT_PATH . DS . $dict . '.dict';
                 if (is_file($dictFile)) {
-                    $words += DictParser::file($this->path . DS . $dict . '.dict')->dict;
+                    $words += DictParser::file($dictFile)->dict;
                 }
             }
             uksort($words, function ($a, $b) {
                 return strlen($b) <=> strlen(($a));
             });
-            foreach ($words as $key => list('mode' => $mode, 'value' => $value)) {
+            foreach ($words as $key => list('mode' => $mode, 'class' => $class, 'value' => $value)) {
                 switch ($mode) {
                     case 'cn':
                         $content = preg_replace(
                             '/\s*\b' . preg_quote($key) . '\b\s*/',
-                            '<span style="color:magenta">' . $value . '</span>',
+                            '<span class="' . $class . '">' . $value . '</span>',
                             $content
                         );
                         break;
                     case 'en':
                         $content = preg_replace(
                             '/\b' . preg_quote($key) . '\b/',
-                            '<span style="color:magenta">' . $value . '</span>',
+                            '<span class="' . $class . '">' . $value . '</span>',
                             $content
                         );
                         break;

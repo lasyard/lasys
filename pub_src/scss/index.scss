@@ -70,6 +70,14 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+em {
+    font-style: italic;
+}
+
+strong {
+    font-weight: bold;
+}
+
 .border {
     @include border;
 }
@@ -94,7 +102,12 @@ body {
     color: $sysColor !important;
 }
 
+.dict {
+    font-weight: bold;
+}
+
 .badge {
+    background-color: var(--trans-bg-color);
     border: 1px solid var(--line-color);
     border-radius: 5px;
     font-family: var(--header-font);
@@ -121,11 +134,6 @@ a {
         background: var(--high-bg-color);
         color: $hotColor;
     }
-}
-
-em {
-    font-style: inherit;
-    text-decoration: underline;
 }
 
 div#bar {
@@ -350,10 +358,6 @@ ul.icon {
 
 img {
     border: 0;
-}
-
-strong {
-    background-color: var(--bg-color2);
 }
 
 code {

@@ -63,7 +63,7 @@ class DbActions extends Actions
                 default:
                     if (preg_match('/enum\((.*)\)/', $c['Type'], $matches)) {
                         $type = 'select';
-                        $attrs['options'] = str_getcsv($matches[1], ',', "'");
+                        $attrs['options'] = str_getcsv($matches[1], ',', "'", "");
                     } else {
                         $type = 'text';
                     }

@@ -36,6 +36,9 @@ if (!defined('CONF_DIR')) {
 if (!defined('DATA_DIR')) {
     define('DATA_DIR', 'data');
 }
+if (!defined('DICT_DIR')) {
+    define('DICT_DIR', 'dict');
+}
 if (!defined('PUB_DIR')) {
     define('PUB_DIR', 'pub');
 }
@@ -62,6 +65,7 @@ if (!defined('STYLES')) {
 }
 define('CONF_PATH', ROOT_PATH . DS . CONF_DIR);
 define('DATA_PATH', ROOT_PATH . DS . DATA_DIR);
+define('DICT_PATH', DATA_PATH . DS . DICT_DIR);
 define('PUB_PATH', ROOT_PATH . DS . PUB_DIR);
 define('ACTIONS_PATH', ROOT_PATH . DS . ACTIONS_DIR);
 define('VIEWS_PATH', ROOT_PATH . DS . VIEWS_DIR);
